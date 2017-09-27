@@ -2,10 +2,10 @@
 #define lib_biquad_h
 
 struct biquad {
-	double x1, x2;
-	double y0, y1, y2;
-	double b0_a0, b1_a0, b2_a0;
-	double a1_a0, a2_a0;
+	float x1, x2;
+	float y0, y1, y2;
+	float b0_a0, b1_a0, b2_a0;
+	float a1_a0, a2_a0;
 	bool initialized;
 	bool first;
 };
@@ -22,12 +22,12 @@ enum biquad_type {
  */
 
 int biquad_init(struct biquad *bq);
-int biquad_config(struct biquad *bq, enum biquad_type type, double freq, double Q);
+int biquad_config(struct biquad *bq, enum biquad_type type, float freq, float Q);
 
 /*
  * Run biquad filer with new sample input, produces new filtered sample
  */
 
-int biquad_run(struct biquad *bq, double v_in, double *v_out);
+int biquad_run(struct biquad *bq, float v_in, float *v_out);
 
 #endif

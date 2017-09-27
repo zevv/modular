@@ -1,6 +1,6 @@
-printd.o: printd.c lpcopen/lpc_board_ngx_xplorer_4330/inc/board.h \
- lpcopen/lpc_chip_43xx/inc/chip.h lpcopen/lpc_chip_43xx/inc/sys_config.h \
- lpcopen/lpc_chip_43xx/inc/cmsis.h lpcopen/lpc_chip_43xx/inc/lpc_types.h \
+printd.o: printd.c board.h lpcopen/lpc_chip_43xx/inc/chip.h \
+ lpcopen/lpc_chip_43xx/inc/sys_config.h lpcopen/lpc_chip_43xx/inc/cmsis.h \
+ lpcopen/lpc_chip_43xx/inc/lpc_types.h \
  lpcopen/lpc_chip_43xx/inc/cmsis_43xx.h \
  lpcopen/lpc_chip_43xx/inc/core_cm4.h \
  lpcopen/lpc_chip_43xx/inc/core_cmInstr.h \
@@ -57,9 +57,6 @@ printd.o: printd.c lpcopen/lpc_board_ngx_xplorer_4330/inc/board.h \
  lpcopen/lpc_chip_43xx/inc/iap_18xx_43xx.h \
  lpcopen/lpc_chip_43xx/inc/error.h \
  lpcopen/lpc_chip_43xx/inc/i2cm_18xx_43xx.h \
- lpcopen/lpc_chip_43xx/inc/fpu_init.h \
- lpcopen/lpc_board_ngx_xplorer_4330/inc/board_api.h \
+ lpcopen/lpc_chip_43xx/inc/fpu_init.h board_api.h \
  lpcopen/lpc_chip_43xx/inc/lpc_types.h \
- lpcopen/lpc_board_ngx_xplorer_4330/inc/lpc_phy.h \
- lpcopen/lpc_board_ngx_xplorer_4330/inc/board.h \
  lpcopen/lpc_board_ngx_xplorer_4330/inc/uda1380.h uart.h

@@ -24,8 +24,6 @@ void uart_init(void)
         Chip_UART_SetupFIFOS(LPC_USART0, (UART_FCR_FIFO_EN | UART_FCR_RX_RS | UART_FCR_TX_RS | UART_FCR_TRG_LEV3));
 	Chip_UART_IntEnable(LPC_USART0, (UART_IER_RBRINT | UART_IER_RLSINT));
 	NVIC_EnableIRQ(USART0_IRQn);
-
-
 }
 
 
@@ -42,7 +40,7 @@ int uart_rx(uint8_t *c)
 }
 
 
-void usart_irq(void)
+void UART0_IRQHandler(void)
 {
 	Chip_UART_RXIntHandlerRB(LPC_USART0, &rxring);
 }

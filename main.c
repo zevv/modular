@@ -1,18 +1,15 @@
 #include <math.h>
 
 #include "board.h"
+#include "uart.h"
+#include "printd.h"
 #include "biquad.h"
 
-struct biquad lp_l, lp_r;
+#define COUNT 5
 
-void poo(void)
-{
-        Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 1, 12);
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 1, 12, (bool) false);
-	for(;;);
-}
+static struct biquad lp_l[COUNT], lp_r[COUNT];
 
-
+static volatile uint32_t jiffies;
 union sample {
 	uint32_t u32;
 	int16_t s16[2];
@@ -25,11 +22,16 @@ void I2S0_IRQHandler(void)
 		union sample s;
 		s.u32 = Chip_I2S_Receive(LPC_I2S0);
 		
-		double sl = s.s16[0];
-		double sr = s.s16[1];
+		float sl = s.s16[0];
+		float sr = s.s16[1];
 
-		biquad_run(&lp_l, sl, &sl);
-		biquad_run(&lp_r, sr, &sr);
+		int i;
+		for(i=0; i<COUNT; i++) {
+			biquad_run(&lp_l[i], sl, &sl);
+		}
+		for(i=0; i<COUNT; i++) {
+			biquad_run(&lp_r[i], sr, &sr);
+		}
 
 		s.s16[0] = sl;
 		s.s16[1] = sr;
@@ -41,37 +43,19 @@ void I2S0_IRQHandler(void)
 }
 
 
-int main(void)
+void SysTick_Handler(void)
 {
-	I2S_AUDIO_FORMAT_T audio_Confg;
-	audio_Confg.SampleRate = 48000;
-	audio_Confg.ChannelNumber = 2;
-	audio_Confg.WordWidth = 16;
+	static float f = 0.05;
+	static int dt = 1;
+	
+	jiffies ++;
 
-	SystemCoreClockUpdate();
-	Board_Init();
+	static int n = 0;
 
-	biquad_init(&lp_l);
-	biquad_init(&lp_r);
-
-	Chip_I2S_Init(LPC_I2S0);
-	Chip_I2S_RxConfig(LPC_I2S0, &audio_Confg);
-	Chip_I2S_TxConfig(LPC_I2S0, &audio_Confg);
-	Chip_I2S_TxStop(LPC_I2S0);
-	Chip_I2S_DisableMute(LPC_I2S0);
-	Chip_I2S_TxStart(LPC_I2S0);
-		
-	Chip_I2S_Int_RxCmd(LPC_I2S0, ENABLE, 1);
-	Chip_I2S_Int_TxCmd(LPC_I2S0, ENABLE, 1);
-	NVIC_EnableIRQ(I2S0_IRQn);
-
-	double f = 0.05;
-	int dt = 1;
-
-	for(;;) {
-		Board_LED_Toggle(1);
-		volatile int i;
-		if(f < 0.001 || f > 0.100) {
+	if(++n == 150) {
+		n = 0;
+	
+		if(f < 0.0005 || f > 0.100) {
 			dt = - dt;
 		}
 		if(dt == 1) {
@@ -79,12 +63,73 @@ int main(void)
 		} else {
 			f /= 0.96;
 		}
-		
-		biquad_config(&lp_l, BIQUAD_TYPE_BP, f, 3);
-		biquad_config(&lp_r, BIQUAD_TYPE_BP, f, 3);
 
-		for(i=0; i<100000; i++);
+		int i;
+		for(i=0; i<COUNT; i++) {
+			biquad_config(&lp_l[i], BIQUAD_TYPE_BP, f, 1);
+			biquad_config(&lp_r[i], BIQUAD_TYPE_BP, f, 1);
+		}
 	}
+}
+
+
+static void i2s_init(void)
+{
+	I2S_AUDIO_FORMAT_T conf;
+	conf.SampleRate = 48000;
+	conf.ChannelNumber = 2;
+	conf.WordWidth = 16;
+
+	Chip_I2S_Init(LPC_I2S0);
+	Chip_I2S_RxConfig(LPC_I2S0, &conf);
+	Chip_I2S_TxConfig(LPC_I2S0, &conf);
+	Chip_I2S_TxStop(LPC_I2S0);
+	Chip_I2S_DisableMute(LPC_I2S0);
+	Chip_I2S_TxStart(LPC_I2S0);
+		
+	Chip_I2S_Int_RxCmd(LPC_I2S0, ENABLE, 1);
+	Chip_I2S_Int_TxCmd(LPC_I2S0, ENABLE, 1);
+	NVIC_EnableIRQ(I2S0_IRQn);
+}
+
+
+int main(void)
+{
+	SystemCoreClockUpdate();
+	Board_Init();
+	uart_init();
+	SysTick_Config(SystemCoreClock / 1000);
+
+	printd("Hello\n");
+
+	int i;
+	for(i=0; i<COUNT; i++) {
+		biquad_init(&lp_l[i]);
+		biquad_init(&lp_r[i]);
+	}
+
+	if(1) i2s_init();
+	
+	uint32_t njiffies = jiffies + 100;
+	uint32_t n = 0;
+
+	/* This loop takes 6 cycles if jiffies != njiffies */
+
+	for(;;) {
+		if(jiffies >= njiffies) {
+			Board_LED_Toggle(1);
+			int load = 100 * (1.0 - 10 * (float)n / SystemCoreClock * 6.0);
+			printd("%d%% ", load);
+			int i;
+			for(i=0; i<50; i++) {
+				uart_tx(i*2 < load ? '#' : '-');
+			}
+			uart_tx('\n');
+			n = 0;
+			njiffies += 100;
+		}
+		n++;
+	};
 
 	return 0;
 }

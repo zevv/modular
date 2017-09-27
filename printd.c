@@ -109,6 +109,9 @@ void vfprintd(void (*tx)(uint8_t c), const char *fmt, va_list va)
 				int v = va_arg(va, int);
 				tx(v);
 			}
+			if(*p == '%') {
+				tx('%');
+			}
 		} else if(*p == '\n') {
 			tx('\r');
 			tx('\n');

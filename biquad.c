@@ -17,11 +17,11 @@
  * to prevent linking in libm's sin and cos. I need to investigate if the
  * precision is sufficient first */
 
-static double small_sin(double x)
+static float small_sin(float x)
 {
-	double x0 = x;
-	double B =  4 / M_PI;
-	double C = -4 /(M_PI*M_PI);
+	float x0 = x;
+	float B =  4 / M_PI;
+	float C = -4 /(M_PI*M_PI);
 
 	while(x0 > M_PI) {
 		x0 -= M_PI * 2;
@@ -31,15 +31,15 @@ static double small_sin(double x)
 		x0 += M_PI * 2;
 	}
 
-	double y = B * x0 + C * x0 * fabs(x0);
-	double P = 0.225;
+	float y = B * x0 + C * x0 * fabs(x0);
+	float P = 0.225;
 
 	y = P * (y * fabs(y) - y) + y;
 	return y;
 }
 
 
-static double small_cos(double x)
+static float small_cos(float x)
 {
 	return small_sin(x + M_PI_2);
 }
@@ -57,7 +57,7 @@ int biquad_init(struct biquad *bq)
 }
 
 
-int biquad_config(struct biquad *bq, enum biquad_type type, double freq, double Q)
+int biquad_config(struct biquad *bq, enum biquad_type type, float freq, float Q)
 {
 	int r = 0;
 
@@ -66,12 +66,12 @@ int biquad_config(struct biquad *bq, enum biquad_type type, double freq, double 
 		goto out;
 	}
 
-	double a0 = 0.0, a1 = 0.0, a2 = 0.0;
-	double b0 = 0.0, b1 = 0.0, b2 = 0.0;
+	float a0 = 0.0, a1 = 0.0, a2 = 0.0;
+	float b0 = 0.0, b1 = 0.0, b2 = 0.0;
 
-	double w0 = 2.0 * M_PI * freq;
-	double alpha = sin(w0) / (2.0*Q);
-	double cos_w0 = cos(w0);
+	float w0 = 2.0 * M_PI * freq;
+	float alpha = sin(w0) / (2.0*Q);
+	float cos_w0 = cos(w0);
 
 	switch(type) {
 
@@ -134,14 +134,14 @@ out:
 }
 
 
-int biquad_run(struct biquad *bq, double v_in, double *v_out)
+int biquad_run(struct biquad *bq, float v_in, float *v_out)
 {
 	int r;
 
 	if(bq->initialized) {
 
-		double x0 = v_in;
-		double y0;
+		float x0 = v_in;
+		float y0;
 
 		if(bq->first) {
 			bq->y1 = bq->y2 = bq->x1 = bq->x2 = x0;

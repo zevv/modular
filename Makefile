@@ -10,6 +10,8 @@ SRC     += sysinit.c
 SRC     += board.c
 SRC     += board_sysinit.c
 SRC     += biquad.c
+SRC     += printd.c
+SRC     += uart.c
 SRC     += lpcopen/lpc_chip_43xx/src/i2s_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/gpdma_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/uart_18xx_43xx.c
@@ -36,6 +38,7 @@ MFLAGS  = -mcpu=cortex-m4
 MFLAGS += -mthumb
 MFLAGS += -mfloat-abi=softfp
 MFLAGS += -mfpu=fpv4-sp-d16
+MFLAGS += -ffast-math
 
 # Standalone configuration, no startup code etc
 
