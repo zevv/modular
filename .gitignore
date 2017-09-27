@@ -1,0 +1,8 @@
+*.d
+*.o
+*.bin
+*.dfu
+*.elf
+*.swp
+tools/lpchdr
+tools/lpcsum
