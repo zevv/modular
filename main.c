@@ -8,7 +8,7 @@
 #include "adc.h"
 
 #define SRATE 48000
-#define COUNT 3
+#define COUNT 0
 
 static struct biquad lp_l[COUNT], lp_r[COUNT];
 static struct osc osc;
@@ -34,6 +34,8 @@ void I2S0_IRQHandler(void)
 		
 		float sl = s.s16[0];
 		float sr = s.s16[1];
+
+		sr = sl = adc_read(0) * 32000;
 
 		if(sl > max) max = sl;
 		if(sr > max) max = sr;
@@ -140,11 +142,11 @@ int main(void)
 {
 	SystemCoreClockUpdate();
 	uart_init();
-	adc_init();
 	Board_Init();
 	Board_Audio_Init(LPC_I2S0, UDA1380_LINE_IN);
 	SysTick_Config(SystemCoreClock / 1000);
 
+	adc_init();
 	printd("Hello\n");
 
 	int i;
@@ -168,7 +170,7 @@ int main(void)
 	for(;;) {
 		if(jiffies >= njiffies) {
 
-			if(1) {
+			if(0) {
 				int load = 100 * (1.0 - 10 * (float)n / SystemCoreClock * 6.0);
 				printd("%d%% ", load);
 				int i;
@@ -179,6 +181,7 @@ int main(void)
 				n = 0;
 			}
 
+			adc_tick();
 			njiffies += 100;
 		}
 		n++;

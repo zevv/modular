@@ -3,6 +3,7 @@
 
 void adc_init(void);
 float adc_read(int channel);
+void adc_tick(void);
 
 #endif
 

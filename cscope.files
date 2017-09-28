@@ -1,3 +1,5 @@
+adc.c
+adc.h
 biquad.c
 biquad.h
 board_api.h
