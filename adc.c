@@ -14,15 +14,16 @@
 
 /* Scale back oversampled samples to -1.0..+1.0 range */
 
-#define ADC_SCALE (1.0 / (2 << 16) / OVERSAMPLE)
+#define ADC_SCALE (1.0 / (2 << 15))
 
-static uint32_t accum[8];
-static uint32_t count0, count1;
+static volatile int32_t accum[8];
+static volatile uint32_t count0, count1;
 
 /* 
- * IRQs are generated when the last of the 4 channels of each ADC is
- * read and are used to accumulate the ADC values
+ * IRQs are generated when the first of the 4 channels of each ADC is
+ * read and are used to accumulate the ADC values for oversampling
  */
+
 
 void ADC0_IRQHandler(void)
 {
@@ -30,7 +31,7 @@ void ADC0_IRQHandler(void)
 	accum[1] += LPC_ADC0->DR[1] & 0x0000ffff;
 	accum[2] += LPC_ADC0->DR[2] & 0x0000ffff;
 	accum[3] += LPC_ADC0->DR[3] & 0x0000ffff;
-	count0++;
+	count0 ++;
 }
 
 
@@ -40,31 +41,47 @@ void ADC1_IRQHandler(void)
 	accum[5] += LPC_ADC1->DR[5] & 0x0000ffff;
 	accum[6] += LPC_ADC1->DR[6] & 0x0000ffff;
 	accum[7] += LPC_ADC1->DR[7] & 0x0000ffff;
-	count1++;
+	count1 ++;
 }
 
 
-uint32_t adc_read(float val[8])
+/*
+ * Average the last read samples for each channel and normalize
+ * to -1.0..+1.0 float
+ */
+
+uint32_t adc_read(volatile float *val)
 {
+	static int ret = 0;
+
 	if(count0 && count1) {
-		val[0] = (accum[4] * ADC_SCALE - 1.0) / count0;
-		val[1] = (accum[5] * ADC_SCALE - 1.0) / count0;
-		val[2] = (accum[6] * ADC_SCALE - 1.0) / count0;
-		val[3] = (accum[7] * ADC_SCALE - 1.0) / count0;
+		
+		int32_t d0 = 0x8000 * count0;
+		int32_t d1 = 0x8000 * count1;
+		float m0 = ADC_SCALE / count0;
+		float m1 = ADC_SCALE / count1;
 
-		val[4] = (accum[0] * ADC_SCALE - 1.0) / count1;
-		val[5] = (accum[1] * ADC_SCALE - 1.0) / count1;
-		val[6] = (accum[2] * ADC_SCALE - 1.0) / count1;
-		val[7] = (accum[3] * ADC_SCALE - 1.0) / count1;
-	}
+		val[0] = (accum[0] - d0) * m0;
+		val[1] = (accum[1] - d0) * m0;
+		val[2] = (accum[2] - d0) * m0;
+		val[3] = (accum[3] - d0) * m0;
+		val[4] = (accum[4] - d1) * m1;
+		val[5] = (accum[5] - d1) * m1;
+		val[6] = (accum[6] - d1) * m1;
+		val[7] = (accum[7] - d1) * m1;
+
+		ret = count0;
+		count0 = count1 = 0;
+		accum[0] = accum[1] = accum[2] = accum[3] = 0;
+		accum[4] = accum[5] = accum[6] = accum[7] = 0;
 	
-	int ret = count0;
-
-	count0 = count1 = 0;
-	accum[0] = accum[1] = accum[2] = accum[3] = 0;
-	accum[4] = accum[5] = accum[6] = accum[7] = 0;
+	}
 
 	return ret;
+}
+
+void adc_tick(void)
+{
 }
 
 
@@ -81,8 +98,8 @@ void adc_init(void)
 		Chip_ADC_EnableChannel(LPC_ADC1, i+4, ENABLE);
 	}
 		
-	Chip_ADC_Int_SetChannelCmd(LPC_ADC0, 3, ENABLE);
-	Chip_ADC_Int_SetChannelCmd(LPC_ADC1, 7, ENABLE);
+	Chip_ADC_Int_SetChannelCmd(LPC_ADC0, 0, ENABLE);
+	Chip_ADC_Int_SetChannelCmd(LPC_ADC1, 4, ENABLE);
 
 	Chip_ADC_SetBurstCmd(LPC_ADC0, ENABLE);
 	Chip_ADC_SetBurstCmd(LPC_ADC1, ENABLE);

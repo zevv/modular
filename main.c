@@ -23,6 +23,7 @@ union sample {
 
 struct audio {
 	float in[4];
+	float adc[8];
 	float out[2];
 };
 
@@ -49,10 +50,12 @@ static void audio_do(void)
 		//sl += osc_gen_nearest(&osc) * 0.001;
 	}
 
-	au.out[0] = au.in[2];
-	au.out[1] = au.in[2];
+	au.out[0] = au.adc[0] * 1.0;
+	au.out[1] = au.adc[0] * 1.0;
 }
 
+
+volatile int count;
 
 /*
  * Main I2S interrupt handler, running at 48Khz
@@ -62,26 +65,22 @@ void I2S0_IRQHandler(void)
 {
 	if(Chip_I2S_GetRxLevel(LPC_I2S0) > 0) {
 
-		/* Read and convert ADC inputs */
-
-		au.in[2] = ((int)(LPC_ADC0->DR[0] & 0xffff) - 0x7fff) / 32768.0;
-		au.in[3] = ((int)(LPC_ADC1->DR[1] & 0xffff) - 0x7fff) / 32768.0;
-
-		Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, 0);
-		Chip_ADC_SetStartMode(LPC_ADC1, ADC_START_NOW, 1);
-
-		/* Read and convert I2S inputs */
+		/* Read and convert I2S and ADC inputs */
 
 		union sample s;
 		s.u32 = Chip_I2S_Receive(LPC_I2S0);
 		
 		au.in[0] = s.s16[0] / 32768.0;
 		au.in[1] = s.s16[1] / 32768.0;
+		count = adc_read(au.adc);
 
 		int i;
-		for(i=0; i<4; i++) {
+		for(i=0; i<2; i++) {
 			if(au.in[i] > max[i]) {
 				max[i] = au.in[i];
+			}
+			if(au.adc[i] > max[i+2]) {
+				max[i+2] = au.adc[i];
 			}
 		}
 
@@ -184,7 +183,11 @@ int main(void)
 	Board_Audio_Init(LPC_I2S0, UDA1380_LINE_IN);
 	SysTick_Config(SystemCoreClock / 1000);
 
-	adc2_init();
+	NVIC_SetPriority(ADC1_IRQn, 1);
+	NVIC_SetPriority(ADC0_IRQn, 1);
+	NVIC_SetPriority(I2S0_IRQn, 1);
+	
+	adc_init();
 	printd("Hello\n");
 
 	int i;
@@ -212,23 +215,23 @@ int main(void)
 				int load = 100 * (1.0 - 10 * (float)n / SystemCoreClock * 6.0);
 				printd("%3d%% ", load);
 				n = 0;
-			}
 
-			if(1) {
 				uart_tx('|');
 
 				for(i=0; i<4; i++) {
 					int j;
 					int k = sqrtf(max[i]) * 10;
 					for(j=0; j<10; j++) {
-						uart_tx(j <= k ? '#' : '-');
+						uart_tx(j <= k ? '=' : ' ');
 					}
 					uart_tx('|');
 					max[i] = 0.0;
 				}
 			}
-		
 			uart_tx('\n');
+
+			adc_tick();
+			printd("%d\n", count);
 			njiffies += 100;
 		}
 		n++;
