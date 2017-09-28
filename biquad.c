@@ -35,8 +35,8 @@ int biquad_config(struct biquad *bq, enum biquad_type type, float freq, float Q)
 	float b0 = 0.0, b1 = 0.0, b2 = 0.0;
 
 	float w0 = 2.0 * M_PI * freq;
-	float alpha = sin(w0) / (2.0*Q);
-	float cos_w0 = cos(w0);
+	float alpha = sinf(w0) / (2.0*Q);
+	float cos_w0 = cosf(w0);
 
 	switch(type) {
 

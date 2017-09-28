@@ -5,9 +5,10 @@
 #include "printd.h"
 #include "biquad.h"
 #include "osc.h"
+#include "adc.h"
 
 #define SRATE 48000
-#define COUNT 1
+#define COUNT 3
 
 static struct biquad lp_l[COUNT], lp_r[COUNT];
 static struct osc osc;
@@ -36,6 +37,7 @@ void I2S0_IRQHandler(void)
 
 		if(sl > max) max = sl;
 		if(sr > max) max = sr;
+		max = max * 0.9;
 
 		int i;
 		for(i=0; i<COUNT; i++) {
@@ -47,7 +49,7 @@ void I2S0_IRQHandler(void)
 	
 		float freq = osc_gen_linear(&osc2) * 1000 + 1500;
 		osc_set_freq(&osc, freq);
-		sl += osc_gen_nearest(&osc) * 8;
+		sl += osc_gen_nearest(&osc) * 1;
 
 		s.s16[0] = sl;
 		s.s16[1] = sr;
@@ -62,10 +64,30 @@ void I2S0_IRQHandler(void)
 }
 
 
+float lin_to_exp(float v)
+{
+	return (expf(v) - 1) * 0.5819767068693265;
+}
+
+
+static void update_led(void)
+{
+	static uint32_t i = 1;
+
+	Board_LED_Set(1, max < i);
+	
+	i <<= 1;
+	if(i >= 32768) i = 1;
+}
+
+
 void SysTick_Handler(void)
 {
 	static float f = 0.05;
 	static int dt = 1;
+
+	update_led();
+			
 	
 	jiffies ++;
 
@@ -83,10 +105,12 @@ void SysTick_Handler(void)
 			f /= 0.99;
 		}
 
+		f = (adc_read(0) + 1) * 0.1;
+
 		int i;
 		for(i=0; i<COUNT; i++) {
-			biquad_config(&lp_l[i], BIQUAD_TYPE_BP, f, 1);
-			biquad_config(&lp_r[i], BIQUAD_TYPE_BP, f, 1);
+			biquad_config(&lp_l[i], BIQUAD_TYPE_BP, f, 1.0);
+			biquad_config(&lp_r[i], BIQUAD_TYPE_BP, f, 1.0);
 		}
 	}
 }
@@ -109,29 +133,6 @@ static void i2s_init(void)
 	Chip_I2S_Int_RxCmd(LPC_I2S0, ENABLE, 1);
 	Chip_I2S_Int_TxCmd(LPC_I2S0, ENABLE, 1);
 	NVIC_EnableIRQ(I2S0_IRQn);
-}
-
-
-void adc_init(void)
-{
-	ADC_CLOCK_SETUP_T cs;
-
-	Chip_ADC_Init(LPC_ADC0, &cs);
-}
-
-
-void adc_read(void)
-{
-	int channel = 1;
-
-	uint16_t data;
-	Chip_ADC_EnableChannel(LPC_ADC0, channel, ENABLE);
-	Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
-	while (Chip_ADC_ReadStatus(LPC_ADC0, channel, ADC_DR_DONE_STAT) != SET);
-	Chip_ADC_ReadValue(LPC_ADC0, channel, &data);
-	Chip_ADC_EnableChannel(LPC_ADC0, channel, DISABLE);
-
-	printd("%d\n", data);
 }
 
 
@@ -166,17 +167,19 @@ int main(void)
 
 	for(;;) {
 		if(jiffies >= njiffies) {
-			Board_LED_Toggle(1);
-			int load = 100 * (1.0 - 10 * (float)n / SystemCoreClock * 6.0);
-			printd("%d%% ", load);
-			int i;
-			for(i=0; i<50; i++) {
-				uart_tx(i*2 < load ? '#' : '-');
+
+			if(1) {
+				int load = 100 * (1.0 - 10 * (float)n / SystemCoreClock * 6.0);
+				printd("%d%% ", load);
+				int i;
+				for(i=0; i<50; i++) {
+					uart_tx(i*2 < load ? '#' : '-');
+				}
+				uart_tx('\n');
+				n = 0;
 			}
-			uart_tx('\n');
-			n = 0;
+
 			njiffies += 100;
-			adc_read();
 		}
 		n++;
 	};

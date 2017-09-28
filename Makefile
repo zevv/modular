@@ -13,6 +13,7 @@ SRC     += biquad.c
 SRC     += printd.c
 SRC     += uart.c
 SRC     += osc.c
+SRC     += adc.c
 SRC     += sintab.c
 SRC	+= lpcopen/lpc_chip_43xx/src/adc_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/i2s_18xx_43xx.c
@@ -52,6 +53,10 @@ LDFLAGS += -ffreestanding -nostartfiles $(MFLAGS)
 
 CFLAGS	+= -ffunction-sections -fdata-sections 
 LDFLAGS += -Wl,--gc-sections
+
+# Always prefer float over doubles (M4 does not support double in hw)
+
+CFLAGS  += -Wdouble-promotion -fsingle-precision-constant
 
 CFLAGS	+= -ggdb -O3
 CFLAGS	+= -Wall -Werror
