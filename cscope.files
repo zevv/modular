@@ -1726,8 +1726,13 @@ lpcopen/webserver/lwip/src/core/udp.c
 lpcopen/webserver/lwip/src/netif/etharp.c
 lpcopen/webserver/lwip/src/netif/ethernetif.c
 main.c
+mul.c
+osc.c
+osc.h
 printd.c
 printd.h
+sintab.c
+sintab.h
 startup.c
 syscalls.c
 sysinit.c

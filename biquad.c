@@ -11,41 +11,6 @@
 
 #include "biquad.h"
 
-#if 0
-
-/* ID: these sin/cos approximations should save a few kb's on the binary size
- * to prevent linking in libm's sin and cos. I need to investigate if the
- * precision is sufficient first */
-
-static float small_sin(float x)
-{
-	float x0 = x;
-	float B =  4 / M_PI;
-	float C = -4 /(M_PI*M_PI);
-
-	while(x0 > M_PI) {
-		x0 -= M_PI * 2;
-	}
-
-	while(x0 < -M_PI) {
-		x0 += M_PI * 2;
-	}
-
-	float y = B * x0 + C * x0 * fabs(x0);
-	float P = 0.225;
-
-	y = P * (y * fabs(y) - y) + y;
-	return y;
-}
-
-
-static float small_cos(float x)
-{
-	return small_sin(x + M_PI_2);
-}
-
-#endif
-
 
 int biquad_init(struct biquad *bq)
 {

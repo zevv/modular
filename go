@@ -1,13 +1,9 @@
-#!/bin/sh
+#!/usr/bin/lua
 
-/opt/toolchains/arm-2014.05/bin/arm-none-eabi-gcc \
-	-c mul.c \
-	-DCORE_M4 \
-	-D__USE_LPCOPEN \
-	-mcpu=cortex-m4 \
-	-mthumb \
-	-mfloat-abi=softfp \
-	-mfpu=fpv4-sp-d16 \
-	-g
+for i = 0, 255 do
+	x = i / 256.0 * math.pi * 2 
+	y = math.cos(x)
+	print(string.format("%+.7f, ", y))
+end
+	
 
-/opt/toolchains/arm-2012.03/bin/arm-none-eabi-objdump -D mul.o
