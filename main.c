@@ -9,7 +9,7 @@
 #include "lib/osc.h"
 
 #define SRATE 48000
-#define COUNT 1
+#define COUNT 0
 
 static struct biquad lp_l[COUNT], lp_r[COUNT];
 static struct osc osc;
@@ -36,8 +36,8 @@ static void audio_do(void)
 {
 	if(1) {
 		int i;
-		float sl = au.adc[0];
-		float sr = au.adc[0];
+		float sl = au.in[0];
+		float sr = au.in[1];
 
 		for(i=0; i<COUNT; i++) {
 			biquad_run(&lp_l[i], sl, &sl);
@@ -60,8 +60,6 @@ static void audio_do(void)
 }
 
 
-volatile int count;
-
 /*
  * Main I2S interrupt handler, running at 48Khz
  */
@@ -77,7 +75,7 @@ void I2S0_IRQHandler(void)
 		
 		au.in[0] = s.s16[0] / 32768.0;
 		au.in[1] = s.s16[1] / 32768.0;
-		count = adc_read(au.adc);
+		adc_read(au.adc);
 
 		int i;
 		for(i=0; i<2; i++) {

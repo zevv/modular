@@ -82,6 +82,7 @@ uint32_t adc_read(volatile float *val)
 
 void adc_tick(void)
 {
+	printd("%d\n", count0);
 }
 
 
@@ -93,7 +94,7 @@ void adc_init(void)
 	Chip_ADC_Init(LPC_ADC0, &cs);
 	Chip_ADC_Init(LPC_ADC1, &cs);
 
-	for(i=0; i<4; i++) {
+	for(i=0; i<2; i++) {
 		Chip_ADC_EnableChannel(LPC_ADC0, i+0, ENABLE);
 		Chip_ADC_EnableChannel(LPC_ADC1, i+4, ENABLE);
 	}
