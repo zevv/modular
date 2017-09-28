@@ -5,16 +5,17 @@ BUILD	:= 0
 TTY	?= /dev/ttyUSB0
 
 SRC     += main.c
-SRC     += startup.c
-SRC     += sysinit.c
-SRC     += board.c
-SRC     += board_sysinit.c
-SRC     += biquad.c
-SRC     += printd.c
-SRC     += uart.c
-SRC     += osc.c
-SRC     += adc.c
-SRC     += sintab.c
+SRC     += lib/biquad.c
+SRC     += lib/osc.c
+SRC     += lib/sintab.c
+SRC     += os/adc.c
+SRC     += os/board.c
+SRC     += os/board_sysinit.c
+SRC     += os/printd.c
+SRC     += os/startup.c
+SRC     += os/sysinit.c
+SRC     += os/syscalls.c
+SRC     += os/uart.c
 SRC	+= lpcopen/lpc_chip_43xx/src/adc_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/i2s_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/gpdma_18xx_43xx.c
@@ -27,7 +28,6 @@ SRC     += lpcopen/lpc_chip_43xx/src/chip_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/i2c_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/sysinit_18xx_43xx.c
 SRC     += lpcopen/lpc_board_ngx_xplorer_4330/src/uda1380.c
-SRC     += syscalls.c
 
 LIBS	+= -lm
 
@@ -140,7 +140,7 @@ flash: $(DFU)
 
 clean: 
 	$(P) " CLEAN"
-	$(E) rm -f $(DEPS) $(OBJS) $(ELF) $(BIN) $(DFU) *~ cscope.out
+	$(E) rm -f $(DEPS) $(OBJS) $(ELF) $(BIN) $(DFU) *~ cscope.out cscope.files
 	$(E) rm -f *.dfu *.bin
 	$(E) $(MAKE) -C tools clean
 

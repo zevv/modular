@@ -1,9 +1,10 @@
 
 #include <math.h>
-#include <printd.h>
 
-#include "sintab.h"
-#include "osc.h"
+#include "os/printd.h"
+
+#include "lib/sintab.h"
+#include "lib/osc.h"
 
 
 void osc_init(struct osc *osc, float freq, float srate)

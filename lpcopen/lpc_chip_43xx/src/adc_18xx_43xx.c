@@ -30,7 +30,6 @@
  */
 
 #include "chip.h"
-#include "printd.h"
 
 /*****************************************************************************
  * Private types/enumerations/variables
@@ -209,7 +208,6 @@ void Chip_ADC_SetSampleRate(LPC_ADC_T *pADC, ADC_CLOCK_SETUP_T *ADCSetup, uint32
 	div = getClkDiv(pADC, ADCSetup->burstMode, rate, (11 - ADCSetup->bitsAccuracy));
 	cr |= ADC_CR_CLKDIV(div);
 	cr |= ADC_CR_BITACC(ADCSetup->bitsAccuracy);
-	printd("div %d\n", div);
 	pADC->CR = cr;
 }
 

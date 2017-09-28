@@ -1,14 +1,15 @@
 #include <math.h>
 
-#include "board.h"
-#include "uart.h"
-#include "printd.h"
-#include "biquad.h"
-#include "osc.h"
-#include "adc.h"
+#include "os/board.h"
+#include "os/uart.h"
+#include "os/printd.h"
+#include "os/adc.h"
+
+#include "lib/biquad.h"
+#include "lib/osc.h"
 
 #define SRATE 48000
-#define COUNT 0
+#define COUNT 1
 
 static struct biquad lp_l[COUNT], lp_r[COUNT];
 static struct osc osc;
@@ -33,10 +34,10 @@ static volatile struct audio au;
 
 static void audio_do(void)
 {
-	if(0) {
+	if(1) {
 		int i;
-		float sl = au.in[0];
-		float sr = au.in[1];
+		float sl = au.adc[0];
+		float sr = au.adc[0];
 
 		for(i=0; i<COUNT; i++) {
 			biquad_run(&lp_l[i], sl, &sl);
@@ -44,14 +45,18 @@ static void audio_do(void)
 		for(i=0; i<COUNT; i++) {
 			biquad_run(&lp_r[i], sr, &sr);
 		}
+		
+		au.out[0] = sl;
+		au.out[1] = sr;
 
-		//float freq = osc_gen_linear(&osc2) * 1000 + 1500;
-		//osc_set_freq(&osc, freq);
-		//sl += osc_gen_nearest(&osc) * 0.001;
+		float freq = osc_gen_linear(&osc2) * 1000 + 1500;
+		osc_set_freq(&osc, freq);
+		sl += osc_gen_nearest(&osc) * 0.001;
+	} else {
+
+		au.out[0] = au.adc[0] * 1.0;
+		au.out[1] = au.adc[0] * 1.0;
 	}
-
-	au.out[0] = au.adc[0] * 1.0;
-	au.out[1] = au.adc[0] * 1.0;
 }
 
 
@@ -133,7 +138,7 @@ void SysTick_Handler(void)
 		if(f < 0) f = 0;
 		if(f > 0.5) f = 0.5;
 
-		f = pot_to_freq(au.in[2]);
+		f = pot_to_freq(au.adc[1]);
 
 		int i;
 		for(i=0; i<COUNT; i++) {
@@ -231,7 +236,7 @@ int main(void)
 			uart_tx('\n');
 
 			adc_tick();
-			printd("%d\n", count);
+			printd("%d\n", (int)pot_to_freq(au.adc[1]));
 			njiffies += 100;
 		}
 		n++;

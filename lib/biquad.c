@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include "biquad.h"
+#include "lib/biquad.h"
 
 
 int biquad_init(struct biquad *bq, float srate)

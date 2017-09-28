@@ -14,16 +14,16 @@
 
 /* Scale back oversampled samples to -1.0..+1.0 range */
 
-#define ADC_SCALE (1.0 / (2 << 15))
+#define ADC_SCALE (1.0 / (2 << 14))
 
 static volatile int32_t accum[8];
 static volatile uint32_t count0, count1;
 
+
 /* 
- * IRQs are generated when the first of the 4 channels of each ADC is
+ * IRQs are triggered when the first of the 4 channels of each ADC is
  * read and are used to accumulate the ADC values for oversampling
  */
-
 
 void ADC0_IRQHandler(void)
 {
