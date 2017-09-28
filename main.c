@@ -115,11 +115,23 @@ static void i2s_init(void)
 void adc_init(void)
 {
 	ADC_CLOCK_SETUP_T cs;
-	cs.adcRate = 100;
-	cs.bitsAccuracy = 10;
-	cs.burstMode = 0;
 
 	Chip_ADC_Init(LPC_ADC0, &cs);
+}
+
+
+void adc_read(void)
+{
+	int channel = 1;
+
+	uint16_t data;
+	Chip_ADC_EnableChannel(LPC_ADC0, channel, ENABLE);
+	Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+	while (Chip_ADC_ReadStatus(LPC_ADC0, channel, ADC_DR_DONE_STAT) != SET);
+	Chip_ADC_ReadValue(LPC_ADC0, channel, &data);
+	Chip_ADC_EnableChannel(LPC_ADC0, channel, DISABLE);
+
+	printd("%d\n", data);
 }
 
 
@@ -164,7 +176,7 @@ int main(void)
 			uart_tx('\n');
 			n = 0;
 			njiffies += 100;
-			printd("%d\n", (int)(max * 1000));
+			adc_read();
 		}
 		n++;
 	};
