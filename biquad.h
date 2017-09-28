@@ -2,6 +2,7 @@
 #define lib_biquad_h
 
 struct biquad {
+	float inv_srate;
 	float x1, x2;
 	float y0, y1, y2;
 	float b0_a0, b1_a0, b2_a0;
@@ -21,7 +22,7 @@ enum biquad_type {
  * Initialze biquad filter
  */
 
-int biquad_init(struct biquad *bq);
+int biquad_init(struct biquad *bq, float srate);
 int biquad_config(struct biquad *bq, enum biquad_type type, float freq, float Q);
 
 /*

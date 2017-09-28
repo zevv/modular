@@ -12,9 +12,10 @@
 #include "biquad.h"
 
 
-int biquad_init(struct biquad *bq)
+int biquad_init(struct biquad *bq, float srate)
 {
 	bq->first = true;
+	bq->inv_srate = 1.0/srate;
 	bq->x1 = bq->x2 = 0.0;
 	bq->y0 = bq->y1 = bq->y2 = 0.0;
 
@@ -25,6 +26,8 @@ int biquad_init(struct biquad *bq)
 int biquad_config(struct biquad *bq, enum biquad_type type, float freq, float Q)
 {
 	int r = 0;
+
+	freq = freq * bq->inv_srate;
 
 	if((freq <= 0.0) || (freq >= 0.5)) {
 		r = -1;
