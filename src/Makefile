@@ -8,6 +8,7 @@ SRC     += main.c
 SRC     += lib/biquad.c
 SRC     += lib/osc.c
 SRC     += lib/sintab.c
+SRC     += lib/noise.c
 SRC     += os/adc.c
 SRC     += os/board.c
 SRC     += os/board_sysinit.c
@@ -129,7 +130,7 @@ $(DFU): $(BIN) tools/lpchdr
 
 usb: $(DFU)
 	$(P) " INSTALL $<"
-	$(E) sudo dfu-util -d 1fc9:000c -a 0 -D $(DFU)
+	$(E) chronic sudo dfu-util -d 1fc9:000c -a 0 -D $(DFU)
 
 flash: $(DFU)
 	$(P) " FLASH $<"

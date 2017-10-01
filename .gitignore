@@ -4,5 +4,6 @@
 *.dfu
 *.elf
 *.swp
-tools/lpchdr
-tools/lpcsum
+src/tools/lpchdr
+src/tools/lpcsum
+cscope.*

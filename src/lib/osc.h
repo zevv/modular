@@ -1,14 +1,25 @@
 #ifndef osc_h
 #define osc_h
 
+
+enum osc_type {
+	OSC_TYPE_SIN,
+	OSC_TYPE_SAW,
+	OSC_TYPE_PULSE,
+};
+
 struct osc {
 	float phase;
 	float srate;
 	float dphase;
+	float dutycycle;
+	enum osc_type type;
 };
 
-void osc_init(struct osc *osc, float freq, float srate);
+void osc_init(struct osc *osc, float srate);
 void osc_set_freq(struct osc *osc, float freq);
+void osc_set_type(struct osc *osc, enum osc_type type);
+void osc_set_dutycycle(struct osc *osc, float dt);
 float osc_gen_nearest(struct osc *osc);
 float osc_gen_linear(struct osc *osc);
 

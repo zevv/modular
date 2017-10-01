@@ -7,9 +7,10 @@
 
 #include "lib/biquad.h"
 #include "lib/osc.h"
+#include "lib/noise.h"
 
-#define SRATE 48000
-#define COUNT 0
+#define SRATE 96000
+#define COUNT 1
 
 static struct biquad lp_l[COUNT], lp_r[COUNT];
 static struct osc osc;
@@ -31,7 +32,6 @@ struct audio {
 static volatile float max[4];
 static volatile struct audio au;
 
-
 static void audio_do(void)
 {
 	if(1) {
@@ -39,19 +39,19 @@ static void audio_do(void)
 		float sl = au.in[0];
 		float sr = au.in[1];
 
-		for(i=0; i<COUNT; i++) {
-			biquad_run(&lp_l[i], sl, &sl);
+		sr = osc_gen_linear(&osc) * 0.25 - sl*0.7;
+
+		if(au.adc[2] > 0) {
+			for(i=0; i<COUNT; i++) {
+				biquad_run(&lp_l[i], sr, &sr);
+			}
 		}
-		for(i=0; i<COUNT; i++) {
-			biquad_run(&lp_r[i], sr, &sr);
-		}
+
+		sl = au.in[0];
 		
 		au.out[0] = sl;
 		au.out[1] = sr;
 
-		float freq = osc_gen_linear(&osc2) * 1000 + 1500;
-		osc_set_freq(&osc, freq);
-		sl += osc_gen_nearest(&osc) * 0.001;
 	} else {
 
 		au.out[0] = au.adc[0] * 1.0;
@@ -73,8 +73,8 @@ void I2S0_IRQHandler(void)
 		union sample s;
 		s.u32 = Chip_I2S_Receive(LPC_I2S0);
 		
-		au.in[0] = s.s16[0] / 32768.0;
-		au.in[1] = s.s16[1] / 32768.0;
+		au.in[0] = s.s16[0] / 32767.0;
+		au.in[1] = s.s16[1] / 32767.0;
 		adc_read(au.adc);
 
 		int i;
@@ -89,8 +89,10 @@ void I2S0_IRQHandler(void)
 
 		audio_do();
 
-		s.s16[0] = au.out[0] * 32768.0;
-		s.s16[1] = au.out[1] * 32768.0;
+		/* fixme: why does this clip at 32767? */
+
+		s.s16[0] = au.out[0] * 30000.0;
+		s.s16[1] = au.out[1] * 30000.0;
 
 		Chip_I2S_Send(LPC_I2S0, s.u32);
 	} else {
@@ -137,11 +139,13 @@ void SysTick_Handler(void)
 		if(f > 0.5) f = 0.5;
 
 		f = pot_to_freq(au.adc[1]);
+		osc_set_freq(&osc, f);
+		osc_set_type(&osc, au.adc[0] < 0 ? OSC_TYPE_SAW : OSC_TYPE_SIN);
 
 		int i;
 		for(i=0; i<COUNT; i++) {
-			biquad_config(&lp_l[i], BIQUAD_TYPE_HP, f, 0.707);
-			biquad_config(&lp_r[i], BIQUAD_TYPE_LP, f, 0.707);
+			biquad_config(&lp_l[i], BIQUAD_TYPE_LP, f*1.5, 1);
+			biquad_config(&lp_r[i], BIQUAD_TYPE_LP, f*1.5, 1);
 		}
 	}
 }
@@ -199,8 +203,8 @@ int main(void)
 		biquad_init(&lp_r[i], SRATE);
 	}
 
-	osc_init(&osc2, 1.05, SRATE);
-	osc_init(&osc, 1000, SRATE);
+	osc_init(&osc2, SRATE);
+	osc_init(&osc, SRATE);
 
 	if(1) i2s_init();
 	
