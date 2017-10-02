@@ -1,15 +1,17 @@
 #include "os/printd.h"
 #include "os/board.h"
+#include "os/uart.h"
 
 void HardFault_Handler(void)
 {
 	extern uint8_t _estack;
 	extern uint8_t _stext;
 	extern uint8_t _etext;
+	volatile int i;
 
         LPC_GPIO_PORT->DIR[1] = 1UL << 11; 
 
-	volatile int i;
+	printd_set_handler(uart_tx);
 	printd("\n\n** HARD FAULT**\n");
 
 	uint32_t j;

@@ -7,14 +7,16 @@
 #include <unistd.h>
 
 #include "board.h"
+#include "os/printd.h"
 #include "uart.h"
 #include "cdc_uart.h"
 
-static uint8_t printd_enabled = 1;
 
-void printd_enable(uint8_t onoff)
+printd_handler handler = uart_tx;
+
+void printd_set_handler(printd_handler h)
 {
-	printd_enabled = onoff;
+	handler = h;
 }
 
 
@@ -124,17 +126,10 @@ void vfprintd(void (*tx)(uint8_t c), const char *fmt, va_list va)
 }
 
 
-static void printd_tx(uint8_t c)
-{
-	if(printd_enabled) {
-		cdc_uart_tx(c);
-	}
-}
-
 
 static void vprintd(const char *fmt, va_list va)
 {
-	vfprintd(printd_tx, fmt, va);
+	vfprintd(handler, fmt, va);
 }
 
 
@@ -155,88 +150,6 @@ void fprintd(void (*tx)(uint8_t c), const char *fmt, ...)
 	va_end(va);
 }
 
-
-static void i64toa(int64_t v, char *b, int8_t radix)
-{
-	uint8_t i = 0;
-
-	do {
-		char c = '0' + (v % radix);
-		if(c > '9') {
-			c += ('a' - '9') - 1;
-		}
-		b[i] = c ;
-		v /= radix;
-		i ++;
-	} while (v != 0);
-
-	b[i] = '\0';
-	i --;
-
-	/* reverse the order of digits */
-	
-	uint8_t j = 0;
-
-	while (i > i) {
-		char c = b[j];
-		b[j] = b[i];
-		b[i] = c;
-		j ++;
-		i --;
-	}
-}
-
-
-void print_hex(void *ptr, size_t len)
-{
-	const uint8_t *p = (uint8_t *)ptr; /*lint !e9079 */
-
-	while(len > 0u) {
-		char buf[3];
-		i64toa((int64_t)*p, buf, 16);
-		uart_tx(buf[0]);
-		uart_tx(buf[1]);
-		uart_tx(' ');
-		p++;
-		len --;
-	}
-}
-
-
-void fhexdump(void (*tx)(uint8_t c), void *addr, size_t len, off_t offset)
-{
-        int i,j;
-	uint8_t *data = addr + offset;
-
-        if(len == 0) return;
-
-        for(i=0; i<len; i+=16) {
-                fprintd(tx, "| %08X  ", i + offset);
-                for(j=i; (j<i+16);  j++) {
-                        if(j<len) {
-                                fprintd(tx, "%02X ", (unsigned char)*(data+j));
-                        } else {
-                                fprintd(tx, "   ");
-                        }
-			if(j == i+7) fprintd(tx, " ");
-                }
-                fprintd(tx, "  ");
-                for(j=i; (j<i+16) && (j<len);  j++) {
-                        if((*(data+j) >= 32) && (*(data+j)<=127)) {
-                                fprintd(tx, "%c", *(data+j));
-                        } else {
-                                fprintd(tx, ".");
-                        }
-                }
-                fprintd(tx, "\n");
-        }
-}
-
-
-void hexdump(void *addr, size_t len, off_t offset)
-{
-	fhexdump(printd_tx, addr, len, offset);
-}
 
 
 /*

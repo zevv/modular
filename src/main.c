@@ -10,7 +10,7 @@
 #include "lib/osc.h"
 #include "lib/noise.h"
 
-#define SRATE 96000
+#define SRATE 48000
 #define COUNT 1
 
 static struct biquad lp_l[COUNT], lp_r[COUNT];
@@ -189,15 +189,17 @@ int main(void)
 	uart_init();
 	Board_Init();
 	Board_Audio_Init(LPC_I2S0, UDA1380_LINE_IN);
-	cdc_uart_init();
 	SysTick_Config(SystemCoreClock / 1000);
+	
+	cdc_uart_init();
+	printd_set_handler(cdc_uart_tx);
+
+	if(1) adc_init();
+	if(1) i2s_init();
 
 	NVIC_SetPriority(ADC1_IRQn, 1);
 	NVIC_SetPriority(ADC0_IRQn, 1);
 	NVIC_SetPriority(I2S0_IRQn, 1);
-	
-	if(1) adc_init();
-	if(1) i2s_init();
 
 	printd("Hello\n");
 
@@ -223,7 +225,7 @@ int main(void)
 
 			if(1) {
 				int load = 100 * (1.0 - 10 * (float)n / SystemCoreClock * 6.0);
-				if(1) printd("%3d%% ", load);
+				if(1) printd("%d %3d%% ", jiffies, load);
 				n = 0;
 
 				cdc_uart_tx('|');
@@ -238,7 +240,10 @@ int main(void)
 					max[i] = 0.0;
 				}
 				cdc_uart_tx('\n');
+				uint8_t c;
+				while(cdc_uart_rx(&c)) cdc_uart_tx(c);
 			}
+
 
 			adc_tick();
 			

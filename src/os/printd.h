@@ -6,7 +6,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-void printd_enable(uint8_t onoff);
+typedef void (*printd_handler)(uint8_t);
+
+void printd_set_handler(printd_handler h);
 void vfprintd(void (*tx)(uint8_t c), const char *fmt, va_list va);
 void printd(const char *fmt, ...); 
 void hexdump(void *addr, size_t len, off_t offset);

@@ -14,14 +14,17 @@
 
 #define CU_RXBUF_SZ	USB_HS_MAX_BULK_PACKET
 #define CU_TXBUF_SZ	USB_HS_MAX_BULK_PACKET
-#define RB_SIZE		512
+#define RB_SIZE		1024
 
 struct cdc_uart {
-	volatile int write_busy;
 	USBD_HANDLE_T cdc;
+	volatile bool tx_busy;
+	volatile bool rx_busy;
 	uint8_t *rx_buf;
 	uint8_t *tx_buf;
 	struct ringbuffer tx_rb;
+	struct ringbuffer rx_rb;
+	uint8_t rx_rb_buf[RB_SIZE];
 	uint8_t tx_rb_buf[RB_SIZE];
 };
 
@@ -33,7 +36,7 @@ static struct cdc_uart cu;
 static void kick_tx(bool irq)
 {
 	if(!USB_IsConfigured(usbd)) return;
-	if(cu.write_busy) return;
+	if(cu.tx_busy) return;
 
 	size_t n = rb_used(&cu.tx_rb);
 
@@ -42,32 +45,36 @@ static void kick_tx(bool irq)
 		for(i=0; i<n ;i++) {
 			rb_pop(&cu.tx_rb, cu.tx_buf + i);
 		}
-		cu.write_busy++;
+		cu.tx_busy = true;
 		usbd_api->hw->WriteEP(usbd, USB_CDC_IN_EP, cu.tx_buf, n);
-
-
-		Board_LED_Set(1, 1);
 	}
 }
 
 
 static ErrorCode_t cdc_bulk_handler(USBD_HANDLE_T usbd, void *data, uint32_t event)
 {
+	int n, i;
 
 	switch (event) {
 
 		case USB_EVT_IN:
-			Board_LED_Set(1, 0);
-			cu.write_busy--;
+			cu.tx_busy = false;
 			kick_tx(true);
 			break;
 
 		case USB_EVT_OUT_NAK:
-			//usbd_api->hw->ReadReqEP(usbd, USB_CDC_OUT_EP, &cu.rx_buf[0], CU_TXBUF_SZ);
+			if(!cu.rx_busy) {
+				cu.rx_busy = true;
+				usbd_api->hw->ReadReqEP(usbd, USB_CDC_OUT_EP, cu.rx_buf, CU_RXBUF_SZ);
+			}
 			break;
 
 		case USB_EVT_OUT:
-			//cu.tx_buf_count = usbd_api->hw->ReadEP(usbd, USB_CDC_OUT_EP, &cu.tx_buf[0]);
+			n = usbd_api->hw->ReadEP(usbd, USB_CDC_OUT_EP, cu.rx_buf);
+			for(i=0; i<n; i++) {
+				rb_push(&cu.rx_rb, cu.rx_buf[i]);
+			}
+			cu.rx_busy = false;
 			break;
 
 		default:
@@ -176,6 +183,7 @@ int cdc_uart_init(void)
 		usb_param.mem_size = cdc_param.mem_size;
 
 		rb_init(&cu.tx_rb, cu.tx_rb_buf, sizeof(cu.tx_rb_buf));
+		rb_init(&cu.rx_rb, cu.rx_rb_buf, sizeof(cu.rx_rb_buf));
 
 		NVIC_SetPriority(LPC_USB_IRQ, 1);
 		NVIC_EnableIRQ(LPC_USB_IRQ);
@@ -195,7 +203,7 @@ void cdc_uart_tx(uint8_t c)
 
 int cdc_uart_rx(uint8_t *c)
 {
-	return 0;
+	return rb_pop(&cu.rx_rb, c);
 }
 
 
