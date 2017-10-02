@@ -29,6 +29,9 @@ SECTIONS {
 		_srodata = .;
 		*(.rodata*);
 		_erodata = .;
+		__start_module_descriptors = .;
+		*(.module_descriptor*);
+		__stop_module_descriptors = .;
 	} > RAM1
 
 	. = ALIGN(16);
@@ -52,11 +55,16 @@ SECTIONS {
 	
 }
 
-PROVIDE(_sheap  = 0x10080000);
-PROVIDE(_eheap  = 0x10092000);
+/* Stack is at end of RAM1 */
 
 PROVIDE(_sstack = 0x1001e000);
 PROVIDE(_estack = 0x10020000);
-
 PROVIDE(_vStackTop = 0x10020000);
+
+/* Heap is in RAM2 */
+
+PROVIDE(_sheap  = 0x10080000);
+PROVIDE(_eheap  = 0x10092000);
+
+
 

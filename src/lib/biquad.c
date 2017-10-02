@@ -19,6 +19,8 @@ int biquad_init(struct biquad *bq, float srate)
 	bq->x1 = bq->x2 = 0.0;
 	bq->y0 = bq->y1 = bq->y2 = 0.0;
 
+	biquad_config(bq, BIQUAD_TYPE_LP, 1000, 0.707);
+
 	return 0;
 }
 

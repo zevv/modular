@@ -2,12 +2,23 @@
 #include "os/board.h"
 #include "os/uart.h"
 
+void fault_blink(void)
+{
+	volatile int i;
+	for(;;) {
+		LPC_GPIO_PORT->B[1][11] = 0;
+		for(i=0; i<100000; i++);
+		LPC_GPIO_PORT->B[1][11] = 1;
+		for(i=0; i<2000000; i++);
+	}
+}
+
+
 void HardFault_Handler(void)
 {
 	extern uint8_t _estack;
 	extern uint8_t _stext;
 	extern uint8_t _etext;
-	volatile int i;
 
         LPC_GPIO_PORT->DIR[1] = 1UL << 11; 
 
@@ -35,11 +46,7 @@ void HardFault_Handler(void)
 		if((j % 8) == 7) printd("\n");
 	}
 
-	for(;;) {
-		LPC_GPIO_PORT->B[1][11] = 0;
-		for(i=0; i<100000; i++);
-		LPC_GPIO_PORT->B[1][11] = 1;
-		for(i=0; i<2000000; i++);
-	}
+	fault_blink();
+
 	for(;;);
 }

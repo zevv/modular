@@ -33,7 +33,7 @@ static USBD_HANDLE_T usbd;
 static struct cdc_uart cu;
 
 
-static void kick_tx(bool irq)
+static void kick_tx(void)
 {
 	if(!USB_IsConfigured(usbd)) return;
 	if(cu.tx_busy) return;
@@ -59,7 +59,7 @@ static ErrorCode_t cdc_bulk_handler(USBD_HANDLE_T usbd, void *data, uint32_t eve
 
 		case USB_EVT_IN:
 			cu.tx_busy = false;
-			kick_tx(true);
+			kick_tx();
 			break;
 
 		case USB_EVT_OUT_NAK:
@@ -116,6 +116,13 @@ static USB_INTERFACE_DESCRIPTOR *find_IntfDesc(const uint8_t *pDesc, uint32_t in
 }
 
 
+static ErrorCode_t on_configure(USBD_HANDLE_T hUsb)
+{
+	//kick_tx();
+	return LPC_OK;
+}
+
+
 int cdc_uart_init(void)
 {
 	USBD_API_INIT_PARAM_T usb_param;
@@ -132,6 +139,7 @@ int cdc_uart_init(void)
 	usb_param.max_num_ep = 4;
 	usb_param.mem_base = USB_STACK_MEM_BASE;
 	usb_param.mem_size = USB_STACK_MEM_SIZE;
+	usb_param.USB_Configure_Event = on_configure;
 
 	desc.device_desc = (uint8_t *)USB_DeviceDescriptor;
 	desc.string_desc = (uint8_t *)USB_StringDescriptor;
@@ -197,7 +205,7 @@ int cdc_uart_init(void)
 void cdc_uart_tx(uint8_t c)
 {
 	rb_push(&cu.tx_rb, c);
-	kick_tx(false);
+	kick_tx();
 }
 
 

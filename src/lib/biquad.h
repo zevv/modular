@@ -1,6 +1,8 @@
 #ifndef lib_biquad_h
 #define lib_biquad_h
 
+#include <stdbool.h>
+
 struct biquad {
 	float inv_srate;
 	float x1, x2;

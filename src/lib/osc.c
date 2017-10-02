@@ -10,7 +10,7 @@
 void osc_init(struct osc *osc, float srate)
 {
 	osc->phase = 0;
-	osc->srate = srate;
+	osc->srate_inv = 1.0/srate;
 	osc_set_type(osc, OSC_TYPE_SIN);
 	osc_set_dutycycle(osc, 0.5);
 	osc_set_freq(osc, 440);
@@ -19,7 +19,7 @@ void osc_init(struct osc *osc, float srate)
 
 void osc_set_freq(struct osc *osc, float freq)
 {
-	osc->dphase = freq / osc->srate;
+	osc->dphase = freq * osc->srate_inv;
 }
 
 
@@ -78,6 +78,14 @@ float osc_gen_linear(struct osc *osc)
 	
 	if(osc->type == OSC_TYPE_PULSE) {
 		val = osc->phase < osc->dutycycle ? -1 : 1;
+	}
+	
+	if(osc->type == OSC_TYPE_TRIANGLE) {
+		if(osc->phase < 0.5) {
+			val = osc->phase * 4 - 1;
+		} else {
+			val = 3 - osc->phase * 4;
+		}
 	}
 
 	if(osc->type == OSC_TYPE_SAW) {

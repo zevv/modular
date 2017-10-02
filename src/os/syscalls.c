@@ -2,6 +2,8 @@
 
 #include <sys/stat.h>
 
+void fault_blink(void);
+
 int _kill(pid_t pid, int signal) { return -1; }
 
 pid_t _getpid(void) { return (pid_t)-1; }
@@ -39,6 +41,9 @@ caddr_t _sbrk(int incr) {
 	prev_heap_end = heap_end;
 
 	if (heap_end + incr > &_eheap) {
+
+		fault_blink();
+
 		/* Heap and stack collision */
 		return (caddr_t) 0;
 	}

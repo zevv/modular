@@ -5,12 +5,13 @@
 enum osc_type {
 	OSC_TYPE_SIN,
 	OSC_TYPE_SAW,
+	OSC_TYPE_TRIANGLE,
 	OSC_TYPE_PULSE,
 };
 
 struct osc {
 	float phase;
-	float srate;
+	float srate_inv;
 	float dphase;
 	float dutycycle;
 	enum osc_type type;

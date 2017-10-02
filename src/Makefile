@@ -5,11 +5,17 @@ BUILD	:= 0
 TTY	?= /dev/ttyUSB0
 
 SRC     += main.c
+SRC     += module.c
+SRC     += panel.c
+
+SRC     += $(wildcard modules/*.c)
+
 SRC     += lib/biquad.c
 SRC     += lib/osc.c
 SRC     += lib/sintab.c
 SRC     += lib/noise.c
 SRC     += os/adc.c
+SRC     += os/i2s.c
 SRC     += os/board.c
 SRC     += os/board_sysinit.c
 SRC     += os/printd.c
@@ -19,9 +25,12 @@ SRC     += os/ringbuffer.c
 SRC     += os/sysinit.c
 SRC     += os/syscalls.c
 SRC     += os/uart.c
+SRC     += os/spifi.c
+SRC     += os/cmd.c
 SRC     += os/cdc_uart.c
-SRC     += os/watchdog.c
+SRC     += os/xmodem.c
 SRC     += os/cdc_desc.c
+SRC     += os/mem.c
 SRC	+= lpcopen/lpc_chip_43xx/src/adc_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/i2s_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/gpdma_18xx_43xx.c
@@ -36,6 +45,7 @@ SRC     += lpcopen/lpc_chip_43xx/src/sysinit_18xx_43xx.c
 SRC     += lpcopen/lpc_board_ngx_xplorer_4330/src/uda1380.c
 
 LIBS	+= -lm
+LIBS	+= ./lpcopen/lib_lpcspifilib/lib/liblpcspifilib_M3.a
 
 ifdef CDC_UART
 SRC	+= cdc_uart.c cdc_desc.c
@@ -57,8 +67,8 @@ LDFLAGS += -ffreestanding -nostartfiles $(MFLAGS)
 
 # garbage-collect unused functions and data
 
-CFLAGS	+= -ffunction-sections -fdata-sections 
-LDFLAGS += -Wl,--gc-sections
+#CFLAGS	+= -ffunction-sections -fdata-sections 
+#LDFLAGS += -Wl,--gc-sections
 
 # Always prefer float over doubles (M4 does not support double in hw)
 
