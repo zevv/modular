@@ -44,6 +44,12 @@ size_t rb_used(struct ringbuffer *rb)
 }
 
 
+size_t rb_free(struct ringbuffer *rb)
+{
+	return rb->size - rb_used(rb) - 1;
+}
+
+
 /*
  * End
  */

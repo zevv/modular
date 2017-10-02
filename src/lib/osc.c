@@ -19,7 +19,7 @@ void osc_init(struct osc *osc, float srate)
 
 void osc_set_freq(struct osc *osc, float freq)
 {
-	osc->dphase = freq * SINTAB_SIZE / osc->srate;
+	osc->dphase = freq / osc->srate;
 }
 
 
@@ -31,7 +31,7 @@ void osc_set_type(struct osc *osc, enum osc_type type)
 
 void osc_set_dutycycle(struct osc *osc, float dt)
 {
-	osc->dutycycle = dt * SINTAB_SIZE;
+	osc->dutycycle = dt;
 }
 
 
@@ -60,11 +60,13 @@ float osc_gen_linear(struct osc *osc)
 {
 	float val = 0;
 
+
 	if(osc->type == OSC_TYPE_SIN) {
 
-		int i = osc->phase;
+		float p = osc->phase * SINTAB_SIZE;
+		int i = p;
 		int j = i+1;
-		float a0 = osc->phase - i;
+		float a0 = p - i;
 		float a1 = 1.0 - a0;
 
 		if(j >= SINTAB_SIZE) j -= SINTAB_SIZE;
@@ -79,12 +81,12 @@ float osc_gen_linear(struct osc *osc)
 	}
 
 	if(osc->type == OSC_TYPE_SAW) {
-		val = 2.0 * osc->phase / SINTAB_SIZE - 1.0;
+		val = osc->phase * 2.0 - 1.0;
 	}
 
 	osc->phase += osc->dphase;
-	while(osc->phase >= SINTAB_SIZE) {
-		osc->phase -= SINTAB_SIZE;
+	while(osc->phase >= 1.0) {
+		osc->phase -= 1.0;
 	}
 
 	return val;

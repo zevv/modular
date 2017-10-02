@@ -63,7 +63,7 @@ static ErrorCode_t cdc_bulk_handler(USBD_HANDLE_T usbd, void *data, uint32_t eve
 			break;
 
 		case USB_EVT_OUT_NAK:
-			if(!cu.rx_busy) {
+			if(!cu.rx_busy && rb_free(&cu.rx_rb) >= CU_RXBUF_SZ) {
 				cu.rx_busy = true;
 				usbd_api->hw->ReadReqEP(usbd, USB_CDC_OUT_EP, cu.rx_buf, CU_RXBUF_SZ);
 			}
