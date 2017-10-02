@@ -2,6 +2,7 @@
 
 #include "os/board.h"
 #include "os/uart.h"
+#include "os/cdc_uart.h"
 #include "os/printd.h"
 #include "os/adc.h"
 
@@ -188,13 +189,16 @@ int main(void)
 	uart_init();
 	Board_Init();
 	Board_Audio_Init(LPC_I2S0, UDA1380_LINE_IN);
+	cdc_uart_init();
 	SysTick_Config(SystemCoreClock / 1000);
 
 	NVIC_SetPriority(ADC1_IRQn, 1);
 	NVIC_SetPriority(ADC0_IRQn, 1);
 	NVIC_SetPriority(I2S0_IRQn, 1);
 	
-	adc_init();
+	if(1) adc_init();
+	if(1) i2s_init();
+
 	printd("Hello\n");
 
 	int i;
@@ -206,7 +210,6 @@ int main(void)
 	osc_init(&osc2, SRATE);
 	osc_init(&osc, SRATE);
 
-	if(1) i2s_init();
 	
 	uint32_t njiffies = jiffies + 100;
 	uint32_t n = 0;
@@ -220,26 +223,27 @@ int main(void)
 
 			if(1) {
 				int load = 100 * (1.0 - 10 * (float)n / SystemCoreClock * 6.0);
-				printd("%3d%% ", load);
+				if(1) printd("%3d%% ", load);
 				n = 0;
 
-				uart_tx('|');
+				cdc_uart_tx('|');
 
 				for(i=0; i<4; i++) {
 					int j;
 					int k = sqrtf(max[i]) * 10;
 					for(j=0; j<10; j++) {
-						uart_tx(j <= k ? '=' : ' ');
+						cdc_uart_tx(j < k ? '=' : ' ');
 					}
-					uart_tx('|');
+					cdc_uart_tx('|');
 					max[i] = 0.0;
 				}
+				cdc_uart_tx('\n');
 			}
-			uart_tx('\n');
 
 			adc_tick();
-			printd("%d\n", (int)pot_to_freq(au.adc[1]));
+			
 			njiffies += 100;
+
 		}
 		n++;
 	};

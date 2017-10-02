@@ -8,6 +8,7 @@
 
 #include "board.h"
 #include "uart.h"
+#include "cdc_uart.h"
 
 static uint8_t printd_enabled = 1;
 
@@ -126,7 +127,7 @@ void vfprintd(void (*tx)(uint8_t c), const char *fmt, va_list va)
 static void printd_tx(uint8_t c)
 {
 	if(printd_enabled) {
-		uart_tx(c);
+		cdc_uart_tx(c);
 	}
 }
 

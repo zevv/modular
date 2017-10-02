@@ -82,7 +82,7 @@ uint32_t adc_read(volatile float *val)
 
 void adc_tick(void)
 {
-	printd("%d\n", count0);
+	//printd("%d\n", count0);
 }
 
 

@@ -14,9 +14,14 @@ SRC     += os/board.c
 SRC     += os/board_sysinit.c
 SRC     += os/printd.c
 SRC     += os/startup.c
+SRC     += os/fault.c
+SRC     += os/ringbuffer.c
 SRC     += os/sysinit.c
 SRC     += os/syscalls.c
 SRC     += os/uart.c
+SRC     += os/cdc_uart.c
+SRC     += os/watchdog.c
+SRC     += os/cdc_desc.c
 SRC	+= lpcopen/lpc_chip_43xx/src/adc_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/i2s_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/gpdma_18xx_43xx.c
@@ -68,6 +73,7 @@ CFLAGS	+= -DBUILD=\"$(BUILD)\"
 
 CFLAGS	+= -DCORE_M4 -D__USE_LPCOPEN 
 CFLAGS	+= -I.
+CFLAGS	+= -I./os
 CFLAGS	+= -I./lpcopen/lpc_chip_43xx/inc/
 CFLAGS	+= -I./lpcopen/lib_lpcspifilib/inc
 CFLAGS	+= -I./lpcopen/lpc_board_ngx_xplorer_4330/inc
@@ -125,7 +131,7 @@ $(BIN): $(ELF) tools/lpcsum
 $(DFU): $(BIN) tools/lpchdr
 	$(P) " LPCHDR $@"
 	$(E) cp $(BIN) $(DFU)
-	$(E) dfu-suffix --vid=0x1fc9 --pid=0x000c --did=0x0 -a $(DFU)
+	$(E) chronic dfu-suffix --vid=0x1fc9 --pid=0x000c --did=0x0 -a $(DFU)
 	$(E) ./tools/lpchdr $(DFU)
 
 usb: $(DFU)

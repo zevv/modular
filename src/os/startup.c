@@ -30,6 +30,7 @@
 //*****************************************************************************
 
 #include "board.h"
+#include "os/printd.h"
 
 #if defined (__cplusplus)
 #ifdef __REDLIB__
@@ -460,6 +461,7 @@ void SysTick_Handler(void) {
 //*****************************************************************************
 __attribute__ ((section(".after_vectors")))
 void IntDefaultHandler(void) {
+    printd("\n\n*** unhandled IRQ ***\n\n");
     while (1) {
     }
 }
