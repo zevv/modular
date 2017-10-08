@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP SSM2604
+D Low Power Audio Codec
+K codec i2s
+$ENDCMP
+#
+#End Doc Library

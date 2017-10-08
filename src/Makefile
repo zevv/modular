@@ -74,7 +74,7 @@ LDFLAGS += -ffreestanding -nostartfiles $(MFLAGS)
 
 CFLAGS  += -Wdouble-promotion -fsingle-precision-constant
 
-CFLAGS	+= -ggdb -O3
+CFLAGS	+= -ggdb -Os
 CFLAGS	+= -Wall -Werror
 
 CFLAGS	+= -DNAME=\"$(NAME)\"
