@@ -3343,4 +3343,14 @@ Wire Wire Line
 	11150 7950 11150 7700
 Wire Wire Line
 	11150 7700 10700 7700
+Text Label 5950 5400 0    60   ~ 0
+DIP2
+Text Label 2350 5400 2    60   ~ 0
+DIP3
+Text Label 2350 5300 2    60   ~ 0
+DIP4
+Text Label 2350 5200 2    60   ~ 0
+DIP5
+Text Label 2350 5100 2    60   ~ 0
+DIP6
 $EndSCHEMATC
