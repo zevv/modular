@@ -2,7 +2,7 @@
 
   (general
     (links 623)
-    (no_connects 1)
+    (no_connects 0)
     (area 184.924999 34.924999 270.075001 120.075001)
     (thickness 1.6)
     (drawings 39)
@@ -16,7 +16,7 @@
   (layers
     (0 F.Cu signal)
     (1 GND signal hide)
-    (2 3V3 signal)
+    (2 3V3 signal hide)
     (31 B.Cu signal)
     (32 B.Adhes user)
     (33 F.Adhes user)
