@@ -139,11 +139,9 @@ void cmd_cli_handle_char(struct cmd_cli *cli, uint8_t c)
 
 void cmd_cli_poll(struct cmd_cli *cli)
 {
-	int r;
 	uint8_t c;
 
-	r = cli->rx(&c);
-	if(r) {
+	while(cli->rx(&c)) {
 		cmd_cli_handle_char(cli, c);
 	}
 }

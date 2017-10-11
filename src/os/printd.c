@@ -154,12 +154,12 @@ void fprintd(void (*tx)(uint8_t c), const char *fmt, ...)
 void fhexdump(void (*tx)(uint8_t c), void *addr, size_t len, off_t offset)
 {
         int i,j;
-	uint8_t *data = addr + offset;
+	uint8_t *data = addr;
 
         if(len == 0) return;
 
         for(i=0; i<len; i+=16) {
-                fprintd(tx, "| %08X  ", i + offset);
+                fprintd(tx, "%08X  ", i + offset);
                 for(j=i; (j<i+16);  j++) {
                         if(j<len) {
                                 fprintd(tx, "%02X ", (unsigned char)*(data+j));

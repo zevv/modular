@@ -382,7 +382,7 @@ int main(void)
 
 	ssp_format.frameFormat = SSP_FRAMEFORMAT_SPI;
 	ssp_format.bits = SSP_DATA_BITS;
-	ssp_format.clockMode = SSP_CLOCK_MODE0;
+	ssp_format.clockMode = SSP_CLOCK_CPHA1_CPOL1;
         Chip_SSP_SetFormat(LPC_SSP, ssp_format.bits, ssp_format.frameFormat, ssp_format.clockMode);
 	Chip_SSP_Enable(LPC_SSP);
 

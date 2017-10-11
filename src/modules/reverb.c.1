@@ -1,0 +1,409 @@
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <stdbool.h>
+
+#include "module.h"
+#include "os/printd.h"
+
+#define LOGTEN 2.302585092994
+
+#define	numcombs		8
+#define	numallpasses	4
+#define	muted			0
+#define	fixedgain		0.015
+#define scalewet		3.0
+#define scaledry		2.0
+#define scaledamp		0.4
+#define scaleroom		0.28
+#define offsetroom		0.7
+#define initialroom		0.5
+#define initialdamp		0.5
+#define initialwet		1.0/scalewet
+#define initialdry		0.0
+#define initialwidth	1.0
+#define initialmode		0
+#define freezemode		0.5
+#define	stereospread	23
+
+/* these values assume 44.1KHz sample rate
+   they will probably be OK for 48KHz sample rate
+   but would need scaling for 96KHz (or other) sample rates.
+   the values were obtained by listening tests.                */
+static const int combtuningL[numcombs]
+                     = { 1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617 };
+static const int combtuningR[numcombs]
+                     = { 1116+stereospread, 1188+stereospread, 1277+stereospread, 1356+stereospread,
+					     1422+stereospread, 1491+stereospread, 1557+stereospread, 1617+stereospread };
+
+static const int allpasstuningL[numallpasses]
+                     = { 556, 441, 341, 225 };
+static const int allpasstuningR[numallpasses]
+                     = { 556+stereospread, 441+stereospread, 341+stereospread, 225+stereospread };
+
+
+
+typedef struct _freeverb
+{
+	/* freeverb stuff */
+	float	x_gain;
+	float	x_roomsize,x_roomsize1;
+	float	x_damp,x_damp1;
+	float	x_wet,x_wet1,x_wet2;
+	float	x_dry;
+	float	x_width;
+	float	x_mode;
+	int     x_skip;
+
+	float	x_allpassfeedback;			/* feedback of allpass filters */
+	float	x_combfeedback;				/* feedback of comb filters */
+	float x_combdamp1;
+	float x_combdamp2;
+	float x_filterstoreL[numcombs];	/* stores last sample value */
+	float x_filterstoreR[numcombs];
+
+	/* buffers for the combs */
+	float	*x_bufcombL[numcombs];
+	float	*x_bufcombR[numcombs];
+	int x_combidxL[numcombs];
+	int x_combidxR[numcombs];
+
+	/* buffers for the allpasses */
+	float	*x_bufallpassL[numallpasses];
+	float	*x_bufallpassR[numallpasses];
+	int x_allpassidxL[numallpasses];
+	int x_allpassidxR[numallpasses];
+
+	/* we'll make local copies adjusted to fit our sample rate */
+	int x_combtuningL[numcombs];
+	int x_combtuningR[numcombs];
+
+	int x_allpasstuningL[numallpasses];
+	int x_allpasstuningR[numallpasses];
+
+	float x_float;
+} t_freeverb;
+
+typedef union ulf
+{
+    unsigned long   ul;
+    float           f;
+} ulf;
+
+
+
+/* we need prototypes for Mac for everything */
+static void comb_setdamp(t_freeverb *x, float val);
+static void comb_setfeedback(t_freeverb *x, float val);
+static inline float comb_processL(t_freeverb *x, int filteridx, float input);
+static inline float comb_processR(t_freeverb *x, int filteridx, float input);
+static inline float allpass_processL(t_freeverb *x, int filteridx, float input);
+static inline float allpass_processR(t_freeverb *x, int filteridx, float input);
+void freeverb_perform(t_freeverb *x, float inL, float inR, float *out1, float *out2);
+static void freeverb_update(t_freeverb *x);
+static void freeverb_setroomsize(t_freeverb *x, float value);
+static void freeverb_setdamp(t_freeverb *x, float value);
+static void freeverb_setwet(t_freeverb *x, float value);
+static void freeverb_setdry(t_freeverb *x, float value);
+static void freeverb_setwidth(t_freeverb *x, float value);
+static void freeverb_setmode(t_freeverb *x, float value);
+static float freeverb_getmode(t_freeverb *x);
+static void freeverb_mute(t_freeverb *x);
+void freeverb_tilde_setup(void);
+void *freeverb_new(int sr);
+
+/* -------------------- comb filter stuff ----------------------- */
+static void comb_setdamp(t_freeverb *x, float val) 
+{
+	x->x_combdamp1 = val; 
+	x->x_combdamp2 = 1-val;
+}
+
+static void comb_setfeedback(t_freeverb *x, float val) 
+{
+	x->x_combfeedback = val;
+}
+
+// Big to inline - but crucial for speed
+static inline float comb_processL(t_freeverb *x, int filteridx, float input)
+{
+	float output;
+	int bufidx = x->x_combidxL[filteridx];
+
+	output = x->x_bufcombL[filteridx][bufidx];
+
+	x->x_filterstoreL[filteridx] = (output*x->x_combdamp2) + (x->x_filterstoreL[filteridx]*x->x_combdamp1);
+
+	x->x_bufcombL[filteridx][bufidx] = input + (x->x_filterstoreL[filteridx]*x->x_combfeedback);
+
+	if(++x->x_combidxL[filteridx] >= x->x_combtuningL[filteridx]) x->x_combidxL[filteridx] = 0;
+
+	return output;
+}
+
+static inline float comb_processR(t_freeverb *x, int filteridx, float input)
+{
+	float output;
+	int bufidx = x->x_combidxR[filteridx];
+
+	output = x->x_bufcombR[filteridx][bufidx];
+
+	x->x_filterstoreR[filteridx] = (output*x->x_combdamp2) + (x->x_filterstoreR[filteridx]*x->x_combdamp1);
+
+	x->x_bufcombR[filteridx][bufidx] = input + (x->x_filterstoreR[filteridx]*x->x_combfeedback);
+
+	if(++x->x_combidxR[filteridx] >= x->x_combtuningR[filteridx]) x->x_combidxR[filteridx] = 0;
+
+	return output;
+}
+
+/* -------------------- allpass filter stuff ----------------------- */
+
+// Big to inline - but crucial for speed
+static inline float allpass_processL(t_freeverb *x, int filteridx, float input)
+{
+	float output;
+	float bufout;
+	int bufidx = x->x_allpassidxL[filteridx];
+	
+	bufout = (float)x->x_bufallpassL[filteridx][bufidx];
+	
+	output = -input + bufout;
+	x->x_bufallpassL[filteridx][bufidx] = input + (bufout*x->x_allpassfeedback);
+
+	if(++x->x_allpassidxL[filteridx] >= x->x_allpasstuningL[filteridx])
+		x->x_allpassidxL[filteridx] = 0;
+
+	return output;
+}
+
+static inline float allpass_processR(t_freeverb *x, int filteridx, float input)
+{
+	float output;
+	float bufout;
+	int bufidx = x->x_allpassidxR[filteridx];
+	
+	bufout = (float)x->x_bufallpassR[filteridx][bufidx];
+	
+	output = -input + bufout;
+	x->x_bufallpassR[filteridx][bufidx] = input + (bufout*x->x_allpassfeedback);
+
+	if(++x->x_allpassidxR[filteridx] >= x->x_allpasstuningR[filteridx])
+		x->x_allpassidxR[filteridx] = 0;
+
+	return output;
+}
+
+/* -------------------- general DSP stuff ----------------------- */
+void freeverb_perform(t_freeverb *x, float inL, float inR, float *out1, float *out2)
+{
+	float outL = 0, outR = 0;
+	float input = (inL + inR) * x->x_gain;
+	int i;
+
+	// Accumulate comb filters in parallel
+	for(i=0; i < numcombs; i++)
+	{
+		outL += comb_processL(x, i, input);
+		outR += comb_processR(x, i, input);
+	}
+
+	// Feed through allpasses in series
+	for(i=0; i < numallpasses; i++)
+	{
+		outL = allpass_processL(x, i, outL);
+		outR = allpass_processR(x, i, outR);
+	}
+
+	// Calculate output REPLACING anything already there
+	*out1 = outL*x->x_wet1 + outR*x->x_wet2 + inL*x->x_dry;
+	*out2 = outR*x->x_wet1 + outL*x->x_wet2 + inR*x->x_dry;
+
+	*out1 = outL;
+	*out2 = outR;
+}
+
+
+
+// ----------- general parameter & calculation stuff -----------
+
+	// recalculate internal values after parameter change
+static void freeverb_update(t_freeverb *x)
+{
+
+	x->x_wet1 = x->x_wet*(x->x_width/2 + 0.5);
+	x->x_wet2 = x->x_wet*((1-x->x_width)/2);
+
+	x->x_roomsize1 = x->x_roomsize;
+	x->x_damp1 = x->x_damp;
+	x->x_gain = (float)fixedgain;
+
+	comb_setfeedback(x, x->x_roomsize1);
+	comb_setdamp(x, x->x_damp1);
+}
+
+	// the following functions set / get the parameters
+static void freeverb_setroomsize(t_freeverb *x, float value)
+{
+	x->x_roomsize = (value*scaleroom) + offsetroom;
+	freeverb_update(x);
+}
+
+static void freeverb_setdamp(t_freeverb *x, float value)
+{
+	x->x_damp = value*scaledamp;
+	freeverb_update(x);
+}
+
+static void freeverb_setwet(t_freeverb *x, float value)
+{
+	x->x_wet = value*scalewet;
+	freeverb_update(x);
+}
+
+static void freeverb_setdry(t_freeverb *x, float value)
+{
+	x->x_dry = value*scaledry;
+}
+
+static void freeverb_setwidth(t_freeverb *x, float value)
+{
+	x->x_width = value;
+	freeverb_update(x);
+}
+
+static void freeverb_setmode(t_freeverb *x, float value)
+{
+	x->x_mode = value;
+	freeverb_update(x);
+}
+
+static float freeverb_getmode(t_freeverb *x)
+{
+	if (x->x_mode >= freezemode)
+		return 1;
+	else
+		return 0;
+}
+
+
+	// fill delay lines with silence
+static void freeverb_mute(t_freeverb *x)
+{
+	int i;
+
+	if (freeverb_getmode(x) >= freezemode)
+		return;
+
+	for (i=0;i<numcombs;i++)
+	{
+		memset(x->x_bufcombL[i], 0x0, x->x_combtuningL[i]*sizeof(float));
+		memset(x->x_bufcombR[i], 0x0, x->x_combtuningR[i]*sizeof(float));
+	}
+	for (i=0;i<numallpasses;i++)
+	{
+		memset(x->x_bufallpassL[i], 0x0, x->x_allpasstuningL[i]*sizeof(float));
+		memset(x->x_bufallpassR[i], 0x0, x->x_allpasstuningR[i]*sizeof(float));
+	}
+}
+
+
+void *freeverb_new(int sr)
+{
+	int i;
+
+	t_freeverb *x;
+	x = calloc(sizeof(x), 1);
+
+	// recalculate the reverb parameters in case we don't run at 44.1kHz
+	for(i = 0; i < numcombs; i++)
+	{
+		x->x_combtuningL[i] = (int)(combtuningL[i] * sr / 44100);
+		x->x_combtuningR[i] = (int)(combtuningR[i] * sr / 44100);
+	}
+	for(i = 0; i < numallpasses; i++)
+	{
+		x->x_allpasstuningL[i] = (int)(allpasstuningL[i] * sr / 44100);
+		x->x_allpasstuningR[i] = (int)(allpasstuningR[i] * sr / 44100);
+	}
+
+	// get memory for delay lines
+	for(i = 0; i < numcombs; i++)
+	{
+		x->x_bufcombL[i] = (float*) calloc(x->x_combtuningL[i], sizeof(float));
+		x->x_bufcombR[i] = (float*) calloc(x->x_combtuningR[i], sizeof(float));
+		x->x_combidxL[i] = 0;
+		x->x_combidxR[i] = 0;
+	}
+	for(i = 0; i < numallpasses; i++)
+	{
+		x->x_bufallpassL[i] = (float*) calloc(x->x_allpasstuningL[i], sizeof(float));
+		x->x_bufallpassR[i] = (float*) calloc(x->x_allpasstuningR[i], sizeof(float));
+		x->x_allpassidxL[i] = 0;
+		x->x_allpassidxR[i] = 0;
+	}
+
+	// set default values
+	x->x_allpassfeedback = 0.5;
+	x->x_skip = 1;	// we use every sample
+	freeverb_setwet(x, initialwet);
+	freeverb_setroomsize(x, initialroom);
+	freeverb_setdry(x, initialdry);
+	freeverb_setdamp(x, initialdamp);
+	freeverb_setwidth(x, initialwidth);
+	freeverb_setmode(x, initialmode);
+
+	// buffers will be full of rubbish - so we MUST mute them
+	freeverb_mute(x);
+
+	return x;
+}
+
+
+
+/************************************************************************/
+
+
+struct mod_reverb {
+	t_freeverb *verb;
+	bool enable;
+};
+
+
+static void *fn_new(uint32_t srate)
+{
+	struct mod_reverb *mo;
+	mo = malloc(sizeof *mo);
+	mo->verb = freeverb_new(srate);
+	freeverb_update(mo->verb);
+	return mo;
+}
+
+
+static void fn_audio(struct module *mod, float *sig)
+{
+	struct mod_reverb *mo = mod->data;
+	float dummy;
+	if(mo->enable) {
+		freeverb_perform(mo->verb, sig[0], sig[0], &dummy, &sig[1]);
+	} else {
+		sig[1] = sig[0];
+	}
+}
+
+
+static void fn_control(struct module *mod, size_t idx, float val)
+{
+	struct mod_reverb *mo = mod->data;
+	if(idx == 0) {
+		mo->enable = val;
+	}
+}
+
+
+MODULE_REGISTER {
+	.name = "reverb",
+	.fn_new = fn_new,
+	.fn_audio = fn_audio,
+	.fn_control = fn_control,
+};

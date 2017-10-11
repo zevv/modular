@@ -6,9 +6,9 @@
 #include "os/cdc_uart.h"
 #include "os/printd.h"
 #include "os/adc.h"
-#include "os/spifi.h"
 #include "os/i2s.h"
 #include "os/cmd.h"
+#include "os/flash.h"
 
 #include "lib/biquad.h"
 #include "lib/osc.h"
@@ -24,6 +24,11 @@
 static volatile uint32_t jiffies;
 
 static struct cmd_cli cli = {
+	.rx = uart_rx,
+	.tx = uart_tx,
+};
+
+static struct cmd_cli cli2 = {
 	.rx = cdc_uart_rx,
 	.tx = cdc_uart_tx,
 };
@@ -83,16 +88,16 @@ void SysTick_Handler(void)
 int main(void)
 {
 	SystemCoreClockUpdate();
-	uart_init();
 	Board_Init();
 	Board_Audio_Init(LPC_I2S0, UDA1380_LINE_IN);
 	SysTick_Config(SystemCoreClock / 1000);
-	
-	cdc_uart_init();
-	printd_set_handler(cdc_uart_tx);
 
-	spifi_init();
-	spifi_check_update();
+	uart_init();
+
+	flash_init();
+
+	cdc_uart_init();
+	printd_set_handler(uart_tx);
 
 	if(1) adc_init();
 	if(1) i2s_init(SRATE);
@@ -106,6 +111,7 @@ int main(void)
 	if(id == 0x045ea184) panel_3_init(SRATE);
 
 	printd("Hello %08x\n", LPC_OTP->OTP0_2);
+
 
 	uint32_t njiffies = jiffies + 100;
 	uint32_t n = 0;
@@ -124,24 +130,25 @@ int main(void)
 				if(1) printd("%d %3d%% ", jiffies, load);
 				n = 0;
 
-				cdc_uart_tx('|');
+				uart_tx('|');
 
 				int i;
 				for(i=0; i<4; i++) {
 					int j;
 					int k = sqrtf(max[i]) * 10;
 					for(j=0; j<10; j++) {
-						cdc_uart_tx(j < k ? '=' : ' ');
+						uart_tx(j < k ? '=' : ' ');
 					}
-					cdc_uart_tx('|');
+					uart_tx('|');
 					max[i] = 0.0;
 				}
 
-				cdc_uart_tx('\n');
+				uart_tx('\n');
 			}
 
 			modules_do_tick();
 			cmd_cli_poll(&cli);
+			cmd_cli_poll(&cli2);
 
 			adc_tick();
 			

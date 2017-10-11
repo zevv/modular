@@ -25,12 +25,12 @@ SRC     += os/ringbuffer.c
 SRC     += os/sysinit.c
 SRC     += os/syscalls.c
 SRC     += os/uart.c
-SRC     += os/spifi.c
 SRC     += os/cmd.c
 SRC     += os/cdc_uart.c
 SRC     += os/xmodem.c
 SRC     += os/cdc_desc.c
 SRC     += os/mem.c
+SRC     += os/flash.c
 SRC	+= lpcopen/lpc_chip_43xx/src/adc_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/i2s_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/gpdma_18xx_43xx.c
@@ -42,10 +42,10 @@ SRC     += lpcopen/lpc_chip_43xx/src/fpu_init.c
 SRC     += lpcopen/lpc_chip_43xx/src/chip_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/i2c_18xx_43xx.c
 SRC     += lpcopen/lpc_chip_43xx/src/sysinit_18xx_43xx.c
+SRC	+= lpcopen/lpc_chip_43xx/src/ssp_18xx_43xx.c
 SRC     += lpcopen/lpc_board_ngx_xplorer_4330/src/uda1380.c
 
 LIBS	+= -lm
-LIBS	+= ./lpcopen/lib_lpcspifilib/lib/liblpcspifilib_M3.a
 
 ifdef CDC_UART
 SRC	+= cdc_uart.c cdc_desc.c
@@ -85,7 +85,6 @@ CFLAGS	+= -DCORE_M4 -D__USE_LPCOPEN
 CFLAGS	+= -I.
 CFLAGS	+= -I./os
 CFLAGS	+= -I./lpcopen/lpc_chip_43xx/inc/
-CFLAGS	+= -I./lpcopen/lib_lpcspifilib/inc
 CFLAGS	+= -I./lpcopen/lpc_board_ngx_xplorer_4330/inc
 
 LDFLAGS += -Trom.lds

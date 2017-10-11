@@ -336,6 +336,10 @@ void ResetISR(void) {
     SystemInit();
 #endif
 
+
+    LPC_GPIO_PORT->DIR[1] = 1UL << 11;
+    LPC_GPIO_PORT->B[1][11] = 0;
+
     /* Clear the BSS */
 
     extern uint8_t _sbss;
