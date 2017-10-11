@@ -686,11 +686,11 @@ F 3 "" H 7150 3750 50  0001 C CNN
 $EndComp
 Text Label 1750 7400 0    60   ~ 0
 SPI_SCK
-Text Label 1750 7700 0    60   ~ 0
-SPI_MISO
 Text Label 1750 7800 0    60   ~ 0
-SPI_MOSI
+SPI_MISO
 Text Label 1750 7900 0    60   ~ 0
+SPI_MOSI
+Text Label 1750 7700 0    60   ~ 0
 SPI_CS
 $Sheet
 S 9600 1700 900  600 
