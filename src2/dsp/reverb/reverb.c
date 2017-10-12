@@ -10,8 +10,8 @@
 #define scaledamp 1.0f
 #define scaleroom 0.28f
 #define offsetroom 0.7f
-#define initialroom 0.8f
-#define initialdamp 0.2f
+#define initialroom 0.9f
+#define initialdamp 0.1f
 #define initialwet 1
 #define initialdry 0
 #define initialwidth 1.0

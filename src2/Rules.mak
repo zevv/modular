@@ -29,7 +29,7 @@ DEPS    = $(subst .c,.d, $(SRC))
 E	= @
 P	= @echo
 
-all: $(ELF) $(BIN) $(DFU)
+all: $(ELF)
 bin: $(BIN)
 dfu: $(DFU)
 

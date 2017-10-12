@@ -58,7 +58,7 @@ void I2S0_IRQHandler(void)
 		*i2s_val = Chip_I2S_Receive(LPC_I2S0);
 		__SEV();
 		//s.s16[0] = rand() & 0x3f;
-		//Chip_I2S_Send(LPC_I2S0, *i2s_val);
+	//	Chip_I2S_Send(LPC_I2S0, *i2s_val);
 	} else {
 		Chip_I2S_Send(LPC_I2S0, 0);
 	}

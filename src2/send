@@ -29,7 +29,7 @@ while true do
 
 end
 
-print "echo 1"
 print "hop"
+print "echo 1"
 
 -- vi: ft=lua ts=3 sw=3

@@ -13,7 +13,6 @@ static const uint8_t core[] = {
 
 void arch_init(void)
 {
-	fpuInit();
 
 //	Chip_SetupCoreClock(CLKIN_IRC, MAX_CLOCK_FREQ, true);
 	Chip_SetupCoreClock(CLKIN_CRYSTAL, MAX_CLOCK_FREQ, true);
@@ -24,6 +23,8 @@ void arch_init(void)
 
 	volatile int i;
 	for(i=0; i<100000; i++);
+	
+	fpuInit();
 }
 
 
@@ -44,7 +45,7 @@ void main(void)
 	led_init();
 
 	led_set(LED_ID_RED, true);
-	
+
 	/* Copy core image for M0 to RAM2 bank */
 
 	uint32_t core_base = 0x10080000;

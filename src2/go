@@ -2,12 +2,7 @@
 
 set -e
 
-make -C core clean
-make -C loader clean
-make -C dsp clean
-
-make -C core bin
-make -C dsp bin
+make
 make -C loader usb
 
 sleep 1

@@ -3,9 +3,7 @@
 #include <stdlib.h>
 
 #include "chip.h"
-#include "led.h"
 #include "reverb.h"
-
 
 void M0APP_IRQHandler(void)
 {
@@ -27,6 +25,7 @@ void main(void)
 		__WFI();
 
 		float in = (*i2s_val) & 0xffff;
+		in *= 3;
 		float out1, out2;
 		revmodel_process(&rev, in, &out1, &out2);
 

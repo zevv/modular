@@ -16,10 +16,6 @@ static int on_mem(struct cmd_cli *cli, uint8_t argc, char **argv)
 	
 	if(cmd == 'w' && argc > 3) {
 		uint32_t addr = strtol(argv[1], NULL, 16);
-		if((addr % 512) == 0) {
-			cmd_printd(cli, ".");
-		}
-
 		uint8_t sum1 = strtol(argv[2], NULL, 16);
 		uint8_t sum2 = 0;
 		uint8_t buf[argc-3];
@@ -29,7 +25,6 @@ static int on_mem(struct cmd_cli *cli, uint8_t argc, char **argv)
 			sum2 += c;
 			buf[i-3] = c;
 		}
-		cmd_hexdump(cli, buf, sizeof(buf), addr);
 		if(sum1 == sum2) {
 			memcpy((void *)addr, buf, 16);
 		} else {
