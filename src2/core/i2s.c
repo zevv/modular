@@ -48,7 +48,7 @@ uint32_t *i2s_val = (void *)0x1001fc00;
 
 /*
  * Main I2S interrupt handler. Reads data from the I2S bus and passes this to 
- * the M4 if it is awake, or copies the data to the output otherwise.
+ * the M4 if it is awake.
  */
 
 void I2S0_IRQHandler(void)
@@ -60,7 +60,7 @@ void I2S0_IRQHandler(void)
 		if(m4_active) {
 			__SEV();
 		} else {
-			Chip_I2S_Send(LPC_I2S0, *i2s_val);
+			Chip_I2S_Send(LPC_I2S0, 0);
 		}
 	} else {
 		Chip_I2S_Send(LPC_I2S0, 0);
