@@ -6,15 +6,18 @@
 
 #include "chip.h"
 #include "cmd.h"
+#include "printd.h"
 #include "flash.h"
+#include "uart.h"
 
 #define CMD_READ_IDENTIFICATION             0x9F
 #define CMD_READ_STATUS_REGISTER            0xD7
 #define CMD_READ_DATA_BYTES                 0x03
 #define CMD_ERASE_AND_WRITE                 0x83
 #define CMD_MAIN_MEMORY_PAGE_PROGRAM        0x82
+#define CMD_PAGE_ERASE                      0x81
 
-#define PAGE_SIZE 512
+#define PAGE_SIZE 528
 
 
 STATIC const PINMUX_GRP_T mux[] = {
@@ -26,7 +29,10 @@ STATIC const PINMUX_GRP_T mux[] = {
 
 static void set_cs(int v)
 {
+	volatile int i;
+	for(i=0; i<200; i++);
 	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 0, 6, v);
+	for(i=0; i<1000; i++);
 }
 
 
@@ -38,13 +44,11 @@ static void wait_busy(void)
 	set_cs(0);
 	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, &cmd, sizeof(cmd));
 	
-	size_t n = 0;
-	while(n < 15000) {
+	for(;;) {
 		Chip_SSP_ReadFrames_Blocking(LPC_SSP0, status, sizeof(status));
 		if(status[0] & 0x80) {
 			break;
 		}
-		n ++;
 	}
 
 	set_cs(1);
@@ -53,8 +57,8 @@ static void wait_busy(void)
 
 static void mk_cmd_addr(uint8_t cmd, uint32_t addr, uint8_t *buf, size_t len)
 {
-	uint32_t page = addr / 528;
-	uint32_t off = addr % 528;
+	uint32_t page = addr / PAGE_SIZE;
+	uint32_t off = addr % PAGE_SIZE;
 
 	uint32_t data = (cmd << 24) | (page << 10) | off;
 	uint8_t *p = (void *)&data;
@@ -89,6 +93,19 @@ void flash_init(void)
 	Chip_SSP_SetBitRate(LPC_SSP0, 18000000);
         Chip_SSP_SetFormat(LPC_SSP0, SSP_BITS_8, SSP_FRAMEFORMAT_SPI, SSP_CLOCK_CPHA0_CPOL0);
 	Chip_SSP_Enable(LPC_SSP0);
+}
+
+
+void flash_page_erase(uint32_t addr)
+{
+	uint8_t cmd[4];
+	mk_cmd_addr(CMD_PAGE_ERASE, addr, cmd, sizeof(cmd));
+
+	set_cs(0);
+	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, cmd, sizeof(cmd));
+	set_cs(1);
+
+	wait_busy();
 }
 
 
@@ -133,7 +150,6 @@ void flash_write(uint32_t addr, const void *buf, size_t len)
 
 static void copy_ram_to_flash(void)
 {
-	
 	extern uint8_t _srom, _sbss;
 	uint8_t *from = &_srom;
 	uint32_t size = (&_sbss - &_srom) + 16;
@@ -152,13 +168,14 @@ static void copy_ram_to_flash(void)
 
 	uint32_t skip = 0x10;
 	uint32_t to = 0x10;
-	uint32_t blocksize = 528;
+	uint32_t blocksize = PAGE_SIZE;
 
 	while(from < &_sbss+blocksize) {
 		flash_write(to, from, blocksize-skip);
 		from += blocksize - skip;
 		to += blocksize - skip;
 		skip = 0;
+		uart_tx('.');
 	}
 }
 
@@ -192,8 +209,34 @@ static int on_cmd_flash(struct cmd_cli *cli, uint8_t argc, char **argv)
 		return 1;
 	}
 
-	if(cmd == 'w') {
-		flash_write(0x1234, "hier", 4);
+	if(cmd == 'w' && argc > 3) {
+		uint32_t addr = strtol(argv[1], NULL, 16);
+
+		if((addr % PAGE_SIZE) == 0) {
+			cmd_printd(cli, ".");
+		}
+
+		uint8_t sum1 = strtol(argv[2], NULL, 16);
+		uint8_t sum2 = 0;
+		uint8_t buf[argc-3];
+		uint8_t buf2[argc-3];
+		size_t i;
+		for(i=3; i<argc; i++) {
+			uint8_t c = strtol(argv[i], NULL, 16);
+			sum2 += c;
+			buf[i-3] = c;
+		}
+		if(sum1 == sum2) {
+			flash_write(addr, buf, sizeof(buf));
+			flash_read(addr, buf2, sizeof(buf2));
+			if(memcmp(buf, buf2, sizeof(buf)) != 0) {
+				cmd_printd(cli, "%06x vrfy\n", addr);
+				cmd_hexdump(cli, buf, sizeof(buf), i);
+				cmd_hexdump(cli, buf2, sizeof(buf2), i);
+			}
+		} else {
+			cmd_printd(cli, "%06x crc\n", addr);
+		}
 		return 1;
 	}
 

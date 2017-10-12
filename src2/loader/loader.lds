@@ -44,14 +44,12 @@ SECTIONS {
 		*(.bss*);
 		_ebss = .;
 	} > RAM1
-		
+
 	_sstack = .;
 }
 
 /* Stack is at end of RAM1 */
 
 PROVIDE(_estack = 0x10020000);
-
-
 
 

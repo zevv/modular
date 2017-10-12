@@ -6,12 +6,11 @@ BUILD	:= 0
 SRC     += boot.c
 SRC     += main.c
 SRC     += led.c
-SRC     += uart.c
 
 SRC	+= lpc_chip_43xx/src/chip_18xx_43xx.c
 SRC	+= lpc_chip_43xx/src/clock_18xx_43xx.c
 SRC	+= lpc_chip_43xx/src/sysinit_18xx_43xx.c
-SRC	+= lpc_chip_43xx/src/uart_18xx_43xx.c
+SRC	+= lpc_chip_43xx/src/fpu_init.c
 
 # CPU specific flags
 
@@ -57,6 +56,7 @@ all: $(BIN)
 
 include ../Rules.mak
 
+main.c: core.inc
 core.inc: ../core/core-$(VERSION)-$(BUILD).bin
 	$(E) ../tools/bin2c $< > $@
 
@@ -94,6 +94,7 @@ clean:
 	$(P) " CLEAN"
 	$(E) rm -f $(DEPS) $(OBJS) $(ELF) $(BIN) $(DFU) *~ cscope.out cscope.files
 	$(E) rm -f *.dfu *.bin
+	$(E) rm -f core.inc
 	$(E) $(MAKE) -C ../tools clean
 
 .PHONY: tools clean

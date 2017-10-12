@@ -7,11 +7,13 @@
 #include "cmd.h"
 #include "printd.h"
 
-#define CMD_MAX_PARTS 8
+#define CMD_MAX_PARTS 20
 
 
-void cmd_init(void)
+void cmd_init(struct cmd_cli *cli)
 {
+	cli->echo = true;
+	cli->len = 0;
 }
 
 
@@ -108,14 +110,18 @@ void cmd_cli_handle_char(struct cmd_cli *cli, uint8_t c)
 		if(cli->len < (sizeof(cli->buf) - 1)) {
 			cli->len++;
 			cli->buf[cli->len] = '\0';
-			cli->tx(c);
+			if(cli->echo) {
+				cli->tx(c);
+			}
 		}
 	}
 
 	/* newline */
 
 	if((c == '\n') || (c == '\r')) {
-		cli->tx('\n');
+		if(cli->echo) {
+			cli->tx('\n');
+		}
 	
 		char *part[CMD_MAX_PARTS];
 		int32_t parts;
@@ -130,7 +136,9 @@ void cmd_cli_handle_char(struct cmd_cli *cli, uint8_t c)
 		cli->len = 0;
 		cli->buf[cli->len] = '\0';
 
-		cmd_printd(cli, "\r> ");
+		if(cli->echo) {
+			cmd_printd(cli, "\r> ");
+		}
 	}
 	
 }
@@ -178,6 +186,18 @@ void cmd_hexdump(struct cmd_cli *cli, void *addr, size_t len, off_t offset)
 
 
 CMD_REGISTER(help, on_help, "");
+
+
+static int on_echo(struct cmd_cli *cli, uint8_t argc, char **argv)
+{
+	if(argc == 1) {
+		cli->echo = argv[0][0] == '1';
+	}
+	return 1;
+}
+
+
+CMD_REGISTER(echo, on_echo, "<0|1>");
 
 /*
  * End

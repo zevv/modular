@@ -13,7 +13,7 @@ static printd_handler handler = NULL;
 
 void printd_set_handler(printd_handler h)
 {
-//	handler = h;
+	handler = h;
 }
 
 

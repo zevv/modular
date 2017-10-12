@@ -40,7 +40,7 @@ void led_init(void)
 	for(i=0; i<LED_COUNT; i++) {
                 struct led *led = &led_list[i];
                 Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, led->gpio, led->pin);
-                led_set(i, LED_STATE_OFF);
+         //       led_set(i, LED_STATE_OFF);
         }
 }
 

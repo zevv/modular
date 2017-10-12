@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <string.h>
 
 #include "chip.h"
 #include "printd.h"
@@ -12,6 +13,30 @@ static int on_mem(struct cmd_cli *cli, uint8_t argc, char **argv)
 	if(argc == 0) return 0;
 
 	char cmd = argv[0][0];
+	
+	if(cmd == 'w' && argc > 3) {
+		uint32_t addr = strtol(argv[1], NULL, 16);
+		if((addr % 512) == 0) {
+			cmd_printd(cli, ".");
+		}
+
+		uint8_t sum1 = strtol(argv[2], NULL, 16);
+		uint8_t sum2 = 0;
+		uint8_t buf[argc-3];
+		size_t i;
+		for(i=3; i<argc; i++) {
+			uint8_t c = strtol(argv[i], NULL, 16);
+			sum2 += c;
+			buf[i-3] = c;
+		}
+		cmd_hexdump(cli, buf, sizeof(buf), addr);
+		if(sum1 == sum2) {
+			memcpy((void *)addr, buf, 16);
+		} else {
+			cmd_printd(cli, "%06x crc %02x %02x\n", addr, sum1, sum2);
+		}
+		return 1;
+	}
 
 	if(cmd == 'd') {
 

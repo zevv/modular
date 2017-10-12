@@ -152,13 +152,19 @@ void (* const _vectors[])(void) = {
 
 void _boot(void) 
 {
+	/* Let there be light */
+
+	LPC_GPIO_PORT->DIR[1] = 1UL << 11;
+	LPC_GPIO_PORT->B[1][11] = 0;
+
 	/* Init vector table */
 
 	uint32_t * pSCB_VTOR = (uint32_t *)0xE000ED08;
 	*pSCB_VTOR = (uint32_t)&_vectors;
 
-	LPC_GPIO_PORT->DIR[1] = 1UL << 11;
-	LPC_GPIO_PORT->B[1][11] = 0;
+	/* Setup basic clocking */
+
+	Chip_SetupCoreClock(CLKIN_IRC, MAX_CLOCK_FREQ, true);
 
 	/* Clear the BSS */
 
@@ -168,7 +174,7 @@ void _boot(void)
 	while(dst < &_ebss) *dst++ = 0;
 
 	/* Start and never return */
-
+	
 	main();
 	for(;;);
 }
