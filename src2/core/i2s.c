@@ -10,6 +10,7 @@ union sample {
 	int16_t s16[2];
 };
 
+extern bool m4_active;
 
 
 STATIC const PINMUX_GRP_T mux[] = {
@@ -46,19 +47,21 @@ void i2s_init(int srate)
 uint32_t *i2s_val = (void *)0x1001fc00;
 
 /*
- * Main I2S interrupt handler, running at 48Khz
+ * Main I2S interrupt handler. Reads data from the I2S bus and passes this to 
+ * the M4 if it is awake, or copies the data to the output otherwise.
  */
 
 void I2S0_IRQHandler(void)
 {
 	if(Chip_I2S_GetRxLevel(LPC_I2S0) > 0) {
 
-		/* Read and convert I2S and ADC inputs */
-
 		*i2s_val = Chip_I2S_Receive(LPC_I2S0);
-		__SEV();
-		//s.s16[0] = rand() & 0x3f;
-	//	Chip_I2S_Send(LPC_I2S0, *i2s_val);
+
+		if(m4_active) {
+			__SEV();
+		} else {
+			Chip_I2S_Send(LPC_I2S0, *i2s_val);
+		}
 	} else {
 		Chip_I2S_Send(LPC_I2S0, 0);
 	}

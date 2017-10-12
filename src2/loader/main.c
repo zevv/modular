@@ -56,7 +56,8 @@ void main(void)
 
 	/* And go to sleep */
 
-	Chip_RGU_TriggerReset(RGU_M3_RST);
+	__disable_irq();
+	__WFI();
 
 	for(;;);
 }

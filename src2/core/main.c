@@ -28,6 +28,8 @@ static struct cmd_cli cli2 = {
 };
 
 
+bool m4_active = false;
+
 void arch_init(void)
 {
 //	Chip_SetupCoreClock(CLKIN_IRC, MAX_CLOCK_FREQ, true);
@@ -110,8 +112,18 @@ CMD_REGISTER(reboot, on_cmd_reboot, "");
 
 static int on_cmd_hop(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
-	Chip_RGU_TriggerReset(RGU_M3_RST);
-        Chip_RGU_ClearReset(RGU_M3_RST);
+	if(argc >= 1u) {
+		char cmd = argv[0][0];
+
+		if(cmd == '0') {
+			m4_active = false;
+		}
+
+		if(cmd == '1') {
+			m4_active = true;
+			Chip_RGU_TriggerReset(RGU_M3_RST);
+		}
+	}
 
 	return 1;
 }
