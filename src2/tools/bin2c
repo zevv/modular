@@ -1,0 +1,17 @@
+#!/usr/bin/lua
+
+local fname = arg[1]
+
+local fd = io.open(fname, "rb")
+
+while true do
+	l = fd:read(12)
+	if not l then break end
+	io.write(" ")
+	for c in l:gmatch(".") do
+		io.write(string.format(" 0x%02x,", c:byte()))
+	end
+	print("")
+end
+
+-- vi: ft=lua ts=3 sw=3

@@ -112,7 +112,6 @@ int main(void)
 
 	printd("Hello %08x\n", LPC_OTP->OTP0_2);
 
-
 	uint32_t njiffies = jiffies + 100;
 	uint32_t n = 0;
 
