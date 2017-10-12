@@ -21,6 +21,31 @@ union sample {
 };
 
 
+const uint8_t breath[] = {
+	0, 0, 0, 16, 32, 64, 128, 254, 254, 200, 150, 100, 60, 40, 30, 30, 60,
+	120, 240, 230, 200, 170, 140, 110, 90, 70, 50, 40, 30, 20, 10, 7, 5, 4,
+	3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+
+
+static void update_led(void)
+{
+	static size_t i = 0;
+	static size_t j = 0;
+	static uint8_t v = 0;
+
+	LPC_GPIO_PORT->B[1][11] = (j > v);
+
+	if(++j >= 255) {
+		j = 0;
+		if(++i >= sizeof(breath)<<3) {
+			i = 0;
+		}
+		v = breath[i >> 3];
+	}
+}
+
+
 void main(void)
 {
 	LPC_GPIO_PORT->B[1][11] = 0;
@@ -29,13 +54,13 @@ void main(void)
 	
 	mod_init();
 
-	int n = 0;
 	float gain = 0.00001;
 
 	for(;;) {
 		__WFI();
+		
+		update_led();
 	
-		LPC_GPIO_PORT->B[1][11] = (n++ & 0xf00) != 0;
 
 		union sample s;
 		s.u32 = *i2s_val;
