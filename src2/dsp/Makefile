@@ -6,7 +6,11 @@ BUILD	:= 0
 SRC     += boot.c
 SRC     += reverb/main.c
 SRC     += reverb/reverb.c
+SRC     += reverb/osc.c
+SRC     += reverb/sintab.c
+SRC	+= fpu_init.c
 
+LIBS	+= -lm
 
 # CPU specific flags
 

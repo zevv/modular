@@ -68,19 +68,6 @@ void audio_init(void)
  * finished. Blink the blue led like crazy until we can go on
  */
 
-volatile bool m4_ready = false;
-void (**trampoline)(void) = (void *)0x10000020;
-void (**new_start)(void) = (void *)0x10000004;
-
-void m4_limbo(void)
-{
-	volatile uint32_t n = 0;
-	while(!m4_ready) {
-		LPC_GPIO_PORT->B[1][11] = ((n++ & 0x3f0000) != 0x10000);
-	}
-	(*new_start)();
-}
-
 void main(void)
 {
 	arch_init();
@@ -95,11 +82,6 @@ void main(void)
 	adc_init();
 	i2s_init(48000);
 	audio_init();
-
-	/* Instruct the M4 to jump into limbo so we can load a new image for it
-	 * to run */
-
-	*trampoline = m4_limbo;
 
 	int n =0;
 
@@ -128,7 +110,9 @@ CMD_REGISTER(reboot, on_cmd_reboot, "");
 
 static int on_cmd_hop(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
-	m4_ready = true;
+	Chip_RGU_TriggerReset(RGU_M3_RST);
+        Chip_RGU_ClearReset(RGU_M3_RST);
+
 	return 1;
 }
 

@@ -39,7 +39,7 @@ void i2s_init(int srate)
 	Chip_I2S_TxStart(LPC_I2S0);
 		
 	Chip_I2S_Int_RxCmd(LPC_I2S0, ENABLE, 1);
-	Chip_I2S_Int_TxCmd(LPC_I2S0, ENABLE, 1);
+	Chip_I2S_Int_TxCmd(LPC_I2S0, ENABLE, 0);
 	NVIC_EnableIRQ(I2S0_IRQn);
 }
 

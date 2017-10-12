@@ -152,11 +152,12 @@ void (* const _vectors[])(void) = {
 
 void _boot(void) 
 {
-
 	/* Init vector table */
 
 	uint32_t * pSCB_VTOR = (uint32_t *)0xE000ED08;
 	*pSCB_VTOR = (uint32_t)&_vectors;
+
+	fpuInit();
 
 	/* Clear the BSS */
 

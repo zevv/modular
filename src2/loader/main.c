@@ -34,10 +34,6 @@ void M0APP_IRQHandler(void)
 }
 
 
-/* We abuse an unused vector as trampoline address */
-
-void (**trampoline)(void) = (void *)0x10000020;
-
 
 void main(void)
 {
@@ -58,18 +54,10 @@ void main(void)
 	Chip_CREG_SetM0AppMemMap(core_base);
 	Chip_RGU_ClearReset(RGU_M0APP_RST);
 
-	/* Wait for the M0 to put the limbo function into the 
-	 * trampoline pointer, and jump there. */
+	/* And go to sleep */
 
-	while(*trampoline == 0) {
-		led_set(LED_ID_BLUE, true);
-	}
+	Chip_RGU_TriggerReset(RGU_M3_RST);
 
-	(*trampoline)();
-
-	/* We never return here. The M0 will load new firmware in RAM0 and
-	 * signal the M4, which will then boot into the new code */
-	
 	for(;;);
 }
 
