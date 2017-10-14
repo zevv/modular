@@ -3,8 +3,9 @@ TOP	:= ../..
 
 BIN	:= $(NAME).bin
 LDS	:= ../../dsp/dsp.lds
-
-LIBS	+= -lm ../../dsp/dsp.a
+LIBS	+= ../../dsp/dsp.a
+LIBS	+= -lm 
+CFLAGS	+= -I../../dsp
 
 # CPU specific flags
 
@@ -18,6 +19,22 @@ CFLAGS	+= -DCORE_M4
 CFLAGS	+= -I.
 CFLAGS	+= -I../../dsp/lpc_chip_43xx/inc/
 
+PNG	:= $(NAME).png
+SVG	:= $(NAME).svg
+
+CLEAN	+= $(SVG) $(PNG)
+ALL	+= $(PNG)
+
 include ../../Rules.mak
+
+$(SVG): module.def
+	$(P) " SVG $@"
+	$(E) ../../tools/mod2svg $? > $@
+
+$(PNG): $(SVG)
+	$(P) " PNG $@"
+	$(E) convert -density 300 -crop 312x312+0+0 $? $@
+
+
 
 

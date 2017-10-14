@@ -5,6 +5,9 @@ LIB	:= $(NAME).a
 SRC	+= main.c
 SRC     += boot.c
 SRC	+= fpu_init.c
+SRC	+= osc.c
+SRC	+= sintab.c
+SRC	+= adsr.c
 
 LIBS	+= -lm
 

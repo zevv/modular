@@ -22,6 +22,8 @@ LDFLAGS += -ffreestanding -nostartfiles $(MFLAGS)
 
 CFLAGS	+= -ffunction-sections -fdata-sections 
 LDFLAGS += -Wl,--gc-sections
+	
+ALL	+= $(SUBDIRS) $(LIB) $(BIN)
 
 
 CROSS 	:= /opt/toolchains/arm-2014.05/bin/arm-none-eabi-
@@ -36,17 +38,25 @@ OBJCOPY := $(CROSS)objcopy
 OBJDUMP := $(CROSS)objdump
 SIZE    := $(CROSS)size
 CCACHE	:= ccache
-MAKE	:= make -s
 
 OBJS    = $(subst .c,.o, $(SRC))
 DEPS    = $(subst .c,.d, $(SRC))
 
-E	= @
-P	= @echo
+ifdef V
+E       =
+P       = @true
+MAKE	= make
+else
+E       = @
+P       = @echo
+MAKE    = make -s
+endif
 
 .PHONY: $(SUBDIRS)
 
-all: $(SUBDIRS) $(LIB) $(BIN)
+all: $(ALL)
+	echo "ALL was $(ALL)"
+
 bin: $(BIN)
 lib: $(LIB)
 dfu: $(DFU)

@@ -1,0 +1,164 @@
+#!/usr/bin/lua
+
+local hole = {
+	{  x =  10.0+7.5,  y =  10.0+7.5 },
+	{  x =  17.5+7.5,  y =  32.5+7.5 },
+	{  x =  17.5+7.5,  y =  52.5+7.5 },
+	{  x =  10.0+7.5,  y =  75.0+7.5 },
+	{  x =  32.5+7.5,  y =  17.5+7.5 },
+	{  x =  32.5+7.5,  y =  67.5+7.5 },
+	{  x =  52.5+7.5,  y =  17.5+7.5 },
+	{  x =  52.5+7.5,  y =  67.5+7.5 },
+	{  x =  75.0+7.5,  y =  10.0+7.5 },
+	{  x =  67.5+7.5,  y =  32.5+7.5 },
+	{  x =  67.5+7.5,  y =  52.5+7.5 },
+	{  x =  75.0+7.5,  y =  75.0+7.5 },
+}
+
+
+local function gen_svg(mod, out)
+
+	local color = {
+		mod = "rgb(120,120,120)",
+		link = "rgb(200,100,20)",
+		output = "rgb(0,100,250)",
+		text = "white",
+	}
+
+	local function a(...)
+		out(string.format(...) .. "\n")
+	end
+
+	if false then
+		a('<style>')
+		a('    @font-face {')
+		a('        font-family: sans;')
+		a('        src: url(/tmp/font.ttf);')
+		a('    }')
+		a('    svg{')
+		a('        font-family: font, fallBackFonts, sans-serif;')
+		a('        margin: 0px; padding; 0px;')
+		a('    }')
+		a('</style>')
+	end
+	
+	a('<svg width="100mm" height="100mm" viewbox="0 0 100 100">')
+
+	-- Panel outline with holes in the corners
+			
+	a([[
+		<path d="
+			M 0 2
+			A 2 2 0 0 0 2 0  
+			L 98 0
+			A 2 2 0 0 0 100 2  
+			L 100 98
+			A 2 2 0 0 0 98 100  
+			L 2 100
+			A 2 2 0 0 0 0 98  
+			L 0 2
+		" fill="%s" />
+	]], color.mod)
+
+	-- Panel name and logo in the center
+
+	a(' <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" fill="white"')
+	a('  font-size="10" font-family="sans" font-weight="normal">%s</text>',
+		mod.name)
+
+	for i = 0, 8 do
+		h = math.sin((i+1)/10 * math.pi * 2) * 4
+		x = 91 + (i-4) * 1.5
+		if i >= 4 then x = x - 1.5 end
+		y = 93
+		if h < 0 then
+			h = -h
+			y = y - h
+		end
+		a('  <rect x="%f" y="%f" width="1" height="%f" fill="white" rx="0.2" ry="0.2" />', x, y, h)
+	end
+
+	-- Links
+
+	for _, l in ipairs(mod.links or {}) do
+		local h1 = hole[l[1]]
+		local h2 = hole[l[2]]
+
+		local dx, dy = h2.x - h1.x, h2.y - h1.y
+		local cx, cy = (h2.x + h1.x) / 2, (h2.y + h1.y) / 2
+		local l = 0.5
+		a(' <line x1="%f" y1="%f" x2="%f" y2="%f" stroke="%s" stroke-width="17" stroke-linecap="round" />',
+			cx - dx*l, cy - dy*l, cx + dx*l, cy + dy*l, color.link)
+	end
+
+	-- Knobs, connectors and switches
+
+	for i, c in pairs(mod.connections or {}) do
+		local h = hole[i]
+		if c then
+			local r = 0
+			a(' <g transform="translate(%f,%f)">', h.x, h.y)
+			if c.type == "output" then
+				a('  <circle cx="-1" cy="3" r="6" fill="rgb(10, 10, 10)" fill-opacity="0.3" />')
+				a('  <circle cx= "0" cy="0" r="6" fill="rgb(40, 40, 40)" />')
+				a('  <circle cx= "0" cy="0" r="5.3" fill="%s" />', color.output)
+				a('  <circle cx= "0" cy="0" r="4" fill="rgb(40, 40, 40)" />')
+				r = 7
+			end
+			if c.type == "switch" then
+				a('  <circle cx="-1" cy="3" r="6" fill="rgb(10, 10, 10)" fill-opacity="0.3" />')
+				a('  <line x1="-3.5" y1="8" x2="-7" y2="15" stroke-width=4 stroke="rgb(10, 10, 10)" stroke-opacity="0.3" />')
+				a('  <circle cx= "0" cy="0" r="5" fill="rgb(200, 190, 190)" />')
+				a('  <circle cx= "0" cy="0" r="4.5" fill="rgb(100, 100, 100)" />')
+				a('  <circle cx= "0" cy="0" r="3" fill="rgb(20, 20, 20)" />')
+				a('  <rect x="-2.5" y="2" width="5" height="1" fill="rgb(200,200,200)" />')
+				a('  <rect x="-2.5" y="1" width="5" height="1" fill="rgb(100,100,100)" />')
+				r = 7
+			end
+			if c.type == "input" then
+				a('  <circle cx="-1" cy="3" r="6" fill="rgb(10, 10, 10)" fill-opacity="0.3" />')
+				a('  <circle cx= "0" cy="0" r="6" fill="rgb(100, 0, 0)" />')
+				a('  <circle cx= "0" cy="0" r="5.3" fill="rgb(200, 0, 0)" />')
+				a('  <circle cx= "0" cy="0" r="4" fill="rgb(40, 0, 0)" />')
+				r = 7
+			end
+			if c.type == "pot" then
+				a('  <circle cx="-2" cy="5" r="7" fill="rgba(10, 10, 10)" fill-opacity="0.3" />')
+				a('  <circle r="7" stroke="rgb(70, 70, 70)" stroke-width="1" fill="rgb(0, 0, 0)" />')
+				a('  <line x1="0" y1="0" x2="-5" y2="5" stroke="rgb(200,200,200)" stroke-width="1.5" stroke-linecap="round" />')
+				a('  <circle cx="-7" cy="7" r="1" fill="white" />')
+				a('  <circle cx="7" cy="7" r="1" fill="white" />')
+				r = 9
+			end
+			if c.label then
+				local x, y, h = 0, 0, "middle"
+				if i <= 4 then
+					x = -r
+					h = "end"
+				end
+				if i >= 5 and i <= 8 then
+					y = -r
+				end
+				if i >= 9 then
+					x = r
+					h = "begin"
+				end
+				a('  <text x="%f" y="%f" text-anchor="%s" fill="%s" font-size="3.5" font-family="sans">%s</text>', 
+					x, y, h, color.text, c.label:upper())
+			end
+			a(' </g>')
+		end
+
+	end
+
+	a('</svg>')
+
+end
+
+
+for _, fname in ipairs(arg) do
+	local mod = dofile(fname)
+	gen_svg(mod, io.write)
+end
+
+-- vi: ft=lua ts=3 sw=3

@@ -1,0 +1,58 @@
+
+return {
+	name = "VCF",
+	connections = {
+		[1] = {
+			type = "input",
+			label = "in",
+		},
+		[2] = {
+			type = "input",
+			label = "FM",
+		},
+		[3] = {
+			type = "input",
+			label = "sync",
+		},
+		[4] = {
+			type = "input",
+			label = "in",
+		},
+		[5] = {
+			type = "pot",
+			label = "freq",
+			link = 2,
+		},
+		[6] = {
+			type = "switch",
+			label = "shape",
+		},
+		[7] = {
+			type = "pot",
+			label = "out",
+		},
+		[8] = {
+			type = "pot",
+			label = "out",
+		},
+		[9] = {
+			type = "output",
+			label = "out",
+		},
+		[10] = {
+			type = "pot",
+			label = "type",
+		},
+		[11] = {
+			type = "pot",
+			label = "type",
+		},
+		[12] = {
+			type = "output",
+			label = "out",
+		},
+	},
+}
+
+
+-- vi: ft=lua ts=3 sw=3

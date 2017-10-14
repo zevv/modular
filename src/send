@@ -1,7 +1,10 @@
 #!/usr/bin/lua
 
+local name = arg[1]
+local fname = "modules/" .. name .. "/" .. name .. ".bin"
+print(fname)
 
-local fd = io.open(arg[1])
+local fd = io.open(fname)
 local addr = 0x10000000
 local done = false
 

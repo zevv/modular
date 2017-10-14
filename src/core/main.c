@@ -90,10 +90,9 @@ void main(void)
 	for(;;) {
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
-		led_set(LED_ID_RED, n);
-		n = !n;
+		led_set(LED_ID_RED, (n++ & 0x3f0) == 0x10);
 		volatile int i;
-		for(i=0; i<1000000; i++);
+		for(i=0; i<10000; i++);
 		i2s_tick();
 	}
 }

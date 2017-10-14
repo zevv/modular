@@ -1,0 +1,45 @@
+
+return {
+	name = "NOISE",
+	connections = {
+		[1] = {
+			type = "input",
+			label = "rate",
+			link = 2,
+		},
+		[2] = {
+			type = "pot",
+		},
+		[5] = {
+			type = "pot",
+			label = "rate",
+		},
+		[6] = {
+			type = "switch",
+			label = "shape",
+		},
+		[7] = {
+			type = "pot",
+			label = "out",
+		},
+		[9] = {
+			type = "output",
+			label = "brn",
+		},
+		[10] = {
+			type = "output",
+			label = "pnk",
+		},
+		[11] = {
+			type = "output",
+			label = "wht",
+		},
+		[12] = {
+			type = "output",
+			label = "wht",
+		},
+	},
+}
+
+
+-- vi: ft=lua ts=3 sw=3

@@ -18,7 +18,7 @@ void mod_init(void)
 
 void mod_run(float *fin, float *fout)
 {
-	float in = (fin[0] + fin[1]) * 0.5;
+	float in = (fin[0] + fin[1]);
 
 	revmodel_process(&rev, in, &fout[0], &fout[1]);
 }

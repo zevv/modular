@@ -1,5 +1,5 @@
 
 TOP	:= ..
-SUBDIRS	:= $(wildcard mod-*/)
+SUBDIRS	:= $(wildcard [a-z]*/)
 
 include ../Rules.mak

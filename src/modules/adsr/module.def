@@ -1,0 +1,66 @@
+
+return {
+	name = "ADSR",
+	connections = {
+		[1] = {
+			type = "input",
+			label = "trig",
+		},
+		[2] = {
+			type = "pot",
+			label = "A",
+		},
+		[3] = {
+			type = "pot",
+			label = "A",
+		},
+		[4] = {
+			type = "input",
+			label = "trig",
+		},
+		[5] = {
+			type = "pot",
+			label = "D",
+		},
+		[6] = {
+			type = "pot",
+			label = "D",
+		},
+		[7] = {
+			type = "pot",
+			label = "S",
+		},
+		[8] = {
+			type = "pot",
+			label = "S",
+		},
+		[9] = {
+			type = "output",
+			label = "out",
+		},
+		[10] = {
+			type = "pot",
+			label = "R",
+		},
+		[11] = {
+			type = "pot",
+			label = "R",
+		},
+		[12] = {
+			type = "output",
+			label = "out",
+		},
+	},
+	links = {
+		{ 1, 2 },
+		{ 1, 5 },
+		{ 2, 5 },
+		{ 5, 7 },
+		{ 7, 9 },
+		{ 7, 10 },
+		{ 9, 10 },
+	},
+}
+
+
+-- vi: ft=lua ts=3 sw=3

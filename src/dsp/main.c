@@ -61,23 +61,28 @@ void main(void)
 		
 		update_led();
 	
-
 		union sample s;
 		s.u32 = *i2s_val;
+
+		/* Convert to float -1.0 .. +1.0 */
 
 		float fin[4] = { s.s16[0] / 32767.0, s.s16[1] / 32767.0, 0, 0 };
 		float fout[4] = { 0, 0, 0, 0} ;
 
+		/* Run module */
+
 		mod_run(fin, fout);
 
-		s.s16[0] = fout[0] * 16000.0 * gain;
-		s.s16[1] = fout[1] * 16000.0 * gain;
+		/* Saturate and convert back to s16 */
+
+		s.s16[0] = __SSAT((int)(fout[0] * 32767.0 * gain), 16);
+		s.s16[1] = __SSAT((int)(fout[1] * 32767.0 * gain), 16);
 
 		if(Chip_I2S_GetTxLevel(LPC_I2S0) < 4) {
 			Chip_I2S_Send(LPC_I2S0, s.u32);
 		}
 
-		if(gain < 1.0) gain += 0.00005;
+		if(gain < 1.0) gain *= 1.0003;
 	}
 }
 
