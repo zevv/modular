@@ -19,10 +19,10 @@ void mod_init(void)
 
 void mod_run(float *fin, float *fout)
 {
-	fout[0] = osc_gen_linear(&osc1) * 0.01 +
-	          osc_gen_linear(&osc2) * 0.01;
-	fout[1] = osc_gen_linear(&osc3) * 0.01+
-	          osc_gen_linear(&osc4) * 0.01;
+	fout[0] = osc_gen(&osc1) * 0.01 +
+	          osc_gen(&osc2) * 0.01;
+	fout[1] = osc_gen(&osc3) * 0.01+
+	          osc_gen(&osc4) * 0.01;
 }
 
 

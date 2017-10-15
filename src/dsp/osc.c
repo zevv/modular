@@ -1,50 +1,28 @@
 
+
 #include <math.h>
 
 #include "sintab.h"
 #include "osc.h"
 
-
-float dpw3(float t, float dt)
-{
-	static float x1 =0, x2 = 0;
-	t += 0.5 + dt;
-	if (t >= 1.) t -= 1.;
-
-	float x = 2.*t - 1.;
-
-	float x0 = x*x*x - x;
-	float y = ((x0 - x1) - (x1 - x2)) / (24.*dt*dt);
-	x2 = x1;
-	x1 = x0;
-	return y;
-}
+/*
+ * polyblep: http://www.kvraudio.com/forum/viewtopic.php?t=375517
+ */
 
 float poly_blep(float t, float dt)
 {
-	// 0 <= t < 1
 	if (t < dt)
 	{
 		t /= dt;
-		// 2 * (t - t^2/2 - 0.5)
 		return t+t - t*t - 1.;
-	}
-
-	// -1 < t < 0
-	else if (t > 1. - dt)
+	} else if (t > 1. - dt)
 	{
 		t = (t - 1.) / dt;
-		// 2 * (t^2/2 + t + 0.5)
 		return t*t + t+t + 1.;
-	}
-
-	// 0 otherwise
-	else
-	{
+	} else {
 		return 0.;
 	}
 }
-
 
 
 void osc_init(struct osc *osc, float srate)
@@ -80,10 +58,9 @@ void osc_set_dutycycle(struct osc *osc, float dt)
  * Linear interpolation sine table lookup
  */
 
-float osc_gen_linear(struct osc *osc)
+float osc_gen(struct osc *osc)
 {
 	float val = 0;
-
 
 	if(osc->type == OSC_TYPE_SIN) {
 
@@ -100,26 +77,37 @@ float osc_gen_linear(struct osc *osc)
 		val = v0 * a1 + v1 * a0;
 	}
 	
-	if(osc->type == OSC_TYPE_PULSE) {
+	if(osc->type == OSC_TYPE_PULSE_NAIVE) {
 		val = osc->phase <= osc->dutycycle ? 1 : -1;
 	}
 	
+	if(osc->type == OSC_TYPE_PULSE) {
+		val = osc->phase > 0.5 ? +1.0 : -1.0;
+		val += poly_blep(fmodf(osc->phase + 0.5, 1.0), osc->dphase);
+		val -= poly_blep(osc->phase, osc->dphase);
+	}
+	
 	if(osc->type == OSC_TYPE_TRIANGLE) {
-		if(osc->phase < 0.5) {
-			val = osc->phase * 4 - 1;
-		} else {
-			val = 3 - osc->phase * 4;
-		}
+		/* Integrated pulse, leaky integrator */
+		val = osc->phase > 0.5 ? +1.0 : -1.0;
+		val += poly_blep(fmodf(osc->phase + 0.5, 1.0), osc->dphase);
+		val -= poly_blep(osc->phase, osc->dphase);
+		val = osc->dphase * val + (1 - osc->dphase) * osc->prev;
+		osc->prev = val;
+	}
+	
+	if(osc->type == OSC_TYPE_TRIANGLE_NAIVE) {
+		val = -1.0 + 2.0 * osc->phase;
+                val = 2.0 * fabsf(val) - 1;
+	}
+	
+	if(osc->type == OSC_TYPE_SAW_NAIVE) {
+		val = osc->phase * 2.0 - 1.0;
 	}
 
 	if(osc->type == OSC_TYPE_SAW) {
-                osc->phase += 2 * osc->dt;
-                if(osc->phase > 1-osc->dt) {
-                        val = osc->phase - osc->phase/osc->dt + 1/osc->dt - 1;
-			osc->phase -= 2;
-                } else {
-                        val = p;
-                }
+		val = osc->phase * 2.0 - 1.0;
+		val -= poly_blep(osc->phase, osc->dphase);
 	}
 
 	osc->phase += osc->dphase;
@@ -144,14 +132,14 @@ int main(void)
 
 	osc_set_freq(&lfo, 0.3);
 
-	osc_set_type(&osc, OSC_TYPE_SAW);
-	osc_set_freq(&osc, 1000);
+	osc_set_type(&osc, OSC_TYPE_PULSE);
+	osc_set_freq(&osc, 1005);
 	int i;
 
 	for(i=0; i<480; i++) {
 	
 		float out;
-		out = osc_gen_linear(&osc);
+		out = osc_gen(&osc);
 		printf("%f\n", out);
 	}
 }

@@ -54,7 +54,7 @@ float osc_gen_nearest(struct osc *osc)
  * Linear interpolation sine table lookup
  */
 
-float osc_gen_linear(struct osc *osc)
+float osc_gen(struct osc *osc)
 {
 	float val = 0;
 

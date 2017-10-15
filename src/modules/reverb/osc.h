@@ -22,6 +22,6 @@ void osc_set_freq(struct osc *osc, float freq);
 void osc_set_type(struct osc *osc, enum osc_type type);
 void osc_set_dutycycle(struct osc *osc, float dt);
 float osc_gen_nearest(struct osc *osc);
-float osc_gen_linear(struct osc *osc);
+float osc_gen(struct osc *osc);
 
 #endif

@@ -40,8 +40,8 @@ void main(void)
 	
 		LPC_GPIO_PORT->B[1][11] = (n++ & 0xf00) != 0;
 
-		float out1 = osc_gen_linear(&osc1) * 0.01;
-		float out2 = osc_gen_linear(&osc2) * 0.01;
+		float out1 = osc_gen(&osc1) * 0.01;
+		float out2 = osc_gen(&osc2) * 0.01;
 		
 		union sample s;
 
