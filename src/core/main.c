@@ -1,4 +1,6 @@
 
+#include <string.h>
+
 #include "chip.h"
 
 #include "adc.h"
@@ -11,6 +13,7 @@
 #include "uart.h"
 #include "uda1380.h"
 #include "watchdog.h"
+#include "shared.h"
 
 const uint32_t OscRateIn = 12000000;
 const uint32_t ExtRateIn = 0;
@@ -64,6 +67,30 @@ void audio_init(void)
 	UDA1380_Init(0);
 }
 
+
+void SysTick_Handler(void)
+{
+
+}
+
+
+static int m4_load;
+
+static void calc_m4_load(void)
+{
+	static int n = 0;
+	static int load = 0;
+
+	if(n++ < 1000) {
+		if(shared->m4_busy) load++;
+	} else {
+		m4_load = load;
+		load = 0;
+		n = 0;
+	}
+}
+
+
 /*
  * This function is called by the M4; it is defined here to allow
  * RAM1 to be updated with new code while the M4 waits here until
@@ -79,11 +106,14 @@ void main(void)
 	
 	printd("\n\nHello %s %s %s\n", VERSION, __DATE__, __TIME__);
 
+	memset((void *)shared, 0, sizeof(*shared));
+
 	cdc_uart_init();
 	flash_init();
 	adc_init();
 	i2s_init(48000);
 	audio_init();
+	SysTick_Config(SystemCoreClock / 1000);
 
 	int n =0;
 
@@ -94,6 +124,7 @@ void main(void)
 		volatile int i;
 		for(i=0; i<10000; i++);
 		i2s_tick();
+		calc_m4_load();
 	}
 }
 
@@ -121,6 +152,11 @@ static int on_cmd_hop(struct cmd_cli *cli, uint8_t argc, char **argv)
 		if(cmd == '1') {
 			m4_active = true;
 			Chip_RGU_TriggerReset(RGU_M3_RST);
+		}
+
+		if(cmd == 'l') {
+			cmd_printd(cli, "%d %d\n", m4_load, shared->m4_ticks);
+			return 1;
 		}
 	}
 

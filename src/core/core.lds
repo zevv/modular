@@ -48,9 +48,9 @@ SECTIONS {
 	_sstack = .;
 }
 
-/* Stack is at end of RAM2 */
+/* Stack is at end of RAM2 with a 1K of room for shared IPC block  */
 
-PROVIDE(_estack = 0x10092000);
+PROVIDE(_estack = 0x10091c00);
 
 
 

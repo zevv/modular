@@ -223,12 +223,6 @@ void PendSV_Handler(void)
 }
 
 
-void SysTick_Handler(void) 
-{
-	for(;;);
-}
-
-
 void IntDefaultHandler(void) 
 {
 	for(;;);

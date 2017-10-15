@@ -5,6 +5,7 @@
 
 #include "chip.h"
 #include "module.h"
+#include "../core/shared.h"
 
 void M0APP_IRQHandler(void)
 {
@@ -58,6 +59,8 @@ void main(void)
 
 	for(;;) {
 		__WFI();
+
+		shared->m4_busy = true;
 		
 		update_led();
 	
@@ -83,6 +86,9 @@ void main(void)
 		}
 
 		if(gain < 1.0) gain *= 1.0003;
+
+		shared->m4_busy = false;
+		shared->m4_ticks ++;
 	}
 }
 
