@@ -113,8 +113,13 @@ float osc_gen_linear(struct osc *osc)
 	}
 
 	if(osc->type == OSC_TYPE_SAW) {
-		val = osc->phase * 2.0 - 1.0;
-		val -= poly_blep(osc->phase, osc->dphase);
+                osc->phase += 2 * osc->dt;
+                if(osc->phase > 1-osc->dt) {
+                        val = osc->phase - osc->phase/osc->dt + 1/osc->dt - 1;
+			osc->phase -= 2;
+                } else {
+                        val = p;
+                }
 	}
 
 	osc->phase += osc->dphase;
