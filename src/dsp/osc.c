@@ -78,15 +78,15 @@ float osc_gen(struct osc *osc)
 	}
 	
 	if(osc->type == OSC_TYPE_PULSE_NAIVE) {
-		val = osc->phase <= osc->dutycycle ? 1 : -1;
+		val = osc->phase > 1.0-osc->dutycycle ? +1.0 : -1.0;
 	}
 	
 	if(osc->type == OSC_TYPE_PULSE) {
-		val = osc->phase > 0.5 ? +1.0 : -1.0;
-		val += poly_blep(fmodf(osc->phase + 0.5, 1.0), osc->dphase);
+		val = osc->phase > 1.0-osc->dutycycle ? +1.0 : -1.0;
+		val += poly_blep(fmodf(osc->phase + osc->dutycycle, 1.0), osc->dphase);
 		val -= poly_blep(osc->phase, osc->dphase);
 	}
-	
+
 	if(osc->type == OSC_TYPE_TRIANGLE) {
 		/* Integrated pulse, leaky integrator */
 		val = osc->phase > 0.5 ? +1.0 : -1.0;
@@ -125,22 +125,29 @@ float osc_gen(struct osc *osc)
 
 int main(void)
 {
-	static struct osc osc, lfo;
+	static struct osc osc, lfo, osc2;
 	osc_init(&lfo, 48000);
 
 	osc_init(&osc, 48000);
+	osc_init(&osc2, 48000);
 
 	osc_set_freq(&lfo, 0.3);
 
+	osc_set_dutycycle(&osc, 0.3);
+	osc_set_dutycycle(&osc2, 0.3);
+
 	osc_set_type(&osc, OSC_TYPE_PULSE);
 	osc_set_freq(&osc, 1005);
+	osc_set_type(&osc2, OSC_TYPE_SIN);
+	osc_set_freq(&osc2, 1005);
 	int i;
 
 	for(i=0; i<480; i++) {
 	
-		float out;
+		float out, out2;
 		out = osc_gen(&osc);
-		printf("%f\n", out);
+		out2 = osc_gen(&osc2);
+		printf("%f %f\n", out, out2);
 	}
 }
 
