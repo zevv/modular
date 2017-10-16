@@ -17,7 +17,7 @@
 #define ADC_SCALE (1.0 / (2 << 14))
 
 static volatile int32_t accum[8];
-static volatile uint32_t count0, count1;
+static volatile int32_t count0, count1;
 
 
 /* 
@@ -47,10 +47,10 @@ void ADC1_IRQHandler(void)
 
 /*
  * Average the last read samples for each channel and normalize
- * to -1.0..+1.0 float
+ * to s16
  */
 
-uint32_t adc_read(volatile float *val)
+uint32_t adc_read(volatile int32_t *val)
 {
 	static int ret = 0;
 
@@ -58,17 +58,15 @@ uint32_t adc_read(volatile float *val)
 		
 		int32_t d0 = 0x8000 * count0;
 		int32_t d1 = 0x8000 * count1;
-		float m0 = ADC_SCALE / count0;
-		float m1 = ADC_SCALE / count1;
 
-		val[0] = (accum[0] - d0) * m0;
-		val[1] = (accum[1] - d0) * m0;
-		val[2] = (accum[2] - d0) * m0;
-		val[3] = (accum[3] - d0) * m0;
-		val[4] = (accum[4] - d1) * m1;
-		val[5] = (accum[5] - d1) * m1;
-		val[6] = (accum[6] - d1) * m1;
-		val[7] = (accum[7] - d1) * m1;
+		val[0] = (accum[0] - d0) / count0;
+		val[1] = (accum[1] - d0) / count0;
+		val[2] = (accum[2] - d0) / count0;
+		val[3] = (accum[3] - d0) / count0;
+		val[4] = (accum[4] - d1) / count1;
+		val[5] = (accum[5] - d1) / count1;
+		val[6] = (accum[6] - d1) / count1;
+		val[7] = (accum[7] - d1) / count1;
 
 		ret = count0;
 		count0 = count1 = 0;

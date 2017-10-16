@@ -3,6 +3,7 @@
 #include "board.h"
 #include "i2s.h"
 #include "printd.h"
+#include "shared.h"
 #include "adc.h"
 
 union sample {
@@ -44,8 +45,6 @@ void i2s_init(int srate)
 	NVIC_EnableIRQ(I2S0_IRQn);
 }
 
-uint32_t *i2s_val = (void *)0x1001fc00;
-
 /*
  * Main I2S interrupt handler. Reads data from the I2S bus and passes this to 
  * the M4 if it is awake.
@@ -55,7 +54,8 @@ void I2S0_IRQHandler(void)
 {
 	if(Chip_I2S_GetRxLevel(LPC_I2S0) > 0) {
 
-		*i2s_val = Chip_I2S_Receive(LPC_I2S0);
+		shared->i2s_in = Chip_I2S_Receive(LPC_I2S0);
+		adc_read(shared->adc_in);
 
 		if(m4_active) {
 			__SEV();

@@ -11,6 +11,8 @@ CFLAGS	+= -DVERSION=\"$(VERSION)\"
 CFLAGS	+= -DBUILD=\"$(BUILD)\"
 CFLAGS  += -Wdouble-promotion -fsingle-precision-constant
 
+MFLAGS	+= -ffast-math
+
 MFLAGS	+= -mthumb
 
 # Standalone configuration, no startup code etc

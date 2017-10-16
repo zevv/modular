@@ -13,8 +13,6 @@ void M0APP_IRQHandler(void)
 }
 
 
-uint32_t *i2s_val = (void *)0x1001fc00;
-
 
 union sample {
 	uint32_t u32;
@@ -47,6 +45,8 @@ static void update_led(void)
 }
 
 
+static const float scale = 1.0 / 32767.0;
+
 void main(void)
 {
 	LPC_GPIO_PORT->B[1][11] = 0;
@@ -56,6 +56,8 @@ void main(void)
 	mod_init();
 
 	float gain = 0.00001;
+	float fin[12];
+	float fout[4];
 
 	for(;;) {
 		__WFI();
@@ -65,12 +67,20 @@ void main(void)
 		update_led();
 	
 		union sample s;
-		s.u32 = *i2s_val;
+		s.u32 = shared->i2s_in;
 
 		/* Convert to float -1.0 .. +1.0 */
 
-		float fin[4] = { s.s16[0] / 32767.0, s.s16[1] / 32767.0, 0, 0 };
-		float fout[4] = { 0, 0, 0, 0} ;
+		fin[ 0] = s.s16[0] * scale;
+		fin[ 1] = s.s16[1] * scale;
+		fin[ 4] = shared->adc_in[0] * scale;
+		fin[ 5] = shared->adc_in[1] * scale;
+		fin[ 6] = shared->adc_in[2] * scale;
+		fin[ 7] = shared->adc_in[3] * scale;
+		fin[ 8] = shared->adc_in[4] * scale;
+		fin[ 9] = shared->adc_in[5] * scale;
+		fin[10] = shared->adc_in[6] * scale;
+		fin[11] = shared->adc_in[7] * scale;
 
 		/* Run module */
 

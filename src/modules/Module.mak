@@ -23,7 +23,7 @@ PNG	:= $(NAME).png
 SVG	:= $(NAME).svg
 
 CLEAN	+= $(SVG) $(PNG)
-ALL	+= $(PNG)
+#ALL	+= $(PNG)
 
 include ../../Rules.mak
 

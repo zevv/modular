@@ -1,5 +1,7 @@
 #!/usr/bin/lua
 
+math.randomseed(os.time())
+
 local hole = {
 	{  x =  10.0+7.5,  y =  10.0+7.5 },
 	{  x =  17.5+7.5,  y =  32.5+7.5 },
@@ -123,11 +125,28 @@ local function gen_svg(mod, out)
 				r = 7
 			end
 			if c.type == "pot" then
+				c.min = c.min or -1
+				c.max = c.max or  1
+				local function ang2xy(ang, r)
+					ang = ang / 360.0 * 3.1415 * 2
+					ang = ang + 40 / 360.0 * 3.1415 * 2
+					return -math.sin(ang) * r, math.cos(ang) * r
+				end
 				a('  <circle cx="-2" cy="5" r="7" fill="rgba(10, 10, 10)" fill-opacity="0.3" />')
 				a('  <circle r="7" stroke="rgb(70, 70, 70)" stroke-width="1" fill="rgb(0, 0, 0)" />')
-				a('  <line x1="0" y1="0" x2="-5" y2="5" stroke="rgb(200,200,200)" stroke-width="1.5" stroke-linecap="round" />')
-				a('  <circle cx="-7" cy="7" r="1" fill="white" />')
-				a('  <circle cx="7" cy="7" r="1" fill="white" />')
+				a('  <line x1="0" y1="0" x2="%f" y2="%f" stroke="rgb(200,200,200)" stroke-width="1.5" stroke-linecap="round" />', 
+					ang2xy(math.random(0, 280), 5))
+				-- min and max dots
+				a('  <circle cx="%f" cy="%f" r="1" fill="white" />', ang2xy(0, 9))
+				a('  <circle cx="%f" cy="%f" r="1" fill="white" />', ang2xy(280, 9))
+				-- center dot
+				if c.min and c.max and c.min < 0 and c.max > 0 then
+					local zero = -c.min
+					local rng = (c.max - c.min)
+					local ang = zero / rng * 280 
+					io.stderr:write(ang .. "\n")
+					a('  <circle cx="%f" cy="%f" r="1" fill="white" />', ang2xy(ang, 9))
+				end
 				r = 9
 			end
 			if c.label then
@@ -137,7 +156,7 @@ local function gen_svg(mod, out)
 					h = "end"
 				end
 				if i >= 5 and i <= 8 then
-					y = -r
+					y = -r - 3
 				end
 				if i >= 9 then
 					x = r

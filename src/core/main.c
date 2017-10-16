@@ -109,6 +109,8 @@ void main(void)
 	memset((void *)shared, 0, sizeof(*shared));
 
 	cdc_uart_init();
+	printd_set_handler(cdc_uart_tx);
+
 	flash_init();
 	adc_init();
 	i2s_init(48000);

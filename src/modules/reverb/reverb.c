@@ -52,20 +52,6 @@
 
 
 
-/** Flags for revmodel_set() */
-typedef enum
-{
-	REVMODEL_SET_ROOMSIZE       = 1 << 0,
-	REVMODEL_SET_DAMPING        = 1 << 1,
-	REVMODEL_SET_WIDTH          = 1 << 2,
-	REVMODEL_SET_LEVEL          = 1 << 3
-} revmodel_set_t;
-
-/** Value for revmodel_set() which sets all reverb parameters. */
-#define REVMODEL_SET_ALL      0x0F
-
-
-revmodel_t* new_revmodel(float sample_rate);
 
 void revmodel_reset(revmodel_t* rev);
 

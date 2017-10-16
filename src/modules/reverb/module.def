@@ -1,3 +1,39 @@
 
-return {}
+return {
+	name = "REV",
+	connections = {
+		[1] = {
+			type = "input",
+			label = "IN",
+			link = 5,
+		},
+		[5] = {
+			type = "pot",
+			label = "wet",
+			min = 0.0,
+			max = 1.0,
+		},
+		[2] = {
+			type = "pot",
+			label = "damp",
+			min = 0.0,
+			max = 1.0,
+		},
+		[7] = {
+			type = "pot",
+			label = "room",
+			min = 0.0,
+			max = 1.0,
+		},
+		[9] = {
+			type = "output",
+			label = "out1",
+		},
+		[10] = {
+			type = "output",
+			label = "out2",
+		},
+	}
+}
 
+-- vi: ft=lua ts=3 sw=3
