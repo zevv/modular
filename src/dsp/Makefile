@@ -9,6 +9,7 @@ SRC	+= osc.c
 SRC	+= biquad.c
 SRC	+= sintab.c
 SRC	+= adsr.c
+SRC	+= fir.c
 
 LIBS	+= -lm
 
