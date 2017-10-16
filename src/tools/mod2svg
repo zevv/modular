@@ -175,9 +175,69 @@ local function gen_svg(mod, out)
 end
 
 
+local function gen_svg2(mod, out)
+
+	local function a(...)
+		out(string.format(...) .. "\n")
+	end
+
+	a('<svg width="100mm" height="100mm" viewbox="0 0 100 100">')
+
+	-- Panel outline with holes in the corners
+			
+	a([[
+		<path d="
+			M 0 2
+			A 2 2 0 0 0 2 0  
+			L 98 0
+			A 2 2 0 0 0 100 2  
+			L 100 98
+			A 2 2 0 0 0 98 100  
+			L 2 100
+			A 2 2 0 0 0 0 98  
+			L 0 2
+		" stroke-width="0.3" stroke="black" fill="none"/>
+	]])
+
+	-- Holes
+
+	for i, c in pairs(mod.connections or {}) do
+		local h = hole[i]
+		if c then
+			local r = 0
+			a(' <g transform="translate(%f,%f)">', h.x, h.y)
+			if c.type == "output" then
+				a('  <circle cx="-1" cy="3" r="3.7" stroke-width="0.3" stroke="black" fill="none"/>')
+			end
+			if c.type == "switch" then
+				a('  <circle cx="-1" cy="3" r="3.1" stroke-width="0.3" stroke="black" fill="none"/>')
+			end
+			if c.type == "input" then
+				a('  <circle cx="-1" cy="3" r="3.7" stroke-width="0.3" stroke="black" fill="none"/>')
+			end
+			if c.type == "pot" then
+				a('  <circle cx="-1" cy="3" r="3.1" stroke-width="0.3" stroke="black" fill="none"/>')
+			end
+			a(' </g>')
+		end
+
+	end
+
+	a('</svg>')
+
+end
+
+
+local gen = gen_svg
+
+if arg[1] == "-t" then
+	gen = gen_svg2
+	table.remove(arg, 1)
+end
+
 for _, fname in ipairs(arg) do
 	local mod = dofile(fname)
-	gen_svg(mod, io.write)
+	gen(mod, io.write)
 end
 
 -- vi: ft=lua ts=3 sw=3
