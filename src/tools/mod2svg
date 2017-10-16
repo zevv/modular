@@ -207,16 +207,16 @@ local function gen_svg2(mod, out)
 			local r = 0
 			a(' <g transform="translate(%f,%f)">', h.x, h.y)
 			if c.type == "output" then
-				a('  <circle cx="-1" cy="3" r="3.7" stroke-width="0.3" stroke="black" fill="none"/>')
+				a('  <circle r="3.7" stroke-width="0.3" stroke="black" fill="none"/>')
 			end
 			if c.type == "switch" then
-				a('  <circle cx="-1" cy="3" r="3.1" stroke-width="0.3" stroke="black" fill="none"/>')
+				a('  <circle r="3.1" stroke-width="0.3" stroke="black" fill="none"/>')
 			end
 			if c.type == "input" then
-				a('  <circle cx="-1" cy="3" r="3.7" stroke-width="0.3" stroke="black" fill="none"/>')
+				a('  <circle r="3.7" stroke-width="0.3" stroke="black" fill="none"/>')
 			end
 			if c.type == "pot" then
-				a('  <circle cx="-1" cy="3" r="3.1" stroke-width="0.3" stroke="black" fill="none"/>')
+				a('  <circle r="3.1" stroke-width="0.3" stroke="black" fill="none"/>')
 			end
 			a(' </g>')
 		end
