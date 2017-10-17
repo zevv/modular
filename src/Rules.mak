@@ -6,6 +6,7 @@ DFU	?= $(NAME).dfu
 CFLAGS	+= -ggdb -O3
 CFLAGS	+= -Wall -Werror
 
+CFLAGS	+= -DSRATE=48000
 CFLAGS	+= -DNAME=\"$(NAME)\"
 CFLAGS	+= -DVERSION=\"$(VERSION)\"
 CFLAGS	+= -DBUILD=\"$(BUILD)\"

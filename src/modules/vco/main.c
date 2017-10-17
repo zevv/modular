@@ -28,8 +28,8 @@ void main(void)
 
 	NVIC_EnableIRQ(M0APP_IRQn);
 
-	osc_init(&osc1, 48000);
-	osc_init(&osc2, 48000);
+	osc_init(&osc1, SRATE);
+	osc_init(&osc2, SRATE);
 	osc_set_freq(&osc1, 400);
 	osc_set_freq(&osc2, 403);
 	int n = 0;

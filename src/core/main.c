@@ -113,7 +113,7 @@ void main(void)
 
 	flash_init();
 	adc_init();
-	i2s_init(48000);
+	i2s_init(SRATE);
 	audio_init();
 	SysTick_Config(SystemCoreClock / 1000);
 

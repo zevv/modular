@@ -126,10 +126,10 @@ float osc_gen(struct osc *osc)
 int main(void)
 {
 	static struct osc osc, lfo, osc2;
-	osc_init(&lfo, 48000);
+	osc_init(&lfo, SRATE);
 
-	osc_init(&osc, 48000);
-	osc_init(&osc2, 48000);
+	osc_init(&osc, SRATE);
+	osc_init(&osc2, SRATE);
 
 	osc_set_freq(&lfo, 0.3);
 

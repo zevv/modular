@@ -6,10 +6,10 @@ static struct osc osc1, osc2, osc3, osc4;
 
 void mod_init(void)
 {
-	osc_init(&osc1, 48000);
-	osc_init(&osc2, 48000);
-	osc_init(&osc3, 48000);
-	osc_init(&osc4, 48000);
+	osc_init(&osc1, SRATE);
+	osc_init(&osc2, SRATE);
+	osc_init(&osc3, SRATE);
+	osc_init(&osc4, SRATE);
 	osc_set_freq(&osc1, 400);
 	osc_set_freq(&osc2, 400 * 0.503);
 	osc_set_freq(&osc3, 403);
