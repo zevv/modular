@@ -97,6 +97,7 @@ local function gen_svg(mod, out)
 
 	for i, c in pairs(mod.connections or {}) do
 		local h = hole[i]
+		io.stderr:write(i .. "\n")
 		if c then
 			local r = 0
 			a(' <g transform="translate(%f,%f)">', h.x, h.y)
@@ -144,7 +145,6 @@ local function gen_svg(mod, out)
 					local zero = -c.min
 					local rng = (c.max - c.min)
 					local ang = zero / rng * 280 
-					io.stderr:write(ang .. "\n")
 					a('  <circle cx="%f" cy="%f" r="1" fill="white" />', ang2xy(ang, 9))
 				end
 				r = 9

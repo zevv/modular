@@ -5,12 +5,10 @@ return {
 		[1] = {
 			type = "input",
 			label = "FM",
-			link = 5,
 		},
 		[2] = {
 			type = "pot",
 			label = "FM",
-			link = 1,
 		},
 		[3] = {
 			type = "input",
@@ -18,13 +16,11 @@ return {
 		},
 		[4] = {
 			type = "input",
-			label = "shape",
-			link = 6,
+			label = "shp",
 		},
 		[5] = {
 			type = "pot",
 			label = "freq",
-			link = 2,
 		},
 		[6] = {
 			type = "pot",
@@ -32,7 +28,6 @@ return {
 		[7] = {
 			type = "pot",
 			label = "fine",
-			link = 5,
 		},
 		[9] = {
 			type = "output",
@@ -50,6 +45,13 @@ return {
 			type = "output",
 			label = "sin",
 		},
+	},
+	links = {
+		{ 1, 5 },
+		{ 2, 1 },
+		{ 4, 6 },
+		{ 5, 2 },
+		{ 5, 7 },
 	},
 }
 

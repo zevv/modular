@@ -14,8 +14,9 @@ void fir_init(struct fir *fir, const float *taps, int ntaps)
 
 void fir_load(struct fir *fir, float fin)
 {
-	fir->s[fir->head++] = fin;
-	if(fir->head > fir->ntaps) {
+	fir->s[fir->head] = fin;
+	fir->head ++;
+	if(fir->head == fir->ntaps) {
 		fir->head = 0;
 	}
 }
@@ -23,17 +24,13 @@ void fir_load(struct fir *fir, float fin)
 
 float fir_calc(struct fir *fir)
 {
-	int p = fir->head;
-
 	float fout = 0.;
 
 	int i;
+	int j = fir->head;
 	for(i=0; i<fir->ntaps; i++) {
-		p --;
-		if(p < 0) {
-			p += fir->ntaps;
-		}
-		fout += fir->s[p] * fir->taps[i];
+		j = (j > 0) ? j-1 : fir->ntaps-1;
+		fout += fir->s[j] * fir->taps[i];
 	}
 
 	return fout;
