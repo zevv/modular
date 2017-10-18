@@ -6,5 +6,6 @@ make
 make -C loader usb
 
 sleep 1
+sudo chmod a+rw /dev/ttyACM0
 iterm ttyACM0
 

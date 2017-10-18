@@ -10,7 +10,9 @@ local done = false
 
 print ""
 print "echo 0"
-print "hop 0"
+print "m4 s"
+os.execute("sleep 0.3")
+print "m4 h"
 
 while true do
 	local cmd = string.format("mem w %08x ", addr)
@@ -33,7 +35,7 @@ while true do
 
 end
 
-print "hop 1"
+print "m4 g"
 print "echo 1"
 
 -- vi: ft=lua ts=3 sw=3

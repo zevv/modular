@@ -95,7 +95,21 @@ void main(void)
 			Chip_I2S_Send(LPC_I2S0, s.u32);
 		}
 
-		if(gain < 1.0) gain *= 1.0003;
+		/* Handle fade in/out */
+
+		if(shared->m4_state == M4_STATE_FADEIN) {
+			if(gain < 1.0) {
+				gain *= 1.0003;
+			} else {
+				shared->m4_state = M4_STATE_RUNNING;
+			}
+		} else if(shared->m4_state == M4_STATE_FADEOUT) {
+			if(gain > 0.00001) {
+				gain *= 0.9997;
+			} else {
+				shared->m4_state = M4_STATE_SILENT;
+			}
+		}
 
 		shared->m4_busy = false;
 		shared->m4_ticks ++;

@@ -142,22 +142,30 @@ CMD_REGISTER(reboot, on_cmd_reboot, "");
 
 
 
-static int on_cmd_hop(struct cmd_cli *cli, uint8_t argc, char **argv)
+static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
 	if(argc >= 1u) {
 		char cmd = argv[0][0];
 
-		if(cmd == '0') {
-			m4_active = false;
+		if(cmd == 's') { /* stop */
+			shared->m4_state = M4_STATE_FADEOUT;
+			return 1;
 		}
 
-		if(cmd == '1') {
+		if(cmd == 'g') { /* go */
+			shared->m4_state = M4_STATE_FADEIN;
 			m4_active = true;
 			Chip_RGU_TriggerReset(RGU_M3_RST);
+			return 1;
+		}
+
+		if(cmd == 'h') { /* halt */
+			m4_active = false;
+			return 1;
 		}
 
 		if(cmd == 'l') {
-			cmd_printd(cli, "%d %d\n", m4_load, shared->m4_ticks);
+			cmd_printd(cli, "%d %d %d\n", m4_load, shared->m4_ticks, shared->m4_state);
 			return 1;
 		}
 	}
@@ -166,7 +174,7 @@ static int on_cmd_hop(struct cmd_cli *cli, uint8_t argc, char **argv)
 }
 
 
-CMD_REGISTER(hop, on_cmd_hop, "");
+CMD_REGISTER(m4, on_cmd_m4, "");
 
 /*
  * End
