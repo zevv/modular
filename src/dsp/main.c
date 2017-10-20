@@ -33,7 +33,7 @@ static void update_led(void)
 	static size_t j = 0;
 	static uint8_t v = 0;
 
-	LPC_GPIO_PORT->B[1][11] = (j > v);
+	LPC_GPIO_PORT->B[0][14] = (j > v);
 
 	if(++j >= 255) {
 		j = 0;
@@ -49,8 +49,6 @@ static const float scale = 1.0 / 32767.0;
 
 void main(void)
 {
-	LPC_GPIO_PORT->B[1][11] = 0;
-
 	NVIC_EnableIRQ(M0APP_IRQn);
 	
 	mod_init();

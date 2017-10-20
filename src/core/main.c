@@ -103,7 +103,7 @@ void main(void)
 	led_init();
 	uart_init();
 	printd_set_handler(uart_tx);
-	
+
 	printd("\n\nHello %s %s %s\n", VERSION, __DATE__, __TIME__);
 
 	memset((void *)shared, 0, sizeof(*shared));
@@ -114,7 +114,7 @@ void main(void)
 	flash_init();
 	adc_init();
 	i2s_init(SRATE);
-	audio_init();
+	//audio_init();
 	SysTick_Config(SystemCoreClock / 1000);
 
 	int n =0;
@@ -122,7 +122,7 @@ void main(void)
 	for(;;) {
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
-		led_set(LED_ID_RED, (n++ & 0x3f0) == 0x10);
+		led_set(LED_ID_GREEN, (n++ & 0x3f0) == 0x10);
 		volatile int i;
 		for(i=0; i<10000; i++);
 		i2s_tick();

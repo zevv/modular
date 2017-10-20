@@ -40,7 +40,7 @@ void main(void)
 	arch_init();
 	led_init();
 
-	led_set(LED_ID_RED, true);
+	led_set(LED_ID_GREEN, true);
 
 	/* Copy core image for M0 to RAM2 bank */
 

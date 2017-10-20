@@ -154,9 +154,6 @@ void _boot(void)
 {
 	/* Let there be light */
 
-	LPC_GPIO_PORT->DIR[1] = 1UL << 11;
-	LPC_GPIO_PORT->B[1][11] = 0;
-
 	/* Init vector table */
 
 	uint32_t * pSCB_VTOR = (uint32_t *)0xE000ED08;

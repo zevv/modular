@@ -2,8 +2,9 @@
 #define led_h
 
 enum led_id {
+	LED_ID_GREEN,
+	LED_ID_YELLOW,
 	LED_ID_RED,
-	LED_ID_BLUE,
 };
 
 enum led_state {
