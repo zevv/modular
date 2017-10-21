@@ -1,5 +1,10 @@
 
 - Weerstanden LED's 330ohm
 - pullup flash 10k
+- pullups I2C 10k
 - footprints potmeters/switches toleranties
-- footprint flash
+- footprint flash schematics
+- I2S rx/tx swap
+- codec MCLK
+- uart labels Rx/Tx/GND
+

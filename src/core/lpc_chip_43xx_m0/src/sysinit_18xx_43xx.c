@@ -60,7 +60,7 @@ static const struct CLK_BASE_STATES InitClkStates[] = {
 	{CLK_BASE_UART1, CLKIN_MAINPLL, true, false},
 	{CLK_BASE_UART2, CLKIN_MAINPLL, true, false},
 	{CLK_BASE_UART3, CLKIN_MAINPLL, true, false},
-	{CLK_BASE_OUT, CLKINPUT_PD, true, false},
+	{CLK_BASE_OUT, CLKIN_CRYSTAL, true, false},
 	{CLK_BASE_APLL, CLKINPUT_PD, true, false},
 	{CLK_BASE_CGU_OUT0, CLKINPUT_PD, true, false},
 	{CLK_BASE_CGU_OUT1, CLKINPUT_PD, true, false},

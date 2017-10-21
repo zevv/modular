@@ -2,7 +2,6 @@
 
 local name = arg[1]
 local fname = "modules/" .. name .. "/" .. name .. ".bin"
-print(fname)
 
 local fd = io.open(fname)
 local addr = 0x10000000

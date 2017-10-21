@@ -13,6 +13,7 @@
 #include "uart.h"
 #include "uda1380.h"
 #include "watchdog.h"
+#include "ssm2604.h"
 #include "shared.h"
 
 const uint32_t OscRateIn = 12000000;
@@ -46,26 +47,6 @@ void arch_init(void)
 	for(i=0; i<100000; i++);
 }
 
-
-static void delay(int n)
-{
-	volatile int i;
-	for(i=0; i<n; i++);
-}
-
-
-void audio_init(void)
-{
-	Chip_SCU_PinMuxSet(0x2, 10, (SCU_MODE_PULLUP | SCU_MODE_FUNC0));
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 0, 14);
-
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 0, 14, true);
-	delay(1000000);
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 0, 14, false);
-	delay(1000000);
-
-	UDA1380_Init(0);
-}
 
 
 void SysTick_Handler(void)
@@ -102,6 +83,7 @@ void main(void)
 	arch_init();
 	led_init();
 	uart_init();
+	watchdog_init();
 	printd_set_handler(uart_tx);
 
 	printd("\n\nHello %s %s %s\n", VERSION, __DATE__, __TIME__);
@@ -112,9 +94,9 @@ void main(void)
 	printd_set_handler(cdc_uart_tx);
 
 	flash_init();
-	adc_init();
+	//adc_init();
 	i2s_init(SRATE);
-	//audio_init();
+	ssm2604_init();
 	SysTick_Config(SystemCoreClock / 1000);
 
 	int n =0;
@@ -122,11 +104,12 @@ void main(void)
 	for(;;) {
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
-		led_set(LED_ID_GREEN, (n++ & 0x3f0) == 0x10);
+		led_set(LED_ID_GREEN, (n++ & 0x1e0) != 0x20);
 		volatile int i;
 		for(i=0; i<10000; i++);
 		i2s_tick();
 		calc_m4_load();
+		watchdog_poll();
 	}
 }
 

@@ -1,5 +1,7 @@
 
 #include "chip.h"
+#include "printd.h"
+#include "uart.h"
 
 #define WEAK __attribute__ ((weak))
 #define ALIAS(f) __attribute__ ((weak, alias (#f)))
@@ -171,58 +173,92 @@ void _boot(void)
 }
 
 
+extern uint8_t _stext;
+extern uint8_t _etext;
+extern uint8_t _sdata;
+extern uint8_t _edata;
+extern uint8_t _sbss;
+extern uint8_t _ebss;
+
+static void boom(void)
+{
+	uint32_t j;
+	uint32_t *sp = &j;
+
+	printd("sp: %08x\n\n", sp);
+
+	uint32_t *p = sp;
+	while(p < (uint32_t *)&_estack) {
+		if(*p >= (uint32_t)&_stext && *p < (uint32_t)&_etext) {
+			printd("%08x\n", *p);
+		}
+		p++;
+	}
+
+	printd("\n");
+
+	for(j=0; j<32; j++) {
+		printd("%08x ", *(sp+j));
+		if((j % 8) == 7) printd("\n");
+	}
+
+	for(;;);
+}
+
+
+#define D printd_set_handler(uart_tx); printd("*** %s ***\n", __FUNCTION__); boom();
 
 void NMI_Handler(void) 
 {
-	for(;;);
+	D;
 }
 
 
 void HardFault_Handler(void) 
 {
-	for(;;);
+	D;
 }
 
 
 void MemManage_Handler(void) 
 {
-	for(;;);
+	D;
 }
 
 
 void BusFault_Handler(void) 
 {
-	for(;;);
+	D;
 }
 
 
 void UsageFault_Handler(void) 
 {
-	for(;;);
+	D;
 }
 
 
 void SVC_Handler(void) 
 {
-	for(;;);
+	D;
 }
 
 
 void DebugMon_Handler(void) 
 {
-	for(;;);
+	D;
 }
 
 
 void PendSV_Handler(void) 
 {
-	for(;;);
+	D;
 }
 
 
 void IntDefaultHandler(void) 
 {
-	for(;;);
+	D;
 }
 
 

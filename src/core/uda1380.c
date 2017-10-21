@@ -163,8 +163,8 @@ int UDA1380_Init(int input)
 
 	if (ret && input) {
 		/* Disable Power On for ADCR, PGAR, PGAL to get mic sound more clearly */
-		ret = UDA1380_REG_WriteVerify(UDA_POWER_CTRL,
-				UDA1380_REG_PWRCTRL_DEFAULT_VALUE & (~(0x0B)));
+//		ret = UDA1380_REG_WriteVerify(UDA_POWER_CTRL,
+//				UDA1380_REG_PWRCTRL_DEFAULT_VALUE & (~(0x0B)));
 
 		if (ret) {
 			ret = UDA1380_REG_WriteVerify(UDA_ADC_CTRL,

@@ -6,6 +6,7 @@
 
 #include "chip.h"
 #include "cmd.h"
+#include "watchdog.h"
 #include "printd.h"
 #include "flash.h"
 #include "uart.h"
@@ -36,7 +37,7 @@ static void set_cs(int v)
 }
 
 
-static void wait_busy(void)
+static void wait_busy(bool do_watchdog)
 {
 	uint8_t cmd = CMD_READ_STATUS_REGISTER;
 	uint8_t status[2];
@@ -48,6 +49,9 @@ static void wait_busy(void)
 		Chip_SSP_ReadFrames_Blocking(LPC_SSP0, status, sizeof(status));
 		if(status[0] & 0x80) {
 			break;
+		}
+		if(do_watchdog) {
+			watchdog_poll();
 		}
 	}
 
@@ -105,7 +109,7 @@ void flash_page_erase(uint32_t addr)
 	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, cmd, sizeof(cmd));
 	set_cs(1);
 
-	wait_busy();
+	wait_busy(true);
 }
 
 
@@ -117,7 +121,7 @@ void flash_erase(void)
 	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, cmd, sizeof(cmd));
 	set_cs(1);
 
-	wait_busy();
+	wait_busy(true);
 }
 
 
@@ -144,7 +148,7 @@ void flash_write(uint32_t addr, const void *buf, size_t len)
 	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, buf, len);
 	set_cs(1);
 
-	wait_busy();
+	wait_busy(false);
 }
 
 

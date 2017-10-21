@@ -14,7 +14,7 @@ SRC     += mem.c
 SRC     += printd.c
 SRC     += ringbuffer.c
 SRC     += uart.c
-SRC     += uda1380.c
+SRC     += ssm2604.c
 SRC     += usbdesc.c
 SRC     += watchdog.c
 

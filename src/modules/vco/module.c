@@ -2,7 +2,7 @@
 #include "../../dsp/module.h"
 #include "osc.h"
 
-static struct osc osc1, osc2, osc3, osc4;
+static struct osc osc1, osc2, osc3, osc4, lfo;
 
 void mod_init(void)
 {
@@ -14,6 +14,9 @@ void mod_init(void)
 	osc_set_freq(&osc2, 400 * 0.503);
 	osc_set_freq(&osc3, 403);
 	osc_set_freq(&osc4, 403 * 0.503);
+	osc_init(&lfo, SRATE);
+	osc_set_type(&lfo, OSC_TYPE_SIN);
+	osc_set_freq(&lfo, 0.2);
 }
 
 
@@ -22,18 +25,16 @@ void mod_run(float *fin, float *fout)
 
 	float f = fin[4] * 300 + 310 + fin[1] * fin[6] * 500;
 
-	osc_set_type(&osc1, fin[5] > 0 ? OSC_TYPE_SIN : OSC_TYPE_TRIANGLE);
-	osc_set_type(&osc3, fin[5] > 0 ? OSC_TYPE_SIN : OSC_TYPE_TRIANGLE);
+	f = osc_gen(&lfo) * 2000 + 2010;
+
+	f = 440;
 
 	osc_set_freq(&osc1, f);
 	osc_set_freq(&osc2, f * 0.503);
 	osc_set_freq(&osc3, f);
 	osc_set_freq(&osc4, f * 0.503);
 
-	fout[0] = osc_gen(&osc1) * 0.25 +
-	          osc_gen(&osc2) * 0.25;
-	fout[1] = osc_gen(&osc3) * 0.25+
-	          osc_gen(&osc4) * 0.25;
+	fout[0] = fout[1] = osc_gen(&osc1) * 0.2;
 }
 
 

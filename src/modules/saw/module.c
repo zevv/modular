@@ -116,7 +116,8 @@ void mod_run(float *fin, float *fout)
 	float f = fin[4] * 10000 + 10000;
 	float g = fin[6] * 0.5 + 0.5;
 
-	f = 500;
+	f = 440;
+	g = 0.1;
 
 	osc_set_freq(&osc, f);
 
