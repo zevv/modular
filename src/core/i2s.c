@@ -47,7 +47,7 @@ void i2s_init(int srate)
 	 *
 	 * This clock is further divided by 6 (5+1) to generate the bit clock
 	 * at 2.83Mhz. With 2 channels 32 bits each, this results in a sample
-	 * rate of 3.07289/32/2, resulting in a sample rate of 44270Hz
+	 * rate of 2.83/32/2, resulting in a sample rate of 44270.833Hz
 	 */
 
 	Chip_I2S_SetTxXYDivider(LPC_I2S0, 1, 6);
