@@ -75,7 +75,7 @@ void i2s_init(int srate)
 	Chip_I2S_DisableMute(LPC_I2S0);
 	Chip_I2S_TxStart(LPC_I2S0);
 		
-	Chip_I2S_Int_RxCmd(LPC_I2S0, ENABLE, 1);
+	Chip_I2S_Int_RxCmd(LPC_I2S0, ENABLE, 2);
 	Chip_I2S_Int_TxCmd(LPC_I2S0, ENABLE, 0);
 	NVIC_EnableIRQ(I2S0_IRQn);
 }
@@ -89,12 +89,14 @@ void I2S0_IRQHandler(void)
 {
 	if(Chip_I2S_GetRxLevel(LPC_I2S0) > 0) {
 
-		shared->i2s_in = Chip_I2S_Receive(LPC_I2S0);
+		shared->i2s_in[0] = Chip_I2S_Receive(LPC_I2S0);
+		shared->i2s_in[1] = Chip_I2S_Receive(LPC_I2S0);
 		adc_read(shared->adc_in);
 
 		if(m4_active) {
 			__SEV();
 		} else {
+			Chip_I2S_Send(LPC_I2S0, 0);
 			Chip_I2S_Send(LPC_I2S0, 0);
 		}
 	} else {

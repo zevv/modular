@@ -13,7 +13,7 @@ enum m4_state {
 };
 
 struct shared {
-	uint32_t i2s_in;
+	int32_t i2s_in[0];
 	int32_t adc_in[8];
 	uint32_t m4_ticks;
 	bool m4_busy;

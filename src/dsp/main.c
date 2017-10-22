@@ -45,7 +45,7 @@ static void update_led(void)
 }
 
 
-static const float scale = 1.0 / 32767.0;
+static const float scale = 1.0 / 4294967296.0;
 
 void main(void)
 {
@@ -64,13 +64,10 @@ void main(void)
 		
 		update_led();
 	
-		union sample s;
-		s.u32 = shared->i2s_in;
-
 		/* Convert to float -1.0 .. +1.0 */
 
-		fin[ 0] = s.s16[0] * scale;
-		fin[ 1] = s.s16[1] * scale;
+		fin[ 0] = shared->i2s_in[0] * scale;
+		fin[ 1] = shared->i2s_in[1] * scale;
 		fin[ 4] = shared->adc_in[0] * scale;
 		fin[ 5] = shared->adc_in[1] * scale;
 		fin[ 6] = shared->adc_in[2] * scale;
@@ -84,13 +81,14 @@ void main(void)
 
 		mod_run(fin, fout);
 
-		/* Saturate and convert back to s16 */
+		/* Saturate at 24 bits and scale to 32 bits */
 
-		s.s16[0] = __SSAT((int)(fout[0] * 32767.0 * gain), 16);
-		s.s16[1] = __SSAT((int)(fout[1] * 32767.0 * gain), 16);
+		uint32_t out1 = __SSAT((int)(fout[0] * 16777216.0 * gain), 24) << 8;
+		uint32_t out2 = __SSAT((int)(fout[1] * 16777216.0 * gain), 24) << 8;
 
-		if(Chip_I2S_GetTxLevel(LPC_I2S0) < 4) {
-			Chip_I2S_Send(LPC_I2S0, s.u32);
+		if(Chip_I2S_GetTxLevel(LPC_I2S0) < 2) {
+			Chip_I2S_Send(LPC_I2S0, out1);
+			Chip_I2S_Send(LPC_I2S0, out2);
 		}
 
 		/* Handle fade in/out */
