@@ -152,7 +152,7 @@ Status Chip_I2S_TxConfig(LPC_I2S_T *pI2S, I2S_AUDIO_FORMAT_T *format)
 	temp |= I2S_MASTER_MODE;
 	temp |= I2S_DAO_WS_HALFPERIOD(format->WordWidth - 1);
 	pI2S->DAO = temp;
-	pI2S->TXMODE = I2S_TXMODE_CLKSEL(0) | I2S_RXMODE_MCENA;
+	pI2S->TXMODE = I2S_TXMODE_CLKSEL(0);
 	pI2S->TXBITRATE = N - 1;
 	pI2S->TXRATE = yDiv | (xDiv << 8);
 	return SUCCESS;

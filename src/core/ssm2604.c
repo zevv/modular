@@ -90,6 +90,8 @@ static uint16_t reg_read(uint8_t reg)
 
 void ssm2604_init(void)
 {
+	volatile int i;
+
 	Chip_SCU_I2C0PinConfig(I2C0_STANDARD_FAST_MODE);
 	Chip_I2C_Init(I2C0);
 	Chip_I2C_SetClockRate(I2C0, 100000);
@@ -97,13 +99,14 @@ void ssm2604_init(void)
 
 	reg_write(REG_SOFTWARE_RESET, RESET(1));
 	reg_write(REG_ACTIVE, 0);
-	reg_write(REG_POWER_MANAGEMENT, OUT);
+	reg_write(REG_POWER_MANAGEMENT, OUT | OSC);
 	reg_write(REG_LEFT_CHANNEL_ADC_INPUT_VOLUME, LINVOL(0x17));
 	reg_write(REG_RIGHT_CHANNEL_ADC_INPUT_VOLUME, RINVOL(0x17));
 	reg_write(REG_ANALOG_AUDIO_PATH, DACSEL);
 	reg_write(REG_DIGITAL_AUDIO_PATH, 0);
 	reg_write(REG_SAMPLING_RATE, BOSR);
 	reg_write(REG_DIGITAL_AUDIO_I_F, FORMAT(2));
+	for(i=0; i<1000000; i++);
 	reg_write(REG_ACTIVE, ACTIVE);
 
 }

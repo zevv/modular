@@ -42,7 +42,8 @@ void i2s_init(int srate)
 	Chip_I2S_SetRxXYDivider(LPC_I2S0, 15, 83);
 	Chip_I2S_SetRxBitRate(LPC_I2S0, 11);
 
-	printd("br %d\n", LPC_I2S0->TXBITRATE);
+	Chip_I2S_TxModeConfig(LPC_I2S0, 0, 0, I2S_RXMODE_MCENA);
+
 #if 0
 	Chip_I2S_RxSlave(LPC_I2S0);
         Chip_I2S_SetRxXYDivider(LPC_I2S0, 0, 0);
