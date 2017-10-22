@@ -48,13 +48,6 @@ void arch_init(void)
 }
 
 
-
-void SysTick_Handler(void)
-{
-
-}
-
-
 static int m4_load;
 
 static void calc_m4_load(void)
@@ -97,14 +90,13 @@ void main(void)
 	//adc_init();
 	i2s_init(SRATE);
 	ssm2604_init();
-	SysTick_Config(SystemCoreClock / 1000);
 
-	int n =0;
+	int n = 0;
 
 	for(;;) {
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
-		led_set(LED_ID_GREEN, (n++ & 0x100) ? LED_STATE_ON : LED_STATE_OFF);
+		led_set(LED_ID_GREEN, (n++ & 0x200) ? LED_STATE_ON : LED_STATE_OFF);
 		volatile int i;
 		for(i=0; i<10000; i++);
 		i2s_tick();
