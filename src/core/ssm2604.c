@@ -57,7 +57,6 @@ static void reg_write(uint8_t reg, uint16_t val)
 		(reg << 1) | ((val & 0x100) >> 8), 
 		val & 0xff,
 	};
-	printd("%02x %02x\n", buf[0], buf[1]);
 	Chip_I2C_MasterSend(I2C0, I2C_ADDR, buf, sizeof(buf));
 }
 
@@ -66,7 +65,6 @@ static uint16_t reg_read(uint8_t reg)
 {
 	uint8_t c[2];
 	Chip_I2C_MasterCmdRead(I2C0, I2C_ADDR, reg << 1, c, sizeof(c));
-	printd("%02x %02x\n", c[1], c[0]);
 	return c[0] | (c[1] << 8);
 }
 
