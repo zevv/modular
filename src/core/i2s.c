@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <math.h>
 #include "board.h"
 #include "i2s.h"
 #include "printd.h"
@@ -38,23 +39,20 @@ void i2s_init(int srate)
 	Chip_I2S_TxConfig(LPC_I2S0, &conf);
 
 	/*
-	 * Configure I2S clocks to generate a 18.432Mhz master clock on
-	 * MCLK_OUT for the codec chip:
+	 * Configure I2S clocks to generate a master clock on MCLK_OUT for the
+	 * codec chip. The fractional divider will generate jitter when xDiv is
+	 * not divisable by yDiv, so we have limited choices. For now we choose
 	 *
-	 * 204E6 * 15 / 83 / 2 = 18.433734 Mhz
+	 * 204E6 * 1 / 6 / 2 = 17 Mhz MCLK
 	 *
 	 * This clock is further divided by 6 (5+1) to generate the bit clock
-	 * at 3.072289Mhz. With 2 channels 32 bits each, this results in a
-	 * sample rate of 3.07289/32/2, yielding a sample rate of
-	 * 48004.515625Hz, which is not quite 48Khz but good enough.
-	 *
-	 * This is not as bad as it seems. For example, for a 440Hz tone this
-	 * will result in a error of 0.04Hz
+	 * at 2.83Mhz. With 2 channels 32 bits each, this results in a sample
+	 * rate of 3.07289/32/2, resulting in a sample rate of 44270Hz
 	 */
 
-	Chip_I2S_SetTxXYDivider(LPC_I2S0, 15, 83);
+	Chip_I2S_SetTxXYDivider(LPC_I2S0, 1, 6);
 	Chip_I2S_SetTxBitRate(LPC_I2S0, 5);
-	Chip_I2S_SetRxXYDivider(LPC_I2S0, 15, 83);
+	Chip_I2S_SetRxXYDivider(LPC_I2S0, 1, 6);
 	Chip_I2S_SetRxBitRate(LPC_I2S0, 5);
 
 	Chip_I2S_TxModeConfig(LPC_I2S0, 0, 0, I2S_RXMODE_MCENA);
@@ -85,6 +83,8 @@ void i2s_init(int srate)
  * the M4 if it is awake.
  */
 
+int32_t level = 0;
+
 void I2S0_IRQHandler(void)
 {
 	if(Chip_I2S_GetRxLevel(LPC_I2S0) > 0) {
@@ -92,6 +92,10 @@ void I2S0_IRQHandler(void)
 		shared->i2s_in[0] = Chip_I2S_Receive(LPC_I2S0);
 		shared->i2s_in[1] = Chip_I2S_Receive(LPC_I2S0);
 		adc_read(shared->adc_in);
+
+		if(shared->i2s_in[0] > level) {
+			level = shared->i2s_in[0];
+		}
 
 		if(m4_active) {
 			__SEV();
@@ -107,6 +111,12 @@ void I2S0_IRQHandler(void)
 
 void i2s_tick(void)
 {
+	static int n = 0;
+	if(n ++ == 100) {
+//		printd("%d\n", level >> 16);
+		level = 0;
+		n = 0;
+	}
 }
 
 /*

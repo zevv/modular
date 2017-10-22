@@ -1,6 +1,7 @@
 
 NAME	:= core
 BIN	:= $(NAME).bin
+LIBS	+= -lm
 
 SRC     += adc.c
 SRC     += boot.c
