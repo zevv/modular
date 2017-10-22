@@ -4,6 +4,7 @@
 local fd = io.open(arg[1])
 local addr = 0
 local done = false
+local sum1 = 0
 
 print ""
 print "echo 0"
@@ -18,17 +19,21 @@ while true do
 
 	c = c .. "                           "
 
-	local sum = 0
+	sum1 = 0
 	for i = 1, 16 do
-		sum = (sum + string.byte(c, i)) % 256
+		local c = string.byte(c, i)
+		sum1 = (sum1 + c) % 256
 	end
 	cmd = cmd .. string.format("%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x", 
-		sum, string.byte(c, 1, #c))
+		sum1, string.byte(c, 1, #c))
 	print(cmd)
 	addr = addr + 16
+
+	for i = 1, 3000000 do end
 
 end
 
 print "echo 1"
+
 
 -- vi: ft=lua ts=3 sw=3

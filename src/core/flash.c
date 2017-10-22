@@ -249,20 +249,33 @@ static int on_cmd_flash(struct cmd_cli *cli, uint8_t argc, char **argv)
 		return 1;
 	}
 
-	if(cmd == 't') {
-		//flash_write(0x00, "een", 3);
-		//flash_write(0x10, "twee", 3);
+	if(cmd == 's') {
 
-		uint8_t cmd[4] = { 0x03, 0, 0, 0 };
-		uint8_t buf[16];
-		size_t i;
-		set_cs(0);
-		Chip_SSP_WriteFrames_Blocking(LPC_SSP0, cmd, sizeof(cmd));
-		for(i=0; i<1024; i+=16) {
-			Chip_SSP_ReadFrames_Blocking(LPC_SSP0, buf, sizeof(buf));
-			cmd_hexdump(cli, buf, sizeof(buf), i);
+		/* Read length from DFU header */
+
+		uint16_t len;
+		uint32_t sum1;
+		flash_read(2, (void *)&len, sizeof(len));
+		flash_read(4, (void *)&sum1, sizeof(sum1));
+
+		uint32_t addr = 16;
+		uint32_t sum2 = 0;
+
+		while(len > 0) {
+			uint8_t buf[16];
+			size_t l = (len > sizeof(buf)) ? sizeof(buf) : len;
+			flash_read(addr, buf, l);
+			int i;
+			for(i=0; i<l; i++) {
+				sum2 = sum2 + buf[i] + 1;
+			}
+			addr += l;
+			len -= l;
+			watchdog_poll();
 		}
-		set_cs(1);
+		cmd_printd(cli, sum1 == sum2 ? "ok:" : "ERR:");
+		cmd_printd(cli, " sum=%08x sum2=%08x\n", sum1, sum2);
+		return 1;
 	}
 
 	return 0;

@@ -41,6 +41,17 @@ struct lpc_header {
 } __attribute__ (( __packed__ ));
 
 
+uint32_t calc_hash(uint8_t *buf, size_t len)
+{
+	size_t i;
+	uint32_t sum = 0;
+	for(i=0; i<len; i++) {
+		sum += buf[i] + 1;
+	}
+	return sum;
+}
+
+
 int main(int argc, char **argv)
 {
 	int r;
@@ -62,7 +73,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	char *bin = malloc(st.st_size);
+	void *bin = malloc(st.st_size);
 	assert(bin);
 
 	FILE *f = fopen(fname, "r+");
@@ -77,9 +88,9 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-
 	hdr.aes_hash_active = 0xda;
 	hdr.size = st.st_size;
+	hdr.hash_value = calc_hash(bin, st.st_size);
 
 	r = fseek(f, 0, SEEK_SET);
 	if(r != 0) {
