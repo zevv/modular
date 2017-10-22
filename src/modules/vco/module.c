@@ -27,14 +27,14 @@ void mod_run(float *fin, float *fout)
 
 	f = osc_gen(&lfo) * 2000 + 2010;
 
-	f = 440;
+	f = 220;
 
 	osc_set_freq(&osc1, f);
 	osc_set_freq(&osc2, f * 0.503);
 	osc_set_freq(&osc3, f);
 	osc_set_freq(&osc4, f * 0.503);
 
-	fout[0] = fout[1] = osc_gen(&osc1) * 0.2;
+	fout[0] = fout[1] = osc_gen(&osc1) * 0.50;
 }
 
 

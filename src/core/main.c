@@ -104,7 +104,7 @@ void main(void)
 	for(;;) {
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
-		led_set(LED_ID_GREEN, (n++ & 0x1e0) != 0x20);
+		led_set(LED_ID_GREEN, (n++ & 0x100) ? LED_STATE_ON : LED_STATE_OFF);
 		volatile int i;
 		for(i=0; i<10000; i++);
 		i2s_tick();
@@ -151,6 +151,11 @@ static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
 			cmd_printd(cli, "%d %d %d\n", m4_load, shared->m4_ticks, shared->m4_state);
 			return 1;
 		}
+
+		if(cmd == 'w') {
+			for(;;);
+		}
+
 	}
 
 	return 1;

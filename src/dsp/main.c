@@ -45,7 +45,7 @@ static void update_led(void)
 }
 
 
-static const float scale = 1.0 / 4294967296.0;
+static const float scale = 1.0 / 2147483648.0;
 
 void main(void)
 {
@@ -83,8 +83,8 @@ void main(void)
 
 		/* Saturate at 24 bits and scale to 32 bits */
 
-		uint32_t out1 = __SSAT((int)(fout[0] * 16777216.0 * gain), 24) << 8;
-		uint32_t out2 = __SSAT((int)(fout[1] * 16777216.0 * gain), 24) << 8;
+		uint32_t out1 = __SSAT((int)(fout[0] * 8388608.0 * gain), 24) << 8;
+		uint32_t out2 = __SSAT((int)(fout[1] * 8388608.0 * gain), 24) << 8;
 
 		if(Chip_I2S_GetTxLevel(LPC_I2S0) < 2) {
 			Chip_I2S_Send(LPC_I2S0, out1);

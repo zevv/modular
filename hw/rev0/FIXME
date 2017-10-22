@@ -7,4 +7,5 @@
 - I2S rx/tx swap
 - codec MCLK
 - uart labels Rx/Tx/GND
+- 12 pin conn labels
 
