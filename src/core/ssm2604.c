@@ -105,7 +105,7 @@ void ssm2604_init(void)
 	reg_write(REG_ANALOG_AUDIO_PATH, DACSEL);
 	reg_write(REG_DIGITAL_AUDIO_PATH, 0);
 	reg_write(REG_SAMPLING_RATE, BOSR);
-	reg_write(REG_DIGITAL_AUDIO_I_F, FORMAT(2));
+	reg_write(REG_DIGITAL_AUDIO_I_F, FORMAT(2) | WL(3);
 	for(i=0; i<1000000; i++);
 	reg_write(REG_ACTIVE, ACTIVE);
 

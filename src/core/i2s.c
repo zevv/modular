@@ -29,7 +29,7 @@ void i2s_init(int srate)
 	I2S_AUDIO_FORMAT_T conf;
 	conf.SampleRate = srate;
 	conf.ChannelNumber = 2;
-	conf.WordWidth = 16;
+	conf.WordWidth = 32;
         
 	Chip_SCU_SetPinMuxing(mux, sizeof(mux) / sizeof(mux[0]));
 
@@ -37,10 +37,25 @@ void i2s_init(int srate)
 	Chip_I2S_RxConfig(LPC_I2S0, &conf);
 	Chip_I2S_TxConfig(LPC_I2S0, &conf);
 
+	/*
+	 * Configure I2S clocks to generate a 18.432Mhz master clock on
+	 * MCLK_OUT for the codec chip:
+	 *
+	 * 204E6 * 15 / 83 / 2 = 18.433734 Mhz
+	 *
+	 * This clock is further divided by 6 (5+1) to generate the bit clock
+	 * at 3.072289Mhz. With 2 channels 32 bits each, this results in a
+	 * sample rate of 3.07289/32/2, yielding a sample rate of
+	 * 48004.515625Hz, which is not quite 48Khz but good enough.
+	 *
+	 * This is not as bad as it seems. For example, for a 440Hz tone this
+	 * will result in a error of 0.04Hz
+	 */
+
 	Chip_I2S_SetTxXYDivider(LPC_I2S0, 15, 83);
-	Chip_I2S_SetTxBitRate(LPC_I2S0, 11);
+	Chip_I2S_SetTxBitRate(LPC_I2S0, 5);
 	Chip_I2S_SetRxXYDivider(LPC_I2S0, 15, 83);
-	Chip_I2S_SetRxBitRate(LPC_I2S0, 11);
+	Chip_I2S_SetRxBitRate(LPC_I2S0, 5);
 
 	Chip_I2S_TxModeConfig(LPC_I2S0, 0, 0, I2S_RXMODE_MCENA);
 
