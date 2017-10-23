@@ -86,7 +86,7 @@ static double filter_taps[FILTER_TAP_NUM] = {
   0.00002256809984183597
 };
 
-static struct osc osc;
+static struct osc osc, lfo;
 static struct fir fir1;
 
 void mod_init(void)
@@ -99,6 +99,10 @@ void mod_init(void)
 
 	osc_set_type(&osc, OSC_TYPE_SAW);
 	osc_set_freq(&osc, 1000);
+	
+	osc_init(&lfo, SRATE);
+	osc_set_type(&lfo, OSC_TYPE_SAW);
+	osc_set_freq(&lfo, 0.1);
 }
 
 
@@ -114,10 +118,8 @@ void mod_run(float *fin, float *fout)
 {
 	
 	float f = fin[4] * 10000 + 10000;
-	float g = fin[6] * 0.5 + 0.5;
 
-	f = 440;
-	g = 0.1;
+	f = osc_gen(&lfo) * 10000 + 10010;
 
 	osc_set_freq(&osc, f);
 
@@ -127,7 +129,7 @@ void mod_run(float *fin, float *fout)
 		fir_load(&fir1, v);
 	}
 
-	fout[0] = fout[1] = fir_calc(&fir1) * g;
+	fout[0] = fout[1] = fir_calc(&fir1) * 0.06;
 
 }
 

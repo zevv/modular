@@ -87,7 +87,7 @@ void main(void)
 	printd_set_handler(cdc_uart_tx);
 
 	flash_init();
-	adc_init();
+	//adc_init();
 	i2s_init(SRATE);
 	ssm2604_init();
 

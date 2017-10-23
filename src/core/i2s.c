@@ -119,7 +119,7 @@ void i2s_tick(void)
 	if(n ++ == 100) {
 		max /= 256;
 		min /= 256;
-if(0)		printd("%d %d %d\n", max-min, (max+min)/2, 144 - (int)(log10(max-min) * 20));
+if(1)		printd("%d %d\n", min, max);
 		max = -999999;
 		min =  999999;
 		n = 0;
