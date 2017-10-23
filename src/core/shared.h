@@ -16,7 +16,7 @@ enum m4_state {
 };
 
 struct shared {
-	int32_t i2s_in[0];
+	int32_t i2s_in[2];
 	int32_t adc_in[8];
 	uint32_t m4_ticks;
 	bool m4_busy;
@@ -25,6 +25,6 @@ struct shared {
 	int debug;
 };
 
-static volatile struct shared *shared = (struct shared *)0x10091c00;
+static volatile struct shared *shared = (struct shared *)0x10091800;
 
 #endif

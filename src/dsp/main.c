@@ -88,7 +88,7 @@ void main(void)
 		uint32_t out1 = __SSAT((int)(fout[0] * 8388608.0 * gain), 24) << 8;
 		uint32_t out2 = __SSAT((int)(fout[1] * 8388608.0 * gain), 24) << 8;
 
-		if(Chip_I2S_GetTxLevel(LPC_I2S0) < 2) {
+		if(Chip_I2S_GetTxLevel(LPC_I2S0) < 4) {
 			Chip_I2S_Send(LPC_I2S0, out1);
 			Chip_I2S_Send(LPC_I2S0, out2);
 		}

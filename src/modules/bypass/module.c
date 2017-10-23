@@ -13,7 +13,8 @@ void mod_init(void)
 
 void mod_run(float *fin, float *fout)
 {
-	fout[0] = fout[1] = fin[0];
+	fout[0] = fin[0];
+	fout[1] = fin[1];
 }
 
 

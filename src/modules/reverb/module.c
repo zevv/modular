@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "../../core/shared.h"
 #include "../../dsp/module.h"
 #include "reverb.h"
 
@@ -21,8 +22,13 @@ void mod_run(float *fin, float *fout)
 {
 	float in = (fin[0] + fin[1]);
 
+	fout[0] = in;
+	fout[1] = in;
+
 	float room = (fin[4] + 1) * 0.5;
 	float damp = (fin[6] + 1) * 0.5;
+
+	shared->debug = room * 1000;
 
 	revmodel_set(&rev, REVMODEL_SET_ROOMSIZE | REVMODEL_SET_DAMPING, room, damp, 0, 0);
 	revmodel_process(&rev, in, &fout[0], &fout[1]);
