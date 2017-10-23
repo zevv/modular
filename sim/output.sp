@@ -28,6 +28,7 @@
 vs in 0 dc 0V ac 5V sin(1.64v 1.64v 1000Hz 0 0)
 R1 in 2 3k3
 R2 2 out 10k
+C1 2 out 10nF
 R3 3 4 2k48
 vref 4 0 dc 1.24v 
 X_AMP 3 2 vplus vmin out NSD LMV981

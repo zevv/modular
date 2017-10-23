@@ -76,7 +76,7 @@ void main(void)
 	arch_init();
 	led_init();
 	uart_init();
-	watchdog_init();
+	//watchdog_init();
 	printd_set_handler(uart_tx);
 
 	printd("\n\nHello %s %s %s\n", VERSION, __DATE__, __TIME__);
@@ -87,7 +87,7 @@ void main(void)
 	printd_set_handler(cdc_uart_tx);
 
 	flash_init();
-	//adc_init();
+	adc_init();
 	i2s_init(SRATE);
 	ssm2604_init();
 
@@ -100,6 +100,7 @@ void main(void)
 		volatile int i;
 		for(i=0; i<10000; i++);
 		i2s_tick();
+		adc_tick();
 		calc_m4_load();
 		watchdog_poll();
 	}
