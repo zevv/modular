@@ -83,9 +83,6 @@ void i2s_init(int srate)
  * the M4 if it is awake.
  */
 
-int32_t max = 0;
-int32_t min = 0;
-
 void I2S0_IRQHandler(void)
 {
 	if(Chip_I2S_GetRxLevel(LPC_I2S0) > 0) {
@@ -94,12 +91,6 @@ void I2S0_IRQHandler(void)
 		shared->i2s_in[1] = Chip_I2S_Receive(LPC_I2S0);
 		adc_read(shared->adc_in);
 
-		if(shared->i2s_in[0] > max) {
-			max = shared->i2s_in[0];
-		}
-		if(shared->i2s_in[0] < min) {
-			min = shared->i2s_in[0];
-		}
 
 		if(m4_active) {
 			__SEV();
@@ -117,11 +108,7 @@ void i2s_tick(void)
 {
 	static int n = 0;
 	if(n ++ == 100) {
-		max /= 256;
-		min /= 256;
-if(1)		printd("%d %d\n", min, max);
-		max = -999999;
-		min =  999999;
+		printd("%d\n", shared->adc_in[2]);
 		n = 0;
 	}
 }

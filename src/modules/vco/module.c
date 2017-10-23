@@ -25,19 +25,18 @@ void mod_init(void)
 
 void mod_run(float *fin, float *fout)
 {
+	float f = fin[6] * 100 + 440;
+	float g = (fin[4] + 1) * 0.03;
 
-	float f = fin[4] * 300 + 310 + fin[1] * fin[6] * 500;
-
-	f = osc_gen(&lfo) * 10000 + 10010;
-
-	f = 100;
+	if(g < -0.1) g = -0.1;
+	if(g >  0.1) g = 0.1;
 
 	osc_set_freq(&osc1, f);
 	osc_set_freq(&osc2, 250);
 
-	float o = osc_gen(&osc1) * 0.15;
+	float o = osc_gen(&osc1) * g;
 
-	fout[0] = fin[0];
+	fout[0] = fin[5];
 	fout[1] = o;
 }
 

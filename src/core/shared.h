@@ -1,6 +1,9 @@
 #ifndef shared_h
 #define shared_h
 
+#include <stdbool.h>
+#include <stdint.h>
+
 /* Shared data at last 1K block of RAM2 */
 
 
@@ -18,8 +21,10 @@ struct shared {
 	uint32_t m4_ticks;
 	bool m4_busy;
 	enum m4_state m4_state;
+
+	int debug;
 };
 
-static volatile struct shared *shared = (struct shared *)0x10091c80;
+static volatile struct shared *shared = (struct shared *)0x10091c00;
 
 #endif

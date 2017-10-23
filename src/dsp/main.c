@@ -45,7 +45,8 @@ static void update_led(void)
 }
 
 
-static const float scale = 1.0 / 2147483648.0;
+static const float scale_i2s = -1.0 / 2147483648.0;
+static const float scale_adc = -1.0 / 32767.0;
 
 void main(void)
 {
@@ -66,16 +67,17 @@ void main(void)
 	
 		/* Convert to float -1.0 .. +1.0 */
 
-		fin[ 0] = shared->i2s_in[0] * scale;
-		fin[ 1] = shared->i2s_in[1] * scale;
-		fin[ 4] = shared->adc_in[0] * scale;
-		fin[ 5] = shared->adc_in[1] * scale;
-		fin[ 6] = shared->adc_in[2] * scale;
-		fin[ 7] = shared->adc_in[3] * scale;
-		fin[ 8] = shared->adc_in[4] * scale;
-		fin[ 9] = shared->adc_in[5] * scale;
-		fin[10] = shared->adc_in[6] * scale;
-		fin[11] = shared->adc_in[7] * scale;
+		fin[ 0] = shared->i2s_in[0] * scale_i2s;
+		fin[ 1] = shared->i2s_in[1] * scale_i2s;
+
+		fin[ 4] = shared->adc_in[0] * scale_adc + 1.0;
+		fin[ 5] = shared->adc_in[1] * scale_adc + 1.0;
+		fin[ 6] = shared->adc_in[2] * scale_adc + 1.0;
+		fin[ 7] = shared->adc_in[3] * scale_adc + 1.0;
+		fin[ 8] = shared->adc_in[4] * scale_adc + 1.0;
+		fin[ 9] = shared->adc_in[5] * scale_adc + 1.0;
+		fin[10] = shared->adc_in[6] * scale_adc + 1.0;
+		fin[11] = shared->adc_in[7] * scale_adc + 1.0;
 
 		/* Run module */
 

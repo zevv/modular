@@ -17,7 +17,6 @@
 #define ADC_SCALE (1.0 / (2 << 14))
 
 static volatile int32_t accum[8];
-static volatile int32_t count0, count1;
 
 
 /* 
@@ -27,21 +26,19 @@ static volatile int32_t count0, count1;
 
 void ADC0_IRQHandler(void)
 {
-	accum[0] += LPC_ADC0->DR[0] & 0x0000ffff;
-	accum[1] += LPC_ADC0->DR[1] & 0x0000ffff;
-	accum[2] += LPC_ADC0->DR[2] & 0x0000ffff;
-	accum[3] += LPC_ADC0->DR[3] & 0x0000ffff;
-	count0 ++;
+	accum[0] = LPC_ADC0->DR[0] & 0x0000ffff;
+	accum[1] = LPC_ADC0->DR[1] & 0x0000ffff;
+	accum[2] = LPC_ADC0->DR[2] & 0x0000ffff;
+	accum[3] = LPC_ADC0->DR[3] & 0x0000ffff;
 }
 
 
 void ADC1_IRQHandler(void)
 {
-	accum[4] += LPC_ADC1->DR[4] & 0x0000ffff;
-	accum[5] += LPC_ADC1->DR[5] & 0x0000ffff;
-	accum[6] += LPC_ADC1->DR[6] & 0x0000ffff;
-	accum[7] += LPC_ADC1->DR[7] & 0x0000ffff;
-	count1 ++;
+	accum[4] = LPC_ADC1->DR[4] & 0x0000ffff;
+	accum[5] = LPC_ADC1->DR[5] & 0x0000ffff;
+	accum[6] = LPC_ADC1->DR[6] & 0x0000ffff;
+	accum[7] = LPC_ADC1->DR[7] & 0x0000ffff;
 }
 
 
@@ -50,33 +47,18 @@ void ADC1_IRQHandler(void)
  * to s16
  */
 
-uint32_t adc_read(volatile int32_t *val)
+void adc_read(volatile int32_t *val)
 {
-	static int ret = 0;
-
-	if(count0 && count1) {
-		
-		int32_t d0 = 0x8000 * count0;
-		int32_t d1 = 0x8000 * count1;
-
-		val[0] = (accum[0] - d0) / count0;
-		val[1] = (accum[1] - d0) / count0;
-		val[2] = (accum[2] - d0) / count0;
-		val[3] = (accum[3] - d0) / count0;
-		val[4] = (accum[4] - d1) / count1;
-		val[5] = (accum[5] - d1) / count1;
-		val[6] = (accum[6] - d1) / count1;
-		val[7] = (accum[7] - d1) / count1;
-
-		ret = count0;
-		count0 = count1 = 0;
-		accum[0] = accum[1] = accum[2] = accum[3] = 0;
-		accum[4] = accum[5] = accum[6] = accum[7] = 0;
-	
-	}
-
-	return ret;
+	val[0] = accum[5];
+	val[1] = accum[7];
+	val[2] = accum[2];
+	val[3] = accum[3];
+	val[4] = accum[4];
+	val[5] = accum[0];
+	val[6] = accum[6];
+	val[7] = accum[7];
 }
+
 
 void adc_tick(void)
 {
@@ -104,8 +86,6 @@ void adc_init(void)
 	Chip_ADC_SetBurstCmd(LPC_ADC1, ENABLE);
 	NVIC_EnableIRQ(ADC0_IRQn);
 	NVIC_EnableIRQ(ADC1_IRQn);
-
-	printd("rate = %d\n", cs.adcRate);
 }
 
 
