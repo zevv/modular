@@ -6,6 +6,7 @@
 - footprint flash schematics
 - I2S rx/tx swap
 - codec MCLK
+- xtal+CS codecs weg
 - uart labels Rx/Tx/GND
 - 12 pin conn labels
 - diode max current
