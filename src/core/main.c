@@ -47,22 +47,6 @@ void arch_init(void)
 }
 
 
-static int m4_load;
-
-static void calc_m4_load(void)
-{
-	static int n = 0;
-	static int load = 0;
-
-	if(n++ < 1000) {
-		if(shared->m4_busy) load++;
-	} else {
-		m4_load = load;
-		load = 0;
-		n = 0;
-	}
-}
-
 
 /*
  * This function is called by the M4; it is defined here to allow
@@ -101,7 +85,6 @@ void main(void)
 		for(i=0; i<10000; i++);
 		i2s_tick();
 		adc_tick();
-		calc_m4_load();
 		watchdog_poll();
 	}
 }
@@ -148,7 +131,8 @@ static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
 		}
 
 		if(cmd == 'l') {
-			cmd_printd(cli, "%d %d %d\n", m4_load, shared->m4_ticks, shared->m4_state);
+			cmd_printd(cli, "%d.%d\n", shared->m4_load/10, shared->m4_load % 10);
+			shared->m4_load = 0;
 			return 1;
 		}
 

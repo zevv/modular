@@ -58,13 +58,15 @@ void main(void)
 	float fin[12];
 	float fout[4];
 
-	for(;;) {
-		__WFI();
+	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
+	SysTick->LOAD = 0x00ffffffu;
+	uint32_t t1 = 0x00ffffffu;
 
-		shared->m4_busy = true;
-		
-		update_led();
-	
+	for(;;) {
+		SysTick->VAL = t1;
+		__WFI();
+		uint32_t t2 = SysTick->VAL;
+
 		/* Convert to float -1.0 .. +1.0 */
 
 		fin[ 0] = shared->i2s_in[0] * scale_i2s;
@@ -92,6 +94,10 @@ void main(void)
 			Chip_I2S_Send(LPC_I2S0, out1);
 			Chip_I2S_Send(LPC_I2S0, out2);
 		}
+	
+		/* Bookkeeping */
+
+		update_led();
 
 		/* Handle fade in/out */
 
@@ -109,8 +115,12 @@ void main(void)
 			}
 		}
 
-		shared->m4_busy = false;
-		shared->m4_ticks ++;
+		uint32_t t3 = SysTick->VAL;
+
+		uint32_t load = 1000*(t2-t3)/(t1-t3);
+		if(load > shared->m4_load) {
+			shared->m4_load = load;
+		}
 	}
 }
 
