@@ -2,7 +2,10 @@
 #include "module.h"
 #include "osc.h"
 #include "biquad.h"
+#include "pot.h"
 
+static struct pot pot_f;
+static struct pot pot_vol;
 static struct osc osc1, osc2, osc3, osc4, lfo;
 static struct biquad lp1, lp2;
 
@@ -27,18 +30,16 @@ void mod_init(void)
 	biquad_config(&lp1, BIQUAD_TYPE_LP, 50, 0.707);
 	biquad_init(&lp2, SRATE);
 	biquad_config(&lp2, BIQUAD_TYPE_LP, 50, 0.707);
+
+	pot_init(&pot_f, POT_SCALE_LOG, 10, 5000);
+	pot_init(&pot_vol, POT_SCALE_LIN, 0, 1);
 }
 
 
 void mod_run(float *fin, float *fout)
 {
-	float f = biquad_run(&lp1, fin[6]) * 4000 + 4010;
-	float g = (biquad_run(&lp2, fin[4]) + 0.8) * 0.5;
-
-	g = g * g;
-
-	if(g < -0.0) g = -0.0;
-	if(g >  1.0) g = 1.0;
+	float f = pot_read(&pot_f, fin[4]);
+	float g = pot_read(&pot_vol, fin[6]);
 
 	osc_set_freq(&osc1, f);
 	osc_set_freq(&osc2, f*0.5 + 5);

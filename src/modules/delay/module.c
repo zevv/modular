@@ -5,10 +5,13 @@
 #include "module.h"
 #include "osc.h"
 #include "biquad.h"
+#include "pot.h"
 
 #define DEL_SIZE 55000
 #define MAX_TAPS 8
 
+static struct pot pot_delay;
+static struct pot pot_feedback;
 static struct osc osc, lfo[MAX_TAPS];
 
 static int q;
@@ -19,7 +22,7 @@ static float c3;
 
 
 static __fp16 delbuf[DEL_SIZE];
-static struct biquad lp1, lp2, hp;
+static struct biquad hp;
 
 struct delay {
 	__fp16 *buf;
@@ -109,12 +112,6 @@ void mod_init(void)
 	biquad_init(&hp, SRATE);
 	biquad_config(&hp, BIQUAD_TYPE_HP, 30, 0.707);
 
-	biquad_init(&lp1, SRATE);
-	biquad_config(&lp1, BIQUAD_TYPE_LP, 2, 0.707);
-	
-	biquad_init(&lp2, SRATE);
-	biquad_config(&lp2, BIQUAD_TYPE_LP, 2, 0.707);
-
 	osc_init(&osc, SRATE);
 	osc_set_type(&osc, OSC_TYPE_SIN);
 	delay_init(&del, delbuf, DEL_SIZE);
@@ -124,6 +121,9 @@ void mod_init(void)
 		osc_init(&lfo[i], SRATE);
 		osc_set_freq(&lfo[i], 1.5 + i * 0.1);
 	}
+
+	pot_init(&pot_delay, POT_SCALE_LOG, 0, 1);
+	pot_init(&pot_feedback, POT_SCALE_LIN, 0, 1);
 }
 
 
@@ -136,10 +136,9 @@ void mod_run(float *fin, float *fout)
 		n = 0;
 	}
 
-	float where = biquad_run(&lp1, (fin[4] + 1) * 0.5);
-	where = where * where;
+	float where = pot_read(&pot_delay, fin[4]);
 
-	delay_set_feedback(&del, biquad_run(&lp2, (fin[6] + 1) * 0.5));
+	delay_set_feedback(&del, pot_read(&pot_feedback, fin[6]));
 
 	float vl = 0, vr = 0;
 

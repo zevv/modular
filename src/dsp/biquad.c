@@ -10,6 +10,8 @@
 #include <stdbool.h>
 
 #include "biquad.h"
+#include "sintab.h"
+#include "tabread.h"
 
 
 int biquad_init(struct biquad *bq, float srate)
@@ -22,6 +24,18 @@ int biquad_init(struct biquad *bq, float srate)
 	biquad_config(bq, BIQUAD_TYPE_LP, 1000, 0.707);
 
 	return 0;
+}
+
+
+static float mycos(float x)
+{
+	return read2(sintab, SINTAB_SIZE, x + 0.25);
+}
+
+
+static float mysin(float x)
+{
+	return read2(sintab, SINTAB_SIZE, x);
 }
 
 
@@ -39,9 +53,8 @@ int biquad_config(struct biquad *bq, enum biquad_type type, float freq, float Q)
 	float a0 = 0.0, a1 = 0.0, a2 = 0.0;
 	float b0 = 0.0, b1 = 0.0, b2 = 0.0;
 
-	float w0 = 2.0 * M_PI * freq;
-	float alpha = sinf(w0) / (2.0*Q);
-	float cos_w0 = cosf(w0);
+	float alpha = mysin(freq) / (2.0*Q);
+	float cos_w0 = mycos(freq);
 
 	switch(type) {
 

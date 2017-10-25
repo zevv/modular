@@ -1,9 +1,11 @@
 
 
 #include <math.h>
+#include <stdlib.h>
 
 #include "sintab.h"
 #include "osc.h"
+#include "tabread.h"
 
 /*
  * polyblep: http://www.kvraudio.com/forum/viewtopic.php?t=375517
@@ -63,18 +65,7 @@ float osc_gen(struct osc *osc)
 	float val = 0;
 
 	if(osc->type == OSC_TYPE_SIN) {
-
-		float p = osc->phase * SINTAB_SIZE;
-		int i = p;
-		int j = i+1;
-		float a0 = p - i;
-		float a1 = 1.0 - a0;
-
-		if(j >= SINTAB_SIZE) j -= SINTAB_SIZE;
-		float v0 = sintab[i];
-		float v1 = sintab[j];
-
-		val = v0 * a1 + v1 * a0;
+		val = read2(sintab, SINTAB_SIZE, osc->phase);
 	}
 	
 	if(osc->type == OSC_TYPE_PULSE_NAIVE) {

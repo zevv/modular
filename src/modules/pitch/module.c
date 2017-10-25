@@ -29,6 +29,7 @@ float readbuf(int ptr, float *buf, int size)
 	return buf[ptr];
 }
 
+
 float read4(float ptr, float *buf, int size)
 {
 	int i = ptr;
