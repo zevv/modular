@@ -7,10 +7,10 @@
 #include "biquad.h"
 
 #define DEL_SIZE 10000
-#define STEP 5
-#define WIN 50
+#define STEP 14
+#define WIN 100
 #define NMIX 50
-#define DMAX 2200
+#define DMAX 960
 
 static float delbuf[DEL_SIZE];
 
@@ -102,8 +102,6 @@ int find(int pf, int pt1, int pt2)
 {
 	float cmax = 0;
 	float ptmax = pt1;
-
-	return (pt1+pt2) * 0.5;
 
 	int pt;
 	for(pt=pt1; pt<pt2-WIN; pt+=STEP) {

@@ -103,7 +103,6 @@ void main(void)
 		adc_tick();
 		calc_m4_load();
 		watchdog_poll();
-		printd("%d\n", button_get() ? 1 : 2);
 	}
 }
 
