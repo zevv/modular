@@ -19,7 +19,7 @@ tools/lpchdr:
 tools/mkimg:
 	$(E) $(MAKE) -C tools mkimg
 
-modular.dfu: loader tools
+modular.dfu: core loader tools
 	$(P) "LPCHDR $@"
 	$(E) cp loader/loader.bin modular.dfu
 	$(E) tools/lpchdr modular.dfu
@@ -38,3 +38,13 @@ run: usb
 	$(E) while [ ! -c /dev/ttyACM0 ]; do sleep 0.1; /bin/echo -en "."; done
 	$(E) sleep 0.1
 	$(E) iterm /dev/ttyACM0
+
+flash-loader: modular.dfu
+	$(P) "FLASH"
+	$(E) ./tools/flash modular.dfu 0 > /dev/ttyACM0
+
+flash-modules: modules.img
+	$(P) "FLASH"
+	$(E) ./tools/flash modules.img 0x21000 > /dev/ttyACM0
+
+flash: flash-loader flash-modules

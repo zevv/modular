@@ -32,8 +32,6 @@ static struct cmd_cli cli2 = {
 };
 
 
-bool m4_active = false;
-
 void arch_init(void)
 {
 //	Chip_SetupCoreClock(CLKIN_IRC, MAX_CLOCK_FREQ, true);
@@ -138,13 +136,12 @@ static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
 
 		if(cmd == 'g') { /* go */
 			shared->m4_state = M4_STATE_FADEIN;
-			m4_active = true;
 			Chip_RGU_TriggerReset(RGU_M3_RST);
 			return 1;
 		}
 
 		if(cmd == 'h') { /* halt */
-			m4_active = false;
+			shared->m4_state = M4_STATE_HALT;
 			return 1;
 		}
 

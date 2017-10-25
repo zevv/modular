@@ -16,6 +16,7 @@
 #define CMD_READ_DATA_BYTES                 0x03
 #define CMD_ERASE_AND_WRITE                 0x83
 #define CMD_MAIN_MEMORY_PAGE_PROGRAM        0x82
+#define CMD_WRITE_BUFFER_1                  0x84
 #define CMD_PAGE_ERASE                      0x81
 
 #define PAGE_SIZE 528
@@ -137,6 +138,37 @@ void flash_read(uint32_t addr, void *buf, size_t len)
 }
 
 
+/*
+ * Load data in flash buffer 1
+ */
+
+void flash_load(uint32_t addr, const void *buf, size_t len)
+{
+	uint8_t cmd[4];
+	mk_cmd_addr(CMD_WRITE_BUFFER_1, addr, cmd, sizeof(cmd));
+
+	set_cs(0);
+	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, cmd, sizeof(cmd));
+	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, buf, len);
+	set_cs(1);
+
+	wait_busy(false);
+}
+
+/*
+ * Erase page and write buffer 1
+ */
+
+void flash_write_buf1(uint32_t addr)
+{
+	uint8_t cmd[4];
+	mk_cmd_addr(CMD_ERASE_AND_WRITE, addr, cmd, sizeof(cmd));
+	set_cs(0);
+	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, cmd, sizeof(cmd));
+	set_cs(1);
+	wait_busy(false);
+}
+
 
 void flash_write(uint32_t addr, const void *buf, size_t len)
 {
@@ -149,38 +181,6 @@ void flash_write(uint32_t addr, const void *buf, size_t len)
 	set_cs(1);
 
 	wait_busy(false);
-}
-
-
-static void copy_ram_to_flash(void)
-{
-	extern uint8_t _srom, _sbss;
-	uint8_t *from = &_srom;
-	uint32_t size = (&_sbss - &_srom) + 16;
-	
-	/* UDF header */
-	
-	uint8_t buf[16];
-	memset(buf, 0xff, sizeof(buf));
-	buf[0] = 0xda;
-	buf[1] = 0xff;
-	buf[2] = ((size & 0x00ff) >>  0);
-	buf[3] = ((size & 0xff00) >>  8);
-	flash_write(0, buf, sizeof(buf));
-
-	/* Copy firmare */
-
-	uint32_t skip = 0x10;
-	uint32_t to = 0x10;
-	uint32_t blocksize = PAGE_SIZE;
-
-	while(from < &_sbss+blocksize) {
-		flash_write(to, from, blocksize-skip);
-		from += blocksize - skip;
-		to += blocksize - skip;
-		skip = 0;
-		uart_tx('.');
-	}
 }
 
 
@@ -212,6 +212,32 @@ static int on_cmd_flash(struct cmd_cli *cli, uint8_t argc, char **argv)
 		flash_erase();
 		return 1;
 	}
+	
+	if(cmd == 'l' && argc > 3) {
+		uint32_t addr = strtol(argv[1], NULL, 16);
+		uint8_t sum1 = strtol(argv[2], NULL, 16);
+		uint8_t sum2 = 0;
+		uint8_t buf[argc-3];
+		size_t i;
+		for(i=3; i<argc; i++) {
+			uint8_t c = strtol(argv[i], NULL, 16);
+			sum2 += c;
+			buf[i-3] = c;
+		}
+		if(sum1 == sum2) {
+			flash_load(addr, buf, sizeof(buf));
+		} else {
+			cmd_printd(cli, "%06x crc\n", addr);
+		}
+		return 1;
+	}
+
+	if(cmd == 'W' && argc > 1) {
+		cmd_printd(cli, ".");
+		uint32_t addr = strtol(argv[1], NULL, 16);
+		flash_write_buf1(addr);
+		return 1;
+	}
 
 	if(cmd == 'w' && argc > 3) {
 		uint32_t addr = strtol(argv[1], NULL, 16);
@@ -241,11 +267,6 @@ static int on_cmd_flash(struct cmd_cli *cli, uint8_t argc, char **argv)
 		} else {
 			cmd_printd(cli, "%06x crc\n", addr);
 		}
-		return 1;
-	}
-
-	if(cmd == 'c') {
-		copy_ram_to_flash();
 		return 1;
 	}
 

@@ -12,8 +12,6 @@ union sample {
 	int16_t s16[2];
 };
 
-extern bool m4_active;
-
 
 STATIC const PINMUX_GRP_T mux[] = {
 	{0x3, 0,  (SCU_PINIO_FAST | SCU_MODE_FUNC3)}, /* MCLK */
@@ -92,7 +90,7 @@ void I2S0_IRQHandler(void)
 		adc_read(shared->adc_in);
 
 
-		if(m4_active) {
+		if(shared->m4_state != M4_STATE_HALT) {
 			__SEV();
 		} else {
 			Chip_I2S_Send(LPC_I2S0, 0);

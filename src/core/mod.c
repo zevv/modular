@@ -5,10 +5,11 @@
 #include "chip.h"
 #include "cmd.h"
 #include "printd.h"
+#include "shared.h"
 #include "flash.h"
 
 #define M4_RAM_BASE 0x10000000
-#define MOD_ADDR 0x20000
+#define MOD_ADDR 0x21000
 
 struct mod_header {
 	char name[32];
@@ -30,7 +31,8 @@ static int loader_foreach(int(*fn)(struct mod_header *mh, void *ptr), void *ptr)
 	flash_read(addr, &magic, sizeof(magic));
 
 	if(magic != MAGIC) {
-		return 0;
+		printd("wrong magic\n");
+		return 1;
 	}
 
 	addr += sizeof(magic);
@@ -54,7 +56,14 @@ static int on_load(struct mod_header *mh, void *ptr)
 	const char *name = ptr;
 	if(strcmp(mh->name, name) == 0) {
 		printd("LOAD %s %x %x\n", name, (int)(MOD_ADDR + mh->off), (int)mh->size);
+		if(shared->m4_state != M4_STATE_HALT) {
+			shared->m4_state = M4_STATE_FADEOUT;
+			while(shared->m4_state == M4_STATE_FADEOUT);
+			shared->m4_state = M4_STATE_HALT;
+		}
 		flash_read(MOD_ADDR + mh->off, (void *)M4_RAM_BASE, mh->size);
+		shared->m4_state = M4_STATE_FADEIN;
+		Chip_RGU_TriggerReset(RGU_M3_RST);
 	}
 	return 1;
 }
@@ -85,4 +94,5 @@ static int on_cmd_mod(struct cmd_cli *cli, uint8_t argc, char **argv)
 	return 0;
 }
 
-CMD_REGISTER(mod, on_cmd_mod, "l[ist] | s[et] <id> <0|1>");
+CMD_REGISTER(mod, on_cmd_mod, "");
+

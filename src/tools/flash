@@ -5,14 +5,24 @@ local fd = io.open(arg[1])
 local addr = tonumber(arg[2]) or 0
 local done = false
 local sum1 = 0
+local bufaddr = 0
+local page_size = 528
 
 print ""
 print "echo 0"
 
+
 while true do
-	local cmd = string.format("fl w %06x ", addr)
+	local cmd = string.format("fl l %x ", bufaddr)
 
 	c = fd:read(16)
+
+	if not c or bufaddr == page_size then
+		print(string.format("f W %x", addr))
+		addr = addr + page_size
+		bufaddr = 0
+	end
+
 	if not c then
 		break
 	end
@@ -26,8 +36,10 @@ while true do
 	end
 	cmd = cmd .. string.format("%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x", 
 		sum1, string.byte(c, 1, #c))
+
 	print(cmd)
-	addr = addr + 16
+	bufaddr = bufaddr + 16
+
 
 end
 
