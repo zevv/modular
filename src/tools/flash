@@ -2,7 +2,7 @@
 
 
 local fd = io.open(arg[1])
-local addr = 0
+local addr = tonumber(arg[2]) or 0
 local done = false
 local sum1 = 0
 

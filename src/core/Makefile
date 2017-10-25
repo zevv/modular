@@ -18,6 +18,7 @@ SRC     += uart.c
 SRC     += ssm2604.c
 SRC     += usbdesc.c
 SRC     += watchdog.c
+SRC     += mod.c
 
 SRC	+= lpc_chip_43xx_m0/src/chip_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/adc_18xx_43xx.c

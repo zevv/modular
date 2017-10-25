@@ -56,6 +56,7 @@ MAKE    = make -s
 endif
 
 .PHONY: $(SUBDIRS)
+.PRECIOUS: $(BIN) $(ELF)
 
 all: $(ALL)
 bin: $(BIN)

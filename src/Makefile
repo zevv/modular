@@ -1,7 +1,7 @@
 
 SUBDIRS = tools core dsp modules loader
 
-all: modular.dfu
+all: modular.dfu modules.img
 
 include Rules.mak
 
@@ -16,11 +16,18 @@ tools/lpcsum:
 tools/lpchdr:
 	$(E) $(MAKE) -C tools lpchdr
 
-modular.dfu: loader tools/lpcsum tools/lpchdr
+tools/mkimg:
+	$(E) $(MAKE) -C tools mkimg
+
+modular.dfu: loader tools
 	$(P) "LPCHDR $@"
 	$(E) cp loader/loader.bin modular.dfu
-	$(E) chronic dfu-suffix --vid=0x1fc9 --pid=0x000c --did=0x0 -a modular.dfu
 	$(E) tools/lpchdr modular.dfu
+	$(E) dfu-suffix --vid=0x1fc9 --pid=0x000c --did=0x0 -a modular.dfu
+
+modules.img: tools modules
+	$(P) "MODIMG"
+	$(E) tools/mkimg modules/*/*bin > $@
 
 usb: modular.dfu
 	$(P) "INSTALL $<"
