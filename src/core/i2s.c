@@ -108,7 +108,7 @@ void i2s_tick(void)
 {
 	static int n = 0;
 	if(n ++ == 100) {
-		printd("%d\n", shared->debug);
+		if(0) printd("%d\n", shared->debug);
 		n = 0;
 	}
 }

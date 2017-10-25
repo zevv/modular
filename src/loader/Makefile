@@ -29,20 +29,9 @@ all: $(BIN)
 include ../Rules.mak
 
 main.c: core.inc
+
 core.inc: ../core/core.bin
 	$(E) ../tools/bin2c $< > $@
-
-../tools/lpcsum:
-	$(E) $(MAKE) -C ../tools lpcsum
-
-../tools/lpchdr:
-	$(E) $(MAKE) -C ../tools lpchdr
-
-usb: $(DFU)
-	$(P) " INSTALL $<"
-	$(E) chronic sudo dfu-util -d 1fc9:000c -a 0 -D $(DFU)
-
-.PHONY: tools clean
 
 -include $(DEPS)
 

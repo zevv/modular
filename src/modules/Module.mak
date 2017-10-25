@@ -7,6 +7,8 @@ LIBS	+= ../../dsp/dsp.a
 LIBS	+= -lm 
 CFLAGS	+= -I../../dsp
 
+$(BIN): $(LIBS)
+
 # CPU specific flags
 
 MFLAGS  = -mcpu=cortex-m4

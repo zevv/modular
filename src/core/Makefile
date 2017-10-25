@@ -39,11 +39,5 @@ CFLAGS	+= -Ilpc_chip_43xx_m0/inc/
 
 include ../Rules.mak
 
-usb: $(DFU)
-	$(P) " INSTALL $<"
-	$(E) chronic sudo dfu-util -d 1fc9:000c -a 0 -D $(DFU)
-
-.PHONY: tools clean
-
 -include $(DEPS)
 

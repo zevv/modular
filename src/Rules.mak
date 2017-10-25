@@ -1,15 +1,15 @@
-TOP	?= ../
+
+VERSION	:= 1.0
+
 ELF	?= $(NAME).elf
 LDS	?= $(NAME).lds
-DFU	?= $(NAME).dfu
 
 CFLAGS	+= -ggdb -O3
 CFLAGS	+= -Wall -Werror
 
 CFLAGS	+= -DSRATE=44270.83
-CFLAGS	+= -DNAME=\"$(NAME)\"
 CFLAGS	+= -DVERSION=\"$(VERSION)\"
-CFLAGS	+= -DBUILD=\"$(BUILD)\"
+CFLAGS	+= -DBUILD=\"$(shell git rev-parse --short HEAD)\"
 CFLAGS  += -Wdouble-promotion -fsingle-precision-constant
 
 MFLAGS	+= -ffast-math
@@ -58,11 +58,8 @@ endif
 .PHONY: $(SUBDIRS)
 
 all: $(ALL)
-	echo "ALL was $(ALL)"
-
 bin: $(BIN)
 lib: $(LIB)
-dfu: $(DFU)
 
 clean:
 	$(P) " CLEAN"
@@ -81,18 +78,11 @@ $(ELF): $(OBJS) $(LDS)
 	$(P) " LD $<"
 	$(E) $(CC) -T$(LDS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
-$(BIN): $(ELF) $(TOP)/tools/lpcsum
-	$(P) " LPCSUM $@"
+$(BIN): $(ELF) 
+	$(P) " BIN $@"
 	$(E) $(OBJCOPY) -O binary -R pkt $(ELF) $(BIN)
-	$(E) $(TOP)/tools/lpcsum $(BIN)
 
 $(LIB): $(OBJS)
 	$(P) " LIB $@"
 	$(E) chronic $(AR) $(ARFLAGS) $@ $?
-
-$(DFU): $(BIN) ../tools/lpchdr
-	$(P) " LPCHDR $@"
-	$(E) cp $(BIN) $(DFU)
-	$(E) chronic dfu-suffix --vid=0x1fc9 --pid=0x000c --did=0x0 -a $(DFU)
-	$(E) ../tools/lpchdr $(DFU)
 

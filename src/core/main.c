@@ -117,6 +117,14 @@ static int on_cmd_reboot(struct cmd_cli *cli, uint8_t argc, char **argv)
 CMD_REGISTER(reboot, on_cmd_reboot, "");
 
 
+static int on_cmd_version(struct cmd_cli *cli, uint8_t argc, char **argv)
+{
+	cmd_printd(cli, "modular %s / %s / %s %s\n", VERSION, BUILD, __DATE__, __TIME__);
+	return 1;
+}
+
+CMD_REGISTER(version, on_cmd_version, "");
+
 
 static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
