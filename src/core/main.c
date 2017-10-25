@@ -14,6 +14,7 @@
 #include "uda1380.h"
 #include "watchdog.h"
 #include "ssm2604.h"
+#include "button.h"
 #include "shared.h"
 
 const uint32_t OscRateIn = 12000000;
@@ -73,6 +74,7 @@ void main(void)
 {
 	arch_init();
 	led_init();
+	button_init();
 	uart_init();
 	//watchdog_init();
 	printd_set_handler(uart_tx);
@@ -101,6 +103,7 @@ void main(void)
 		adc_tick();
 		calc_m4_load();
 		watchdog_poll();
+		printd("%d\n", button_get() ? 1 : 2);
 	}
 }
 

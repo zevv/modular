@@ -10,6 +10,7 @@ SRC     += cmd.c
 SRC     += flash.c
 SRC     += i2s.c
 SRC     += led.c
+SRC     += button.c
 SRC     += main.c
 SRC     += mem.c
 SRC     += printd.c

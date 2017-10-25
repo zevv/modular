@@ -97,13 +97,13 @@ void main(void)
 
 		if(shared->m4_state == M4_STATE_FADEIN) {
 			if(gain < 1.0) {
-				gain *= 1.0003;
+				gain *= 1.0006;
 			} else {
 				shared->m4_state = M4_STATE_RUNNING;
 			}
 		} else if(shared->m4_state == M4_STATE_FADEOUT) {
 			if(gain > 0.00001) {
-				gain *= 0.9997;
+				gain *= 0.9994;
 			} else {
 				shared->m4_state = M4_STATE_SILENT;
 			}

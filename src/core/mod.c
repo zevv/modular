@@ -13,6 +13,7 @@
 
 struct mod_header {
 	char name[32];
+	uint32_t id;
 	uint32_t off;
 	uint32_t size;
 	uint32_t sum;
@@ -22,7 +23,7 @@ struct mod_header {
 #define MAGIC 0x30444f4d /* MOD0 */
 
 
-static int loader_foreach(int(*fn)(struct mod_header *mh, void *ptr), void *ptr)
+static int mod_foreach(int(*fn)(struct mod_header *mh, void *ptr), void *ptr)
 {
 	uint32_t addr = MOD_ADDR;
 	uint32_t magic;
@@ -51,35 +52,58 @@ static int loader_foreach(int(*fn)(struct mod_header *mh, void *ptr), void *ptr)
 }
 
 
-static int on_load(struct mod_header *mh, void *ptr)
+static void mod_load(struct mod_header *mh)
 {
-	const char *name = ptr;
-	if(strcmp(mh->name, name) == 0) {
-		printd("LOAD %s %x %x\n", name, (int)(MOD_ADDR + mh->off), (int)mh->size);
-		if(shared->m4_state != M4_STATE_HALT) {
-			shared->m4_state = M4_STATE_FADEOUT;
-			while(shared->m4_state == M4_STATE_FADEOUT);
-			shared->m4_state = M4_STATE_HALT;
-		}
-		flash_read(MOD_ADDR + mh->off, (void *)M4_RAM_BASE, mh->size);
-		shared->m4_state = M4_STATE_FADEIN;
-		Chip_RGU_TriggerReset(RGU_M3_RST);
+	printd("loading %s %x %x\n", mh->name, (int)(MOD_ADDR + mh->off), (int)mh->size);
+	if(shared->m4_state != M4_STATE_HALT) {
+		shared->m4_state = M4_STATE_FADEOUT;
+		while(shared->m4_state == M4_STATE_FADEOUT);
+		shared->m4_state = M4_STATE_HALT;
 	}
-	return 1;
+	flash_read(MOD_ADDR + mh->off, (void *)M4_RAM_BASE, mh->size);
+	shared->m4_state = M4_STATE_FADEIN;
+	Chip_RGU_TriggerReset(RGU_M3_RST);
 }
 
 
-
-static int loader_load(const char *name)
+static int on_load_name(struct mod_header *mh, void *ptr)
 {
-	return loader_foreach(on_load, (char *)name);
+	const char *name = ptr;
+	if(strcmp(mh->name, name) == 0) {
+		mod_load(mh);
+		return 1;
+	}
+	return 0;
+}
+
+
+int mod_load_name(const char *name)
+{
+	return mod_foreach(on_load_name, (char *)name);
+}
+
+
+static int on_load_id(struct mod_header *mh, void *ptr)
+{
+	int *id = ptr;
+	if(mh->id == *id) {
+		mod_load(mh);
+		return 1;
+	}
+	return 0;
+}
+
+
+int mod_load_id(int id)
+{
+	return mod_foreach(on_load_id, &id);
 }
 
 
 static int on_list(struct mod_header *mh, void *ptr)
 {
 	struct cmd_cli *cli = ptr;
-	cmd_printd(cli, "%08x %08x %08x %s\n", (int)mh->off, (int)mh->size, (int)mh->sum, mh->name);
+	cmd_printd(cli, "%08x %08x %08x %3d: %s\n", (int)mh->off, (int)mh->size, (int)mh->sum, mh->id, mh->name);
 	return 1;
 }
 
@@ -87,12 +111,13 @@ static int on_list(struct mod_header *mh, void *ptr)
 static int on_cmd_mod(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
 	if(argc == 1) {
-		return loader_load(argv[0]);
+		return mod_load_name(argv[0]);
 	} else {
-		return loader_foreach(on_list, cli);
+		return mod_foreach(on_list, cli);
 	}
 	return 0;
 }
+
 
 CMD_REGISTER(mod, on_cmd_mod, "");
 

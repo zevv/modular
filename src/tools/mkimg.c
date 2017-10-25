@@ -14,6 +14,7 @@
 
 struct mod_header {
 	char name[32];
+	uint32_t id;
 	uint32_t off;
 	uint32_t size;
 	uint32_t sum;
@@ -40,6 +41,7 @@ int main(int argc, char **argv)
 {
 	uint32_t magic = MAGIC;
 	size_t count = argc-1;
+	size_t id = 0;
 
 	struct mod_header mod_header[count+1];
 	memset(&mod_header, 0, sizeof(mod_header));
@@ -66,6 +68,7 @@ int main(int argc, char **argv)
 		h->sum = blob->sum;
 		h->size = blob->size;
 		h->off = off;
+		h->id = id++;
 		off += blob->size;
 
 		mod_blob[i] = blob;
