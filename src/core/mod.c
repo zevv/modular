@@ -52,17 +52,39 @@ static int mod_foreach(int(*fn)(struct mod_header *mh, void *ptr), void *ptr)
 }
 
 
-static void mod_load(struct mod_header *mh)
+static int mod_load(struct mod_header *mh)
 {
 	printd("loading %s %x %x\n", mh->name, (int)(MOD_ADDR + mh->off), (int)mh->size);
+
+	/* Ask M4 to shutdown */
 	if(shared->m4_state != M4_STATE_HALT) {
 		shared->m4_state = M4_STATE_FADEOUT;
 		while(shared->m4_state == M4_STATE_FADEOUT);
 		shared->m4_state = M4_STATE_HALT;
 	}
+	
+	/* Load module from flash */
+
 	flash_read(MOD_ADDR + mh->off, (void *)M4_RAM_BASE, mh->size);
-	shared->m4_state = M4_STATE_FADEIN;
-	Chip_RGU_TriggerReset(RGU_M3_RST);
+
+	/* Verify checksum */
+
+	uint32_t sum = 0;
+	uint8_t *p = (void *)M4_RAM_BASE;
+	size_t i;
+	for(i=0; i<mh->size; i++) {
+		sum += *p++ + 1;
+	}
+
+	if(sum == mh->sum) {
+		shared->m4_state = M4_STATE_FADEIN;
+		Chip_RGU_TriggerReset(RGU_M3_RST);
+	} else {
+		printd("mod '%s' sum err\n", mh->name, sum);
+		return 0;
+	}
+
+	return 1;
 }
 
 
@@ -70,10 +92,9 @@ static int on_load_name(struct mod_header *mh, void *ptr)
 {
 	const char *name = ptr;
 	if(strcmp(mh->name, name) == 0) {
-		mod_load(mh);
-		return 1;
+		return mod_load(mh);
 	}
-	return 0;
+	return 1;
 }
 
 
@@ -87,10 +108,9 @@ static int on_load_id(struct mod_header *mh, void *ptr)
 {
 	int *id = ptr;
 	if(mh->id == *id) {
-		mod_load(mh);
-		return 1;
+		return mod_load(mh);
 	}
-	return 0;
+	return 1;
 }
 
 
