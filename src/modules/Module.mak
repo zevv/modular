@@ -11,7 +11,8 @@ $(BIN): $(LIBS)
 
 # CPU specific flags
 
-MFLAGS  = -mcpu=cortex-m4
+MFLAGS += -mfp16-format=alternative
+MFLAGS += -mcpu=cortex-m4
 MFLAGS += -mthumb
 MFLAGS += -mfloat-abi=softfp
 MFLAGS += -mfpu=fpv4-sp-d16

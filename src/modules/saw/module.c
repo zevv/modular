@@ -97,7 +97,7 @@ void mod_init(void)
 
 	fir_init(&fir1, filter_taps, FILTER_TAP_NUM);
 
-	osc_set_type(&osc, OSC_TYPE_SAW);
+	osc_set_type(&osc, OSC_TYPE_SIN);
 	osc_set_freq(&osc, 1000);
 	
 	osc_init(&lfo, SRATE);
@@ -117,9 +117,8 @@ float prand(void)
 void mod_run(float *fin, float *fout)
 {
 	
-	float f = fin[4] * 10000 + 10000;
+	float f = fin[4] * 10000 + 5000;
 
-	f = osc_gen(&lfo) * 10000 + 10010;
 
 	osc_set_freq(&osc, f);
 
