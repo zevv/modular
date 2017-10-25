@@ -29,8 +29,6 @@ while true do
 	print(cmd)
 	addr = addr + 16
 
-	for i = 1, 3000000 do end
-
 end
 
 print "echo 1"
