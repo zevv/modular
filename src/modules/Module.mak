@@ -38,6 +38,7 @@ $(PNG): $(SVG)
 	$(P) " PNG $@"
 	$(E) convert -density 300 -crop 312x312+0+0 $? $@
 
+png: $(PNG)
 
 
 

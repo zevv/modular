@@ -10,6 +10,7 @@ SRC	+= biquad.c
 SRC	+= sintab.c
 SRC	+= adsr.c
 SRC	+= fir.c
+SRC	+= pot.c
 
 LIBS	+= -lm
 

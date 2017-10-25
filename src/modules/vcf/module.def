@@ -6,53 +6,24 @@ return {
 			type = "input",
 			label = "in",
 		},
-		[2] = {
-			type = "input",
-			label = "FM",
-		},
-		[3] = {
-			type = "input",
-			label = "sync",
-		},
-		[4] = {
-			type = "input",
-			label = "in",
-		},
 		[5] = {
 			type = "pot",
 			label = "freq",
-		},
-		[6] = {
-			type = "switch",
-			label = "shape",
+			scale = "log",
+			min = 10,
+			max = 1000,
 		},
 		[7] = {
 			type = "pot",
-			label = "out",
-		},
-		[8] = {
-			type = "pot",
-			label = "out",
+			label = "Q",
+			scale = "lin",
+			min = 0.1,
+			max = 5,
 		},
 		[9] = {
 			type = "output",
 			label = "out",
 		},
-		[10] = {
-			type = "pot",
-			label = "type",
-		},
-		[11] = {
-			type = "pot",
-			label = "type",
-		},
-		[12] = {
-			type = "output",
-			label = "out",
-		},
-	},
-	links = {
-		{ 2, 5 }
 	},
 }
 
