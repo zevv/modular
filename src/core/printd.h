@@ -4,18 +4,24 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#include <sys/types.h>
 
-typedef void (*printd_handler)(uint8_t);
+typedef void (*printd_handler)(uint8_t c);
 
-void printd_set_handler(printd_handler h);
-void vfprintd(void (*tx)(uint8_t c), const char *fmt, va_list va);
-void printd(const char *fmt, ...); 
-void hexdump(void *addr, size_t len, off_t offset);
-void fhexdump(void (*tx)(uint8_t c), void *addr, size_t len, off_t offset);
-void fprintd(void (*tx)(uint8_t c), const char *fmt, ...);
+void vfprintd(printd_handler tx, const char *fmt, va_list va);
+void fprintd(printd_handler tx, const char *fmt, ...);
+
+void vsnprintd(char *str, size_t size, const char *fmt, va_list va);
+
+void snprintd(char *str, size_t size, const char *fmt, ...);
+
+void printd(const char *fmt, ...);
+
+void hexdump(const void *addr, size_t len, uintptr_t offset);
+void fhexdump(printd_handler tx, const void *addr, size_t len, uintptr_t offset);
 
 
 //__attribute__((format(printf, 1, 2)));
+
+void printd_set_handler(printd_handler h);
 
 #endif
