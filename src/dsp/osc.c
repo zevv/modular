@@ -102,6 +102,9 @@ float osc_gen(struct osc *osc)
 	}
 
 	osc->phase += osc->dphase;
+	while(osc->phase < 0.0) {
+		osc->phase += 1.0;
+	}
 	while(osc->phase >= 1.0) {
 		osc->phase -= 1.0;
 	}

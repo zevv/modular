@@ -42,14 +42,14 @@ void mod_run(float *fin, float *fout)
 	float g = pot_read(&pot_vol, fin[6]);
 
 	osc_set_freq(&osc1, f);
-	osc_set_freq(&osc2, f*0.5 + 5);
-	osc_set_freq(&osc3, f*1.0 + 5);
-	osc_set_freq(&osc4, f*0.25 + 5);
+	osc_set_freq(&osc2, f*1.2);
+	osc_set_freq(&osc3, f*1.333);
+	osc_set_freq(&osc4, f*1.5);
 
-	fout[0] = (osc_gen(&osc1) + osc_gen(&osc2)) * g * 0.5;
-	fout[1] = (osc_gen(&osc3) + osc_gen(&osc4)) * g * 0.5;
-	fout[2] = fout[0];
-	fout[3] = fout[1];
+	fout[0] = osc_gen(&osc1)* g * 0.5;
+	fout[1] = osc_gen(&osc2)* g * 0.5;
+	fout[2] = osc_gen(&osc3)* g * 0.5;
+	fout[3] = osc_gen(&osc4)* g * 0.5;
 }
 
 
