@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 
 		mod_blob[i] = blob;
 
-		fprintf(stderr, "- %08x %08x %s\n", h->off, h->size, h->name);
+		fprintf(stderr, "  %2d: %08x %5.1f kB %s\n", h->id, h->off, h->size/1024.0, h->name);
 	}
 
 	fwrite(&magic, 1, sizeof(magic), stdout);

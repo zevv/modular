@@ -2,6 +2,8 @@
 SUBDIRS = tools core dsp modules loader
 
 all: modular.dfu modules.img
+	$(E) ls -lh modular.dfu
+	$(E) ls -lh modules.img
 
 include Rules.mak
 
