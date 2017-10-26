@@ -49,22 +49,26 @@
 #define REG_SOFTWARE_RESET 0x0F
 #define  RESET(v) (v)
 
+STATIC const PINMUX_GRP_T mux[] = {
+	{ 2, 3, (SCU_PINIO_FAST | SCU_MODE_FUNC1) }, /* I2C1_SDA */
+	{ 2, 4, (SCU_PINIO_FAST | SCU_MODE_FUNC1) }, /* I2C1_SCL */
+};
 
 
-static void reg_write(uint8_t reg, uint16_t val)
+static void reg_write(enum I2C_ID bus, uint8_t reg, uint16_t val)
 {
 	uint8_t buf[2] = { 
 		(reg << 1) | ((val & 0x100) >> 8), 
 		val & 0xff,
 	};
-	Chip_I2C_MasterSend(I2C0, I2C_ADDR, buf, sizeof(buf));
+	Chip_I2C_MasterSend(bus, I2C_ADDR, buf, sizeof(buf));
 }
 
 
-static uint16_t reg_read(uint8_t reg)
+static uint16_t reg_read(enum I2C_ID bus, uint8_t reg)
 {
 	uint8_t c[2];
-	Chip_I2C_MasterCmdRead(I2C0, I2C_ADDR, reg << 1, c, sizeof(c));
+	Chip_I2C_MasterCmdRead(bus, I2C_ADDR, reg << 1, c, sizeof(c));
 	return c[0] | (c[1] << 8);
 }
 
@@ -86,27 +90,35 @@ static uint16_t reg_read(uint8_t reg)
  *      the out bit of Register R6 to 0.
  */
 
+static void init_one(enum I2C_ID bus)
+{
+	Chip_I2C_Init(bus);
+	Chip_I2C_SetClockRate(bus, 100000);
+	Chip_I2C_SetMasterEventHandler(bus, Chip_I2C_EventHandlerPolling);
+
+	reg_write(bus, REG_SOFTWARE_RESET, RESET(1));
+	reg_write(bus, REG_ACTIVE, 0);
+	reg_write(bus, REG_POWER_MANAGEMENT, OUT | OSC);
+	reg_write(bus, REG_LEFT_CHANNEL_ADC_INPUT_VOLUME, LRINBOTH | LINVOL(0x18));
+	reg_write(bus, REG_RIGHT_CHANNEL_ADC_INPUT_VOLUME, RLINBOTH | RINVOL(0x18));
+	reg_write(bus, REG_ANALOG_AUDIO_PATH, DACSEL);
+	reg_write(bus, REG_DIGITAL_AUDIO_PATH, ADCHPF);
+	reg_write(bus, REG_SAMPLING_RATE, BOSR);
+	reg_write(bus, REG_DIGITAL_AUDIO_I_F, FORMAT(2) | WL(3);
+
+	volatile int i;
+	for(i=0; i<5000000; i++);
+
+	reg_write(bus, REG_ACTIVE, ACTIVE);
+}
+
 void ssm2604_init(void)
 {
-	volatile int i;
-
+	Chip_SCU_SetPinMuxing(mux, sizeof(mux) / sizeof(mux[0]));
 	Chip_SCU_I2C0PinConfig(I2C0_STANDARD_FAST_MODE);
-	Chip_I2C_Init(I2C0);
-	Chip_I2C_SetClockRate(I2C0, 100000);
-	Chip_I2C_SetMasterEventHandler(I2C0, Chip_I2C_EventHandlerPolling);
 
-	reg_write(REG_SOFTWARE_RESET, RESET(1));
-	reg_write(REG_ACTIVE, 0);
-	reg_write(REG_POWER_MANAGEMENT, OUT | OSC);
-	reg_write(REG_LEFT_CHANNEL_ADC_INPUT_VOLUME, LRINBOTH | LINVOL(0x18));
-	reg_write(REG_RIGHT_CHANNEL_ADC_INPUT_VOLUME, RLINBOTH | RINVOL(0x18));
-	reg_write(REG_ANALOG_AUDIO_PATH, DACSEL);
-	reg_write(REG_DIGITAL_AUDIO_PATH, ADCHPF);
-	reg_write(REG_SAMPLING_RATE, BOSR);
-	reg_write(REG_DIGITAL_AUDIO_I_F, FORMAT(2) | WL(3);
-	for(i=0; i<5000000; i++);
-	reg_write(REG_ACTIVE, ACTIVE);
-
+	init_one(I2C0);
+	init_one(I2C1);
 }
 
 
@@ -122,22 +134,25 @@ static int on_cmd_ssm(struct cmd_cli *cli, uint8_t argc, char **argv)
 		}
 		
 		if(cmd == 'r') {
-			int reg = strtol(argv[1], NULL, 0);
-			cmd_printd(cli,"%03x\n", reg_read(reg));
+			int bus = strtol(argv[1], NULL, 0);
+			int reg = strtol(argv[2], NULL, 0);
+			cmd_printd(cli,"%03x\n", reg_read(bus, reg));
 			return 1;
 		}
 
 		if(cmd == 'w') {
-			int reg = strtol(argv[1], NULL, 0);
-			int val = strtol(argv[2], NULL, 0);
-			reg_write(reg, val);
+			int bus = strtol(argv[1], NULL, 0);
+			int reg = strtol(argv[2], NULL, 0);
+			int val = strtol(argv[3], NULL, 0);
+			reg_write(bus, reg, val);
 			return 1;
 		}
 
 		if(cmd == 'd') {
+			int bus = strtol(argv[1], NULL, 0);
 			int i;
 			for(i=0; i<10; i++) {
-				cmd_printd(cli, "%0d %03x\n", i, reg_read(i));
+				cmd_printd(cli, "%0d %03x\n", i, reg_read(bus, i));
 			}
 			return 1;
 		}

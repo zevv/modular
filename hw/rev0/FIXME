@@ -9,5 +9,7 @@
 - xtal+CS codecs weg
 - uart labels Rx/Tx/GND
 - 12 pin conn labels
-- diode max current
+- diode max current skottchkey
 - 0.1uF over uitgang CONN9/10/11/12
+- dikte voedingssporen
+

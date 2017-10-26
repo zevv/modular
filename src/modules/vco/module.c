@@ -48,6 +48,8 @@ void mod_run(float *fin, float *fout)
 
 	fout[0] = (osc_gen(&osc1) + osc_gen(&osc2)) * g * 0.5;
 	fout[1] = (osc_gen(&osc3) + osc_gen(&osc4)) * g * 0.5;
+	fout[2] = fout[0];
+	fout[3] = fout[1];
 }
 
 

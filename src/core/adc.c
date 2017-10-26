@@ -56,7 +56,7 @@ void adc_read(volatile int32_t *val)
 	val[4] = accum[4];
 	val[5] = accum[0];
 	val[6] = accum[6];
-	val[7] = accum[7];
+	val[7] = accum[1];
 }
 
 

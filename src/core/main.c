@@ -157,9 +157,9 @@ CMD_REGISTER(m4, on_cmd_m4, "");
 
 static const char *label[] = {
 	"in 1 ", "in 2 ", "in 3 ", "in 4 ",
-	"out 1", "out 2", "out 3", "out 4",
-	"ctl 1", "ctl 2", "ctl 3", "ctl 4",
+	"out 9", "out10", "out11", "out12",
 	"ctl 5", "ctl 6", "ctl 7", "ctl 8",
+	"ctl 9", "ctl10", "ctl11", "ctl12",
 };
 
 static void mon_tick(void)

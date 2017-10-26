@@ -102,6 +102,10 @@ void main(void)
 			Chip_I2S_Send(LPC_I2S0, shared->i2s_out[0]);
 			Chip_I2S_Send(LPC_I2S0, shared->i2s_out[1]);
 		}
+		if(Chip_I2S_GetTxLevel(LPC_I2S1) < 4) {
+			Chip_I2S_Send(LPC_I2S1, shared->i2s_out[2]);
+			Chip_I2S_Send(LPC_I2S1, shared->i2s_out[3]);
+		}
 
 		/* Bookkeeping */
 

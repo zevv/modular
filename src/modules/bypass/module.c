@@ -15,6 +15,8 @@ void mod_run(float *fin, float *fout)
 {
 	fout[0] = fin[0];
 	fout[1] = fin[1];
+	fout[2] = fin[2];
+	fout[3] = fin[3];
 }
 
 

@@ -163,6 +163,8 @@ static void boom(void)
 		if((j % 8) == 7) printd("\n");
 	}
 
+	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 1, 11, 0);
+
 	for(;;);
 }
 
