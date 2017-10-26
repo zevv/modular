@@ -45,6 +45,13 @@ static void update_led(void)
 }
 
 
+static void update_level(int i, float f)
+{
+	shared->level[i].max = (f > shared->level[i].max) ? f : shared->level[i].max;
+	shared->level[i].min = (f < shared->level[i].min) ? f : shared->level[i].min;
+}
+
+
 static const float scale_i2s = -1.0 / 2147483648.0;
 static const float scale_adc = -1.0 / 32767.0;
 
@@ -69,17 +76,16 @@ void main(void)
 
 		/* Convert to float -1.0 .. +1.0 */
 
-		fin[ 0] = shared->i2s_in[0] * scale_i2s;
-		fin[ 1] = shared->i2s_in[1] * scale_i2s;
+		int i;
+		for(i=0; i<4; i++) {
+			fin[i] = shared->i2s_in[i] * scale_i2s;
+			update_level(i, fin[i]);
+		}
 
-		fin[ 4] = shared->adc_in[0] * scale_adc + 1.0;
-		fin[ 5] = shared->adc_in[1] * scale_adc + 1.0;
-		fin[ 6] = shared->adc_in[2] * scale_adc + 1.0;
-		fin[ 7] = shared->adc_in[3] * scale_adc + 1.0;
-		fin[ 8] = shared->adc_in[4] * scale_adc + 1.0;
-		fin[ 9] = shared->adc_in[5] * scale_adc + 1.0;
-		fin[10] = shared->adc_in[6] * scale_adc + 1.0;
-		fin[11] = shared->adc_in[7] * scale_adc + 1.0;
+		for(i=0; i<8; i++) {
+			fin[i+4] = shared->adc_in[i] * scale_adc + 1.0;
+			update_level(i+8, fin[i+4]);
+		}
 
 		/* Run module */
 
@@ -87,14 +93,16 @@ void main(void)
 
 		/* Saturate at 24 bits and scale to 32 bits */
 
-		uint32_t out1 = __SSAT((int)(fout[0] * 8388608.0 * gain), 24) << 8;
-		uint32_t out2 = __SSAT((int)(fout[1] * 8388608.0 * gain), 24) << 8;
+		for(i=0; i<4; i++) {
+			shared->i2s_out[i] = __SSAT((int)(fout[i] * 8388608.0 * gain), 24) << 8;
+			update_level(i+4, fout[i]);
+		}
 
 		if(Chip_I2S_GetTxLevel(LPC_I2S0) < 4) {
-			Chip_I2S_Send(LPC_I2S0, out1);
-			Chip_I2S_Send(LPC_I2S0, out2);
+			Chip_I2S_Send(LPC_I2S0, shared->i2s_out[0]);
+			Chip_I2S_Send(LPC_I2S0, shared->i2s_out[1]);
 		}
-	
+
 		/* Bookkeeping */
 
 		update_led();

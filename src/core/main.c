@@ -16,6 +16,10 @@
 #include "ssm2604.h"
 #include "button.h"
 #include "shared.h"
+#include "mod.h"
+
+static void mon_tick(void);
+static bool mon_enable = false;
 
 const uint32_t OscRateIn = 12000000;
 const uint32_t ExtRateIn = 0;
@@ -75,6 +79,8 @@ void main(void)
 	i2s_init(SRATE);
 	ssm2604_init();
 
+	mod_load_name("bypass");
+
 	int n = 0;
 
 	for(;;) {
@@ -86,6 +92,7 @@ void main(void)
 		i2s_tick();
 		adc_tick();
 		watchdog_poll();
+		mon_tick();
 	}
 }
 
@@ -145,8 +152,55 @@ static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
 	return 1;
 }
 
-
 CMD_REGISTER(m4, on_cmd_m4, "");
+
+
+static const char *label[] = {
+	"in 1 ", "in 2 ", "in 3 ", "in 4 ",
+	"out 1", "out 2", "out 3", "out 4",
+	"ctl 1", "ctl 2", "ctl 3", "ctl 4",
+	"ctl 5", "ctl 6", "ctl 7", "ctl 8",
+};
+
+static void mon_tick(void)
+{
+	if(!mon_enable) return;
+	static int n = 0;
+	if(n++ < 100) return;
+	n = 0;
+
+	printd("\e[H");
+	printd("DSP load: %3d.%d\n", shared->m4_load/10, shared->m4_load % 10);
+	shared->m4_load = 0;
+
+	printd("\n");
+	
+	int i, j;
+	for(i=0; i<16; i++) {
+		printd("%s |", label[i]);
+		float v = (shared->level[i].max - shared->level[i].min);
+		float l = v * 7523;
+		for(j=1; j<41; j++) {
+			if(j == 32) printd("\e[33m");
+			if(j == 37) printd("\e[31m");
+			printd("%c", l>1 ? '=' : ' ');
+			l = l * 0.8;
+		}
+		printd("\e[0m|\n");
+		shared->level[i].min =  10;
+		shared->level[i].max = -10;
+	}
+}
+
+
+static int on_cmd_mon(struct cmd_cli *cli, uint8_t argc, char **argv)
+{
+	mon_enable = !mon_enable;
+	printd("\e[2J");
+	return 1;
+}
+
+CMD_REGISTER(mon, on_cmd_mon, "");
 
 /*
  * End

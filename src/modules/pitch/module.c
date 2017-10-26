@@ -163,7 +163,7 @@ void mod_run(float *fin, float *fout)
 	prn += factor;
 	if(prn > del.size) prn -= del.size;
 
-	fout[0] = vi * 1.0;
+	fout[0] = vo * 1.0;
 	fout[1] = vo * 1.0;
 }
 
