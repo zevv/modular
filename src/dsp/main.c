@@ -53,7 +53,8 @@ static void update_level(int i, float f)
 
 
 static const float scale_i2s = -1.0 / 2147483648.0;
-static const float scale_adc = -1.0 / 32767.0;
+static const float scale_adc = -1.0 / 32767.0 * 1.5;
+static const float offset_adc = 1.25;
 
 void main(void)
 {
@@ -83,7 +84,7 @@ void main(void)
 		}
 
 		for(i=0; i<8; i++) {
-			fin[i+4] = shared->adc_in[i] * scale_adc + 1.0;
+			fin[i+4] = shared->adc_in[i] * scale_adc + offset_adc;
 			update_level(i+8, fin[i+4]);
 		}
 

@@ -10,7 +10,7 @@ CFLAGS	+= -Wall -Werror
 CFLAGS	+= -DSRATE=44270.83
 CFLAGS	+= -DVERSION=\"$(VERSION)\"
 CFLAGS	+= -DBUILD=\"$(shell git rev-parse --short HEAD)\"
-CFLAGS  += -Wdouble-promotion -fsingle-precision-constant
+CFLAGS  += -fsingle-precision-constant
 
 MFLAGS	+= -ffast-math
 

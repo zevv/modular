@@ -156,10 +156,10 @@ CMD_REGISTER(m4, on_cmd_m4, "");
 
 
 static const char *label[] = {
-	"in 1 ", "in 2 ", "in 3 ", "in 4 ",
-	"out 9", "out10", "out11", "out12",
-	"ctl 5", "ctl 6", "ctl 7", "ctl 8",
-	"ctl 9", "ctl10", "ctl11", "ctl12",
+	"in   1", "in   2", "in   3", "in   4",
+	"out  9", "out 10", "out 11", "out 12",
+	"ctl  5", "ctl  6", "ctl  7", "ctl  8",
+	"ctl  9", "ctl 10", "ctl 11", "ctl 12",
 };
 
 static void mon_tick(void)
@@ -179,14 +179,21 @@ static void mon_tick(void)
 	for(i=0; i<16; i++) {
 		printd("%s |", label[i]);
 		float v = (shared->level[i].max - shared->level[i].min);
-		float l = v * 7523;
-		for(j=1; j<41; j++) {
-			if(j == 32) printd("\e[33m");
-			if(j == 37) printd("\e[31m");
-			printd("%c", l>1 ? '=' : ' ');
+		float l = v * 4000;
+		for(j=0; j<40; j++) {
+			if(j == 32) printd("\e[33;1m");
+			if(j == 37) printd("\e[31;1m");
+			printd("%s", l>1 ? "■" : " ");
 			l = l * 0.8;
 		}
-		printd("\e[0m|\n");
+		printd("\e[0m|");
+		float v1 = shared->level[i].min;
+		float v2 = shared->level[i].max;
+		for(l=-1; l<=1.05; l+=0.05) {
+			printd("%s", (l > v1-0.025 && l < v2+0.025) ? "\e[36m◆" : 
+					((l > -0.025 && l < 0.025) ? "|" : "\e[30;1m┄"));
+		}
+		printd("\e[0m| %+.3f\n", shared->level[i].min);
 		shared->level[i].min =  10;
 		shared->level[i].max = -10;
 	}

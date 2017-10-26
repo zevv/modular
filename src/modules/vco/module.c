@@ -32,7 +32,7 @@ void mod_init(void)
 	biquad_config(&lp2, BIQUAD_TYPE_LP, 50, 0.707);
 
 	pot_init(&pot_f, POT_SCALE_LOG, 10, 5000);
-	pot_init(&pot_vol, POT_SCALE_LIN, 0, 1);
+	pot_init(&pot_vol, POT_SCALE_LOG, 0, 1);
 }
 
 
@@ -46,10 +46,10 @@ void mod_run(float *fin, float *fout)
 	osc_set_freq(&osc3, f*1.333);
 	osc_set_freq(&osc4, f*1.5);
 
-	fout[0] = osc_gen(&osc1)* g * 0.5;
-	fout[1] = osc_gen(&osc2)* g * 0.5;
-	fout[2] = osc_gen(&osc3)* g * 0.5;
-	fout[3] = osc_gen(&osc4)* g * 0.5;
+	fout[0] = osc_gen(&osc1)* g;
+	fout[1] = osc_gen(&osc2)* g;
+	fout[2] = osc_gen(&osc3)* g;
+	fout[3] = osc_gen(&osc4)* g;
 }
 
 

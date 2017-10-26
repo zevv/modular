@@ -33,6 +33,9 @@ float pot_read(struct pot *pot, float v)
 		v = v * v * v;
 	}
 
+	if(v < 0.0) v = 0.0;
+	if(v > 1.0) v = 1.0;
+
 	return v * (pot->max - pot->min) + pot->min;
 }
 
