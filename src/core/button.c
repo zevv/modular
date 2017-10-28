@@ -13,7 +13,7 @@ STATIC const PINMUX_GRP_T mux[] = {
 
 bool button_get(void)
 {
-	return Chip_GPIO_GetPinState(LPC_GPIO_PORT, 0, 8);
+	return !Chip_GPIO_GetPinState(LPC_GPIO_PORT, 0, 8);
 }
 
 

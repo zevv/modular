@@ -82,6 +82,8 @@ void main(void)
 	//mod_load_name("bypass");
 
 	int n = 0;
+	static bool bp = false;
+	static int mod_id = 0;
 
 	for(;;) {
 		cmd_cli_poll(&cli1);
@@ -93,6 +95,13 @@ void main(void)
 		adc_tick();
 		watchdog_poll();
 		mon_tick();
+
+		bool b = button_get();
+		if(b && !bp) {
+			mod_load_id(mod_id);
+			mod_id = (mod_id + 1) % 8;
+		}
+		bp = b;
 	}
 }
 
