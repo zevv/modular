@@ -2,6 +2,7 @@
 NAME	:= core
 BIN	:= $(NAME).bin
 LIBS	+= -lm
+CORE	:= m0
 
 SRC     += adc.c
 SRC     += boot.c
@@ -31,11 +32,6 @@ SRC	+= lpc_chip_43xx_m0/src/sysinit_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/uart_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/wwdt_18xx_43xx.c
 
-# CPU specific flags
-
-MFLAGS  = -mcpu=cortex-m0
-
-CFLAGS	+= -DCORE_M0
 CFLAGS	+= -I.
 CFLAGS	+= -Ilpc_chip_43xx_m0/inc/
 

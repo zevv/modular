@@ -1,6 +1,7 @@
 
 NAME	:= loader
 BIN	:= $(NAME).bin
+CORE	:= m4
 
 SRC     += boot.c
 SRC     += main.c
@@ -13,14 +14,6 @@ SRC	+= lpc_chip_43xx/src/fpu_init.c
 
 CLEAN	+= core.inc
 
-# CPU specific flags
-
-MFLAGS  = -mcpu=cortex-m4
-MFLAGS += -mfloat-abi=softfp
-MFLAGS += -mfpu=fpv4-sp-d16
-MFLAGS += -ffast-math
-
-CFLAGS	+= -DCORE_M4
 CFLAGS	+= -I.
 CFLAGS	+= -Ilpc_chip_43xx/inc/
 

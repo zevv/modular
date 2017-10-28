@@ -1,6 +1,7 @@
 
 NAME	:= dsp
 LIB	:= $(NAME).a
+CORE	:= m4
 
 SRC	+= main.c
 SRC     += boot.c
@@ -14,14 +15,6 @@ SRC	+= pot.c
 
 LIBS	+= -lm
 
-# CPU specific flags
-
-MFLAGS  = -mcpu=cortex-m4
-MFLAGS += -mthumb
-MFLAGS += -mfloat-abi=softfp
-MFLAGS += -mfpu=fpv4-sp-d16
-
-CFLAGS	+= -DCORE_M4
 CFLAGS	+= -I.
 CFLAGS	+= -Ilpc_chip_43xx/inc/
 

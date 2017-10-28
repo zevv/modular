@@ -7,19 +7,10 @@ LIBS	+= ../../dsp/dsp.a
 LIBS	+= ../../dsp/libarm_cortexM4l_math.a
 LIBS	+= -lm 
 CFLAGS	+= -I../../dsp
+CORE	:= m4
 
 $(BIN): $(LIBS)
 
-# CPU specific flags
-
-MFLAGS += -mfp16-format=alternative
-MFLAGS += -mcpu=cortex-m4
-MFLAGS += -mthumb
-MFLAGS += -mfloat-abi=softfp
-MFLAGS += -mfpu=fpv4-sp-d16
-MFLAGS += -ffast-math
-
-CFLAGS	+= -DCORE_M4 -DARM_MATH_CM4
 CFLAGS	+= -I.
 CFLAGS	+= -I../../dsp/lpc_chip_43xx/inc/
 

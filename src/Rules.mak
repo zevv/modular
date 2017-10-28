@@ -27,10 +27,25 @@ LDFLAGS += -Wl,--gc-sections
 	
 ALL	+= $(SUBDIRS) $(LIB) $(BIN)
 
+ifeq ($(CORE), m0)
+  MFLAGS  += -mcpu=cortex-m0
+  CFLAGS  += -DCORE_M0
+  CFLAGS  += -I.
+  CFLAGS  += -Ilpc_chip_43xx_m0/inc/
+endif
 
-#CROSS 	:= /opt/toolchains/arm-2014.05/bin/arm-none-eabi-
+ifeq ($(CORE), m4)
+  MFLAGS  += -mcpu=cortex-m4
+  MFLAGS  += -mfloat-abi=softfp
+  MFLAGS  += -mfpu=fpv4-sp-d16
+  MFLAGS  += -mfp16-format=alternative
+  MFLAGS  += -ffast-math
+  CFLAGS  += -DCORE_M4 -DARM_MATH_CM4
+  CFLAGS  += -I.
+  CFLAGS  += -Ilpc_chip_43xx/inc/
+endif
+
 CROSS	:= /opt/toolchains/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
-
 AS      := $(CROSS)as
 LD      := $(CROSS)ld
 CC      := $(CROSS)gcc
