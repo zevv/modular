@@ -30,7 +30,7 @@ float pot_read(struct pot *pot, float v)
 	v = (v + 1.0) * 0.5;
 
 	if(pot->scale == POT_SCALE_LOG) {
-		v = v * v * v;
+		v = v * v * v * v;
 	}
 
 	if(v < 0.0) v = 0.0;

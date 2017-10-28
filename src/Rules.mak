@@ -28,7 +28,8 @@ LDFLAGS += -Wl,--gc-sections
 ALL	+= $(SUBDIRS) $(LIB) $(BIN)
 
 
-CROSS 	:= /opt/toolchains/arm-2014.05/bin/arm-none-eabi-
+#CROSS 	:= /opt/toolchains/arm-2014.05/bin/arm-none-eabi-
+CROSS	:= /opt/toolchains/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
 
 AS      := $(CROSS)as
 LD      := $(CROSS)ld

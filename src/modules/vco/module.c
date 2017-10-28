@@ -42,7 +42,7 @@ void mod_run(float *fin, float *fout)
 	float g = pot_read(&pot_vol, fin[6]);
 
 	osc_set_freq(&osc1, f);
-	osc_set_freq(&osc2, f*1.2);
+	osc_set_freq(&osc2, f*1.25);
 	osc_set_freq(&osc3, f*1.333);
 	osc_set_freq(&osc4, f*1.5);
 
