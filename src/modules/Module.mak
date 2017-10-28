@@ -4,6 +4,7 @@ TOP	:= ../..
 BIN	:= $(NAME).bin
 LDS	:= ../../dsp/dsp.lds
 LIBS	+= ../../dsp/dsp.a
+LIBS	+= ../../dsp/libarm_cortexM4l_math.a
 LIBS	+= -lm 
 CFLAGS	+= -I../../dsp
 
@@ -18,7 +19,7 @@ MFLAGS += -mfloat-abi=softfp
 MFLAGS += -mfpu=fpv4-sp-d16
 MFLAGS += -ffast-math
 
-CFLAGS	+= -DCORE_M4
+CFLAGS	+= -DCORE_M4 -DARM_MATH_CM4
 CFLAGS	+= -I.
 CFLAGS	+= -I../../dsp/lpc_chip_43xx/inc/
 

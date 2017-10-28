@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 #include "../../dsp/module.h"
+#include "lpc_chip_43xx/inc/cmsis.h"
+#include "arm_math.h"
 
 	
 

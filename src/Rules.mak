@@ -13,7 +13,6 @@ CFLAGS	+= -DBUILD=\"$(shell git rev-parse --short HEAD)\"
 CFLAGS  += -fsingle-precision-constant
 
 MFLAGS	+= -ffast-math
-
 MFLAGS	+= -mthumb
 
 # Standalone configuration, no startup code etc

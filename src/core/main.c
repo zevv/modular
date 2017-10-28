@@ -79,7 +79,7 @@ void main(void)
 	i2s_init(SRATE);
 	ssm2604_init();
 
-	mod_load_name("bypass");
+	//mod_load_name("bypass");
 
 	int n = 0;
 

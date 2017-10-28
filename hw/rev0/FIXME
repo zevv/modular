@@ -1,7 +1,7 @@
 
-- Weerstanden LED's 330ohm
-- pullup flash 10k
-- pullups I2C 10k
+- Weerstanden LED's -> 330ohm
+- pullup flash -> 10k
+- pullups I2C -> 10k
 - footprints potmeters/switches toleranties
 - footprint flash schematics
 - I2S rx/tx swap
@@ -13,3 +13,6 @@
 - 0.1uF over uitgang CONN9/10/11/12
 - dikte voedingssporen
 - usb conn naar achteren
+- input opamp circuits
+- schuine hoeken pcb
+
