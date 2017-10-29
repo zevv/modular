@@ -39,7 +39,6 @@ static struct cmd_cli cli2 = {
 
 void arch_init(void)
 {
-//	Chip_SetupCoreClock(CLKIN_IRC, MAX_CLOCK_FREQ, true);
 	Chip_SetupCoreClock(CLKIN_CRYSTAL, MAX_CLOCK_FREQ, true);
 	Chip_Clock_SetBaseClock(CLK_BASE_USB1, CLKIN_IDIVD, true, true);
 
@@ -163,6 +162,21 @@ static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
 
 CMD_REGISTER(m4, on_cmd_m4, "");
 
+static int on_cmd_clock(struct cmd_cli *cli, uint8_t argc, char **argv)
+{
+	if(argc == 1) {
+		uint32_t rate = strtol(argv[0], NULL, 0) * 1000000;
+		if(rate >= 8000000 && rate <= 204000000) {
+			Chip_SetupCoreClock(CLKIN_CRYSTAL, rate, true);
+		}
+	}
+	
+	cmd_printd(cli, "%d\n", Chip_Clock_GetMainPLLHz());
+	return 1;
+}
+
+
+CMD_REGISTER(clock, on_cmd_clock, "");
 
 static const char *label[] = {
 	"in   1", "in   2", "in   3", "in   4",
