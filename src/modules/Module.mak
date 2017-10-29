@@ -32,5 +32,10 @@ $(PNG): $(SVG)
 
 png: $(PNG)
 
+.PHONY: sim
+
+sim:
+	gcc -DSIM -DSRATE=48000 -lm -I ../../dsp ../../dsp/adsr.c ../../dsp/osc.c  ../../dsp/sintab.c \
+		../../dsp/biquad.c ../../dsp/fir.c  ../../dsp/pot.c $(SRC) -osim
 
 

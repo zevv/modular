@@ -12,6 +12,7 @@ struct fir {
 void fir_init(struct fir *fir, const float *taps, int ntaps);
 void fir_load(struct fir *fir, float fin);
 float fir_calc(struct fir *fir);
+float fir_calc_poly(struct fir *fir, int n, int m);
 
 #endif
 
