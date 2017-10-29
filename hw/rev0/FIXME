@@ -13,6 +13,6 @@
 - 0.1uF over uitgang CONN9/10/11/12
 - dikte voedingssporen
 - usb conn naar achteren
-- input opamp circuits
+- input opamp circuits + clamp rail AD input
 - schuine hoeken pcb
 

@@ -7,6 +7,7 @@
 #include "board.h"
 #include "printd.h"
 #include "adc.h"
+#include "shared.h"
 
  
 #define OVERSAMPLE 4
@@ -26,38 +27,21 @@ static volatile int32_t accum[8];
 
 void ADC0_IRQHandler(void)
 {
-	accum[0] = LPC_ADC0->DR[0] & 0x0000ffff;
-	accum[1] = LPC_ADC0->DR[1] & 0x0000ffff;
-	accum[2] = LPC_ADC0->DR[2] & 0x0000ffff;
-	accum[3] = LPC_ADC0->DR[3] & 0x0000ffff;
+	shared->adc_in[5] = LPC_ADC0->DR[0] & 0x0000ffff;
+	shared->adc_in[7] = LPC_ADC0->DR[1] & 0x0000ffff;
+	shared->adc_in[2] = LPC_ADC0->DR[2] & 0x0000ffff;
+	shared->adc_in[3] = LPC_ADC0->DR[3] & 0x0000ffff;
 }
 
 
 void ADC1_IRQHandler(void)
 {
-	accum[4] = LPC_ADC1->DR[4] & 0x0000ffff;
-	accum[5] = LPC_ADC1->DR[5] & 0x0000ffff;
-	accum[6] = LPC_ADC1->DR[6] & 0x0000ffff;
-	accum[7] = LPC_ADC1->DR[7] & 0x0000ffff;
+	shared->adc_in[4] = LPC_ADC1->DR[4] & 0x0000ffff;
+	shared->adc_in[0] = LPC_ADC1->DR[5] & 0x0000ffff;
+	shared->adc_in[6] = LPC_ADC1->DR[6] & 0x0000ffff;
+	shared->adc_in[1] = LPC_ADC1->DR[7] & 0x0000ffff;
 }
 
-
-/*
- * Average the last read samples for each channel and normalize
- * to s16
- */
-
-void adc_read(volatile int32_t *val)
-{
-	val[0] = accum[5];
-	val[1] = accum[7];
-	val[2] = accum[2];
-	val[3] = accum[3];
-	val[4] = accum[4];
-	val[5] = accum[0];
-	val[6] = accum[6];
-	val[7] = accum[1];
-}
 
 
 void adc_tick(void)

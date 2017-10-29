@@ -116,8 +116,6 @@ void I2S0_IRQHandler(void)
 
 		shared->i2s_in[0] = Chip_I2S_Receive(LPC_I2S0);
 		shared->i2s_in[1] = Chip_I2S_Receive(LPC_I2S0);
-		adc_read(shared->adc_in);
-
 
 		if(shared->m4_state != M4_STATE_HALT) {
 			__SEV();
