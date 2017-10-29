@@ -82,7 +82,7 @@ float dist(float v)
 void mod_run(float *fin, float *fout)
 {
 	float v = osc_gen(&osc);
-	v = fin[0];
+//	v = fin[0];
 	fout[0] = fout[1] = v;
 
 	float g = pot_read(&pot, fin[6]);

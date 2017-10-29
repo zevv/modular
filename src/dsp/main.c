@@ -53,8 +53,8 @@ static void update_level(int i, float f)
 
 
 static const float scale_i2s = -1.0 / 2147483648.0;
-static const float scale_adc = -1.0 / 32767.0 * 1.5;
-static const float offset_adc = 1.25;
+static const float scale_adc = -1.0 / 32767.0 * 1.2;
+static const float offset_adc = 1.15;
 
 void main(void)
 {
