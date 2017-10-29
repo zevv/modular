@@ -12,7 +12,7 @@ CFLAGS	+= -DVERSION=\"$(VERSION)\"
 CFLAGS	+= -DBUILD=\"$(shell git rev-parse --short HEAD)\"
 CFLAGS  += -fsingle-precision-constant
 
-MFLAGS	+= -ffast-math
+MFLAGS	 = -ffast-math
 MFLAGS	+= -mthumb
 
 # Standalone configuration, no startup code etc
@@ -96,7 +96,7 @@ $(ELF): $(OBJS) $(LDS)
 
 $(BIN): $(ELF) 
 	$(P) " BIN $@"
-	$(E) $(OBJCOPY) -O binary -R pkt $(ELF) $(BIN)
+	$(E) $(OBJCOPY) -O binary $(ELF) $(BIN)
 
 $(LIB): $(OBJS)
 	$(P) " LIB $@"

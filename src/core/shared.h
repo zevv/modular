@@ -28,6 +28,6 @@ struct shared {
 	int debug;
 };
 
-static volatile struct shared *shared = (struct shared *)0x10091800;
+static struct shared *shared = (struct shared *)0x10091800;
 
 #endif
