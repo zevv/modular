@@ -84,7 +84,8 @@ float osc_gen(struct osc *osc)
 		val += poly_blep(fmodf(osc->phase + 0.5, 1.0), osc->dphase);
 		val -= poly_blep(osc->phase, osc->dphase);
 		val = osc->dphase * val + (1 - osc->dphase) * osc->prev;
-		osc->prev = val;
+		osc->prev = val * 0.99;
+		val *= 4;
 	}
 	
 	if(osc->type == OSC_TYPE_TRIANGLE_NAIVE) {
