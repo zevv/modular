@@ -60,18 +60,22 @@ void mod_run_int(int16_t *in, int16_t *out)
 	int i = 0 ;
 
 	while(t > 16) {
-		uint32_t *c = (void *)&tap2[i];
-		uint32_t *s = (void *)&sig[t-2];
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		i += 16;
-		t -= 16;
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
 	}
 
 	while(t > 0) {
@@ -81,24 +85,27 @@ void mod_run_int(int16_t *in, int16_t *out)
 	t = NTAPS;
 	
 	while(t > tail+16) {
-		uint32_t *c = (void *)&tap2[i];
-		uint32_t *s = (void *)&sig[t-2];
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		acc = __SMLALD(*c++, *s--, acc);
-		i += 16;
-		t -= 16;
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
+		acc += tap[i++] * sig[--t];
 	}
 	
 	while(t > tail) {
 		acc += tap[i++] * sig[--t];
 	}
-
 
 	out[0] = out[1] = (acc >> 16) * 1;
 }
