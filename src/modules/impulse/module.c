@@ -4,7 +4,6 @@
 
 #include "../../dsp/module.h"
 #include "lpc_chip_43xx/inc/cmsis.h"
-#include "lpc_chip_43xx/inc/cmsis_gcc.h"
 #include "arm_math.h"
 
 
@@ -31,14 +30,14 @@ static int16_t tap[] = {
 
 static int16_t tap2[NTAPS];
 static int16_t sig[512];
-static int head;
+static size_t head;
 
 
 
 void mod_init(void)
 {
 	module_mode = MODULE_MODE_INT;
-	int i;
+	size_t i;
 
 	for(i=0; i<NTAPS; i+=2) {
 		tap2[i+0] = tap[i+1];

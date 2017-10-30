@@ -6,7 +6,7 @@
 
 struct cmd_cli {
 	char buf[128];
-	int len;
+	size_t len;
 	void (*tx)(uint8_t c);
 	int (*rx)(uint8_t *c);
 	bool echo;

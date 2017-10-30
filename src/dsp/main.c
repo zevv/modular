@@ -43,8 +43,8 @@ static void update_led(void)
 
 static void update_level(int i, int32_t v)
 {
-	shared->level[i].max = (v > shared->level[i].max) ? v : shared->level[i].max;
-	shared->level[i].min = (v < shared->level[i].min) ? v : shared->level[i].min;
+	if(v > shared->level[i].max) shared->level[i].max = v;
+	if(v < shared->level[i].min) shared->level[i].min = v;
 }
 
 
@@ -130,6 +130,7 @@ void main(void)
 
 	for(;;) {
 
+		__DMB();
 		__WFI();
 
 		int i;

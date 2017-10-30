@@ -286,7 +286,7 @@ static int on_cmd_flash(struct cmd_cli *cli, uint8_t argc, char **argv)
 			uint8_t buf[16];
 			size_t l = (len > sizeof(buf)) ? sizeof(buf) : len;
 			flash_read(addr, buf, l);
-			int i;
+			size_t i;
 			for(i=0; i<l; i++) {
 				sum2 = sum2 + buf[i] + 1;
 			}

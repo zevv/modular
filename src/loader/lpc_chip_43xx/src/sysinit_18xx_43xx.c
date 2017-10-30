@@ -80,7 +80,7 @@ static const struct CLK_BASE_STATES InitClkStates[] = {
 /* Setup Chip Core clock */
 void Chip_SetupCoreClock(CHIP_CGU_CLKIN_T clkin, uint32_t core_freq, bool setbase)
 {
-	int i;
+	unsigned i;
 	volatile uint32_t delay = 500;
 	uint32_t direct = 0, pdivide = 0;
 	PLL_PARAM_T ppll;

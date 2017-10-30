@@ -107,7 +107,7 @@ int mod_load_name(const char *name)
 
 static int on_load_id(struct mod_header *mh, void *ptr)
 {
-	int *id = ptr;
+	uint32_t *id = ptr;
 	if(mh->id == *id) {
 		return mod_load(mh);
 	}
