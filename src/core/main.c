@@ -1,5 +1,6 @@
 
 #include <string.h>
+#include <math.h>
 
 #include "chip.h"
 
@@ -68,9 +69,13 @@ static void logd(const char *fmt, ...)
 
 static void read_m4_log(void)
 {
-	while(shared->log.tail != shared->log.head) {
-		printd("%c", shared->log.buf[shared->log.tail]);
-		shared->log.tail = (shared->log.tail + 1) % SHARED_LOG_BUF_SIZE;
+	if(shared->log.tail != shared->log.head) {
+		printd("\e[36m");
+		while(shared->log.tail != shared->log.head) {
+			printd("%c", shared->log.buf[shared->log.tail]);
+			shared->log.tail = (shared->log.tail + 1) % SHARED_LOG_BUF_SIZE;
+		}
+		printd("\e[0m");
 	}
 }
 
@@ -229,25 +234,31 @@ static void mon_tick(void)
 	
 	int i, j;
 	for(i=0; i<16; i++) {
+		uint32_t amp = (shared->level[i].max - shared->level[i].min);
+		
+		float dB = -96;
+		if(amp > 1) {
+			dB += 20 * logf(amp) / logf(10);
+		}
+		
 		printd("%s |", label[i]);
-		float v = (shared->level[i].max - shared->level[i].min);
-		float l = v * 4000;
-		for(j=0; j<40; j++) {
-			if(j == 32) printd("\e[33;1m");
-			if(j == 37) printd("\e[31;1m");
-			printd("%s", l>1 ? "■" : " ");
-			l = l * 0.8;
+
+		for(j=-70; j<0; j+=2) {
+			if(j == -12) printd("\e[33;1m");
+			if(j ==  -6) printd("\e[31;1m");
+			printd("%s", dB >= j ? "■" : " ");
 		}
 		printd("\e[0m|");
-		float v1 = shared->level[i].min;
-		float v2 = shared->level[i].max;
-		for(l=-1; l<=1.05; l+=0.05) {
-			printd("%s", (l > v1-0.025 && l < v2+0.025) ? "\e[36m◆" : 
-					((l > -0.025 && l < 0.025) ? "|" : "\e[30;1m┄"));
+		float v1 = shared->level[i].min >> 11;
+		float v2 = shared->level[i].max >> 11;
+		int j;
+		for(j=-16; j<=16; j++) {
+			printd("%s", (j >= v1 && j <= v2) ? "\e[36m◆" : 
+					(j == 0) ? "|" : "\e[30;1m┄");
 		}
-		printd("\e[0m| %+.3f\n", shared->level[i].min);
-		shared->level[i].min =  10;
-		shared->level[i].max = -10;
+		printd("\e[0m| %+5.1f dB      \n", dB);
+		shared->level[i].min = INT32_MAX;
+		shared->level[i].max = INT32_MIN;
 	}
 }
 

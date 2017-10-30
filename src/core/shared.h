@@ -15,14 +15,15 @@ enum m4_state {
 	M4_STATE_FADEIN,
 	M4_STATE_RUNNING,
 	M4_STATE_FADEOUT,
-	M4_STATE_SILENT,
 };
 
 struct shared {
+
 	struct {
-		float min;
-		float max;
+		int32_t min;
+		int32_t max;
 	} level[16];
+
 	int32_t i2s_in[4];
 	int32_t i2s_out[4];
 	int32_t adc_in[8];
