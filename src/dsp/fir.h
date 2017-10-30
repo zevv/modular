@@ -12,7 +12,7 @@ struct fir {
 void fir_init(struct fir *fir, const float *taps, int ntaps);
 
 
-inline void fir_load(struct fir *fir, float fin)
+static inline void fir_load(struct fir *fir, float fin)
 {
 	fir->s[fir->head] = fin;
 	fir->head ++;
@@ -22,7 +22,7 @@ inline void fir_load(struct fir *fir, float fin)
 }
 
 
-inline float fir_calc(struct fir *fir)
+static inline float fir_calc(struct fir *fir)
 {
 	float fout = 0.;
 
@@ -37,7 +37,7 @@ inline float fir_calc(struct fir *fir)
 }
 
 
-inline float fir_calc_poly(struct fir *fir, int n, int m)
+static inline float fir_calc_poly(struct fir *fir, int n, int m)
 {
 	float fout = 0.;
 

@@ -1,7 +1,7 @@
 #ifndef reverb_h
 #define reverb_h
 
-#define numcombs 8
+#define numcombs 6
 #define numallpasses 4
 
 typedef struct _allpass allpass;
