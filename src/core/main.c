@@ -50,6 +50,31 @@ void arch_init(void)
 }
 
 
+static void to_shared_log(uint8_t c)
+{
+	shared->log.buf[shared->log.head] = c;
+	shared->log.head = (shared->log.head + 1) % SHARED_LOG_BUF_SIZE;
+}
+
+
+static void logd(const char *fmt, ...)
+{
+	va_list va;
+	va_start(va, fmt);
+	vfprintd(to_shared_log, fmt, va);
+	va_end(va);
+}
+
+
+static void read_m4_log(void)
+{
+	while(shared->log.tail != shared->log.head) {
+		printd("%c", shared->log.buf[shared->log.tail]);
+		shared->log.tail = (shared->log.tail + 1) % SHARED_LOG_BUF_SIZE;
+	}
+}
+
+
 
 /*
  * This function is called by the M4; it is defined here to allow
@@ -78,6 +103,9 @@ void main(void)
 	i2s_init(SRATE);
 	ssm2604_init();
 
+	shared->logd = logd;
+	logd("M0 ready\n");
+
 	//mod_load_name("bypass");
 
 	int n = 0;
@@ -87,6 +115,7 @@ void main(void)
 	for(;;) {
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
+		read_m4_log();
 		led_set(LED_ID_GREEN, (n++ & 0x200) ? LED_STATE_ON : LED_STATE_OFF);
 		volatile int i;
 		for(i=0; i<10000; i++);
@@ -231,6 +260,15 @@ static int on_cmd_mon(struct cmd_cli *cli, uint8_t argc, char **argv)
 }
 
 CMD_REGISTER(mon, on_cmd_mon, "");
+
+
+static int on_cmd_log(struct cmd_cli *cli, uint8_t argc, char **argv)
+{
+	cmd_hexdump(cli, shared->log.buf, SHARED_LOG_BUF_SIZE, 0);
+	return 1;
+}
+
+CMD_REGISTER(log, on_cmd_log, "");
 
 /*
  * End

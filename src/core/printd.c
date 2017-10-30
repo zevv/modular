@@ -224,7 +224,7 @@ static unsigned outChars(printd_handler tx, char ch, int len)
 
 unsigned xvformat(printd_handler tx, const char *fmt, va_list args)
 {
-	static struct param_s param;
+	struct param_s param;
 	int i;
 	char c;
 

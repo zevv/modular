@@ -55,12 +55,17 @@ static void update_level(int i, float f)
 static const float scale_i2s = -1.0 / 2147483648.0;
 static const float scale_adc = -1.0 / 32767.0 * 1.2;
 static const float offset_adc = 1.15;
+void (*logd)(const char *str, ...);
 
 void main(void)
 {
 	NVIC_EnableIRQ(M0APP_IRQn);
 	
 	mod_init();
+
+	logd = shared->logd;
+
+	logd("M4 ready\n");
 
 	float gain = 0.00001;
 	float fin[12];
@@ -71,6 +76,7 @@ void main(void)
 	uint32_t t1 = 0x00ffffffu;
 
 	for(;;) {
+
 		SysTick->VAL = t1;
 		__WFI();
 		uint32_t t2 = SysTick->VAL;

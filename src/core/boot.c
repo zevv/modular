@@ -158,13 +158,7 @@ static void boom(void)
 
 	printd("\n");
 
-	for(j=0; j<32; j++) {
-		printd("%08x ", *(sp+j));
-		if((j % 8) == 7) printd("\n");
-	}
-
 	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 1, 11, 0);
-
 	for(;;);
 }
 

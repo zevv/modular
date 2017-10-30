@@ -173,65 +173,49 @@ void _boot(void)
 }
 
 
+extern uint8_t _stext;
+extern uint8_t _etext;
+extern uint8_t _sdata;
+extern uint8_t _edata;
+extern uint8_t _sbss;
+extern uint8_t _ebss;
 
-void NMI_Handler(void) 
+extern void (*logd)(const char *str, ...);
+
+void boom(void)
 {
+	uint32_t j;
+	uint32_t *sp = &j;
+
+	logd("sp: %08x\n\n", sp);
+
+	uint32_t *p = sp;
+	while(p < (uint32_t *)&_estack) {
+		if(*p >= (uint32_t)&_stext && *p < (uint32_t)&_etext) {
+			logd("%08x\n", *p);
+		}
+		p++;
+	}
+
+	logd("\n");
+
+	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 1, 11, 0);
+
 	for(;;);
 }
 
 
-void HardFault_Handler(void) 
-{
-	for(;;);
-}
+#define D logd("*** %s ***\n", __FUNCTION__); boom();
 
-
-void MemManage_Handler(void) 
-{
-	for(;;);
-}
-
-
-void BusFault_Handler(void) 
-{
-	for(;;);
-}
-
-
-void UsageFault_Handler(void) 
-{
-	for(;;);
-}
-
-
-void SVC_Handler(void) 
-{
-	for(;;);
-}
-
-
-void DebugMon_Handler(void) 
-{
-	for(;;);
-}
-
-
-void PendSV_Handler(void) 
-{
-	for(;;);
-}
-
-
-void SysTick_Handler(void) 
-{
-	for(;;);
-}
-
-
-void IntDefaultHandler(void) 
-{
-	for(;;);
-}
+void NMI_Handler(void)        { D } 
+void HardFault_Handler(void)  { D } 
+void MemManage_Handler(void)  { D } 
+void BusFault_Handler(void)   { D } 
+void UsageFault_Handler(void) { D } 
+void SVC_Handler(void)        { D } 
+void DebugMon_Handler(void)   { D } 
+void PendSV_Handler(void)     { D } 
+void IntDefaultHandler(void)  { D } 
 
 
 /*

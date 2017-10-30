@@ -3,8 +3,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdarg.h>
 
-/* Shared data at last 1K block of RAM2 */
+#define SHARED_LOG_BUF_SIZE 1024
+
+/* Shared data at the end of RAM2 */
 
 
 enum m4_state {
@@ -26,6 +29,12 @@ struct shared {
 	uint32_t m4_load;
 	enum m4_state m4_state;
 	int debug;
+	struct {
+		uint8_t buf[SHARED_LOG_BUF_SIZE];
+		volatile size_t head;
+		volatile size_t tail;
+	} log;
+	void (*logd)(const char *str, ...);
 };
 
 static struct shared *shared = (struct shared *)0x10091800;
