@@ -17,6 +17,7 @@
 #define CMD_ERASE_AND_WRITE                 0x83
 #define CMD_MAIN_MEMORY_PAGE_PROGRAM        0x82
 #define CMD_WRITE_BUFFER_1                  0x84
+#define CMD_READ_BUFFER_1                   0xd1
 #define CMD_PAGE_ERASE                      0x81
 #define CMD_COMPARE                         0x60
 
@@ -109,7 +110,7 @@ void flash_init(void)
 	
 	Chip_SSP_Init(LPC_SSP0);
 	Chip_SSP_SetBitRate(LPC_SSP0, 18000000);
-        Chip_SSP_SetFormat(LPC_SSP0, SSP_BITS_8, SSP_FRAMEFORMAT_SPI, SSP_CLOCK_CPHA0_CPOL0);
+        Chip_SSP_SetFormat(LPC_SSP0, SSP_BITS_8, SSP_FRAMEFORMAT_SPI, SSP_CLOCK_CPHA1_CPOL1);
 	Chip_SSP_Enable(LPC_SSP0);
 }
 
@@ -158,6 +159,7 @@ void flash_read(uint32_t addr, void *buf, size_t len)
 void flash_load(uint32_t addr, const void *buf, size_t len)
 {
 	uint8_t cmd[4];
+retry:
 	mk_cmd_addr(CMD_WRITE_BUFFER_1, addr, cmd, sizeof(cmd));
 
 	set_cs(0);
@@ -166,7 +168,23 @@ void flash_load(uint32_t addr, const void *buf, size_t len)
 	set_cs(1);
 
 	wait_busy(false);
+
+	/* Verify */
+
+	uint8_t buf2[len];
+	mk_cmd_addr(CMD_READ_BUFFER_1, addr, cmd, sizeof(cmd));
+
+	set_cs(0);
+	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, cmd, sizeof(cmd));
+	Chip_SSP_ReadFrames_Blocking(LPC_SSP0, buf2, len);
+	set_cs(1);
+
+	if(memcmp(buf, buf2, len) != 0) {
+		printd("R");
+		goto retry;
+	}
 }
+
 
 /*
  * Erase page and write buffer 1

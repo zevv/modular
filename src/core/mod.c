@@ -54,7 +54,7 @@ static int mod_foreach(int(*fn)(struct mod_header *mh, void *ptr), void *ptr)
 
 static int mod_load(struct mod_header *mh)
 {
-	printd("loading %s %x %x\n", mh->name, (int)(MOD_ADDR + mh->off), (int)mh->size);
+	printd("loading %s at %x size %x\n", mh->name, (int)(MOD_ADDR + mh->off), (int)mh->size);
 
 	/* Ask M4 to shutdown */
 
@@ -74,14 +74,15 @@ static int mod_load(struct mod_header *mh)
 	uint8_t *p = (void *)M4_RAM_BASE;
 	size_t i;
 	for(i=0; i<mh->size; i++) {
-		sum += *p++ + 1;
+		sum += *p + 1;
+		p++;
 	}
 
 	if(sum == mh->sum) {
 		shared->m4_state = M4_STATE_FADEIN;
 		Chip_RGU_TriggerReset(RGU_M3_RST);
 	} else {
-		printd("mod '%s' sum err\n", mh->name, sum);
+		printd("mod '%s' sum err: %08x != %08x\n", mh->name, sum != mh->sum);
 		return 0;
 	}
 
@@ -124,7 +125,30 @@ int mod_load_id(int id)
 static int on_list(struct mod_header *mh, void *ptr)
 {
 	struct cmd_cli *cli = ptr;
-	cmd_printd(cli, "%08x %08x %08x %3d: %s\n", (int)mh->off, (int)mh->size, (int)mh->sum, mh->id, mh->name);
+
+	uint32_t sum = 0;
+	uint32_t s = mh->size;
+	uint32_t addr = MOD_ADDR + mh->off;
+	while(s > 0) {
+		uint32_t n = (s > 16) ? 16 : s;
+		uint8_t buf[16];
+		flash_read(addr, buf, n);
+		size_t i;
+		for(i=0; i<n; i++) {
+			sum += buf[i] + 1;
+		}
+		s -= n;
+		addr += n;
+	}
+
+	cmd_printd(cli, "%08x %08x %08x %3d: %s", (int)mh->off, (int)mh->size, (int)mh->sum, mh->id, mh->name);
+
+	if(sum != mh->sum) {
+		cmd_printd(cli, " (CRC err)");
+	}
+
+	cmd_printd(cli, "\n");
+
 	return 1;
 }
 

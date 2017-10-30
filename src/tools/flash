@@ -17,13 +17,8 @@ while true do
 
 	c = fd:read(16)
 
-	if not c or bufaddr == page_size then
-		print(string.format("f W %x", addr))
-		addr = addr + page_size
-		bufaddr = 0
-	end
-
 	if not c then
+		print(string.format("f W %x", addr))
 		break
 	end
 
@@ -39,6 +34,12 @@ while true do
 
 	print(cmd)
 	bufaddr = bufaddr + 16
+	
+	if bufaddr == page_size then
+		print(string.format("f W %x", addr))
+		addr = addr + page_size
+		bufaddr = 0
+	end
 
 
 end

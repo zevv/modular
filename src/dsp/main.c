@@ -116,8 +116,6 @@ void I2S0_IRQHandler(void)
 
 void main(void)
 {
-	NVIC_EnableIRQ(M0APP_IRQn);
-	
 	mod_init();
 
 	logd = shared->logd;
@@ -168,7 +166,10 @@ void main(void)
 
 		if(shared->m4_state == M4_STATE_HALT) {
 			NVIC_DisableIRQ(I2S0_IRQn);
-			for(;;) __WFI();
+			for(;;) {
+				__WFI();
+				Chip_GPIO_SetPinState(LPC_GPIO_PORT, 1, 11, 0);
+			}
 		}
 	}
 }
