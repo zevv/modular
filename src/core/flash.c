@@ -18,6 +18,7 @@
 #define CMD_MAIN_MEMORY_PAGE_PROGRAM        0x82
 #define CMD_WRITE_BUFFER_1                  0x84
 #define CMD_PAGE_ERASE                      0x81
+#define CMD_COMPARE                         0x60
 
 #define PAGE_SIZE 528
 
@@ -35,6 +36,18 @@ static void set_cs(int v)
 	for(i=0; i<200; i++);
 	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 0, 6, v);
 	for(i=0; i<1000; i++);
+}
+
+
+static uint16_t read_status(void)
+{
+	uint8_t cmd = CMD_READ_STATUS_REGISTER;
+	uint16_t status;
+	set_cs(0);
+	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, &cmd, sizeof(cmd));
+	Chip_SSP_ReadFrames_Blocking(LPC_SSP0, (void *)&status, sizeof(status));
+	set_cs(1);
+	return status;
 }
 
 
@@ -170,6 +183,19 @@ void flash_write_buf1(uint32_t addr)
 }
 
 
+bool flash_compare_buf1(uint32_t addr)
+{
+	uint8_t cmd[4];
+	mk_cmd_addr(CMD_COMPARE, addr, cmd, sizeof(cmd));
+	set_cs(0);
+	Chip_SSP_WriteFrames_Blocking(LPC_SSP0, cmd, sizeof(cmd));
+	set_cs(1);
+	wait_busy(false);
+
+	return (read_status() & (1<<6)) == 0;
+}
+
+
 void flash_write(uint32_t addr, const void *buf, size_t len)
 {
 	uint8_t cmd[4];
@@ -236,6 +262,10 @@ static int on_cmd_flash(struct cmd_cli *cli, uint8_t argc, char **argv)
 		cmd_printd(cli, ".");
 		uint32_t addr = strtol(argv[1], NULL, 16);
 		flash_write_buf1(addr);
+		bool ok = flash_compare_buf1(addr);
+		if(!ok) {
+			printd("compare error at %p\n", addr);
+		}
 		return 1;
 	}
 
