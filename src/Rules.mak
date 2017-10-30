@@ -4,7 +4,7 @@ VERSION	:= 1.0
 ELF	?= $(NAME).elf
 LDS	?= $(NAME).lds
 
-CFLAGS	+= -ggdb -Os
+CFLAGS	+= -ggdb -O3
 CFLAGS	+= -Wall -Werror
 
 CFLAGS	+= -DSRATE=44270.83

@@ -32,12 +32,12 @@ struct shared {
 	int debug;
 	struct {
 		uint8_t buf[SHARED_LOG_BUF_SIZE];
-		volatile size_t head;
-		volatile size_t tail;
+		size_t head;
+		size_t tail;
 	} log;
 	void (*logd)(const char *str, ...);
 };
 
-static struct shared *shared = (struct shared *)0x10091800;
+static volatile struct shared *shared = (struct shared *)0x10091800;
 
 #endif

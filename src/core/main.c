@@ -276,7 +276,7 @@ CMD_REGISTER(mon, on_cmd_mon, "");
 
 static int on_cmd_log(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
-	cmd_hexdump(cli, shared->log.buf, SHARED_LOG_BUF_SIZE, 0);
+	cmd_hexdump(cli, (void *)shared->log.buf, SHARED_LOG_BUF_SIZE, 0);
 	return 1;
 }
 
