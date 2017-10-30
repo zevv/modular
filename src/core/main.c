@@ -244,6 +244,7 @@ static void mon_tick(void)
 		printd("%s |", label[i]);
 
 		for(j=-70; j<0; j+=2) {
+			if(j == -12) printd("\e[32;1m");
 			if(j == -12) printd("\e[33;1m");
 			if(j ==  -6) printd("\e[31;1m");
 			printd("%s", dB >= j ? "■" : " ");
@@ -253,8 +254,8 @@ static void mon_tick(void)
 		float v2 = shared->level[i].max >> 11;
 		int j;
 		for(j=-16; j<=16; j++) {
-			printd("%s", (j >= v1 && j <= v2) ? "\e[36m◆" : 
-					(j == 0) ? "|" : "\e[30;1m┄");
+			printd("%s", (j >= v1 && j <= v2) ? "\e[33;1m◆\e[0m" : 
+					(j == 0) ? "|" : "┄");
 		}
 		printd("\e[0m| %+5.1f dB      \n", dB);
 		shared->level[i].min = INT32_MAX;

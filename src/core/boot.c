@@ -146,7 +146,7 @@ static void boom(void)
 	uint32_t j;
 	uint32_t *sp = &j;
 
-	printd("sp: %08x\n\n", sp);
+	printd("SP    %08x\n", sp);
 
 	uint32_t *p = sp;
 	while(p < (uint32_t *)&_estack) {

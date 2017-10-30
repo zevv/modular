@@ -187,7 +187,10 @@ void boom(void)
 	uint32_t j;
 	uint32_t *sp = &j;
 
-	logd("sp: %08x\n\n", sp);
+	logd("BFAR  %08x  MMFAR %08x  CFSR  %08x\n", SCB->BFAR, SCB->MMFAR, SCB->CFSR);
+	logd("HFSR  %08x  DFSR  %08x  AFSR  %08x\n", SCB->HFSR, SCB->DFSR, SCB->AFSR);
+	logd("\n");
+	logd("SP    %08x\n", sp);
 
 	uint32_t *p = sp;
 	while(p < (uint32_t *)&_estack) {
