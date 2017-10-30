@@ -236,7 +236,7 @@ static void mon_tick(void)
 	for(i=0; i<16; i++) {
 		uint32_t amp = (shared->level[i].max - shared->level[i].min);
 		
-		float dB = -96;
+		float dB = -96.33;
 		if(amp > 1) {
 			dB += 20 * logf(amp) / logf(10);
 		}

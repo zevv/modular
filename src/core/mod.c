@@ -57,10 +57,11 @@ static int mod_load(struct mod_header *mh)
 	printd("loading %s %x %x\n", mh->name, (int)(MOD_ADDR + mh->off), (int)mh->size);
 
 	/* Ask M4 to shutdown */
-	if(shared->m4_state != M4_STATE_HALT) {
-		shared->m4_state = M4_STATE_FADEOUT;
-		while(shared->m4_state == M4_STATE_FADEOUT);
-		shared->m4_state = M4_STATE_HALT;
+
+	shared->m4_state = M4_STATE_HALT;
+	{
+		volatile int i;
+		for(i=0; i<1000000; i++);
 	}
 	
 	/* Load module from flash */
