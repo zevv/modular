@@ -69,12 +69,12 @@ void I2S0_IRQHandler(void)
 	uint32_t t1 = 0x00ffffffu;
 	SysTick->VAL = t1;
 
-	if(Chip_I2S_GetRxLevel(LPC_I2S0) > 0) {
+	if(Chip_I2S_GetRxLevel(LPC_I2S0) >= 2) {
 		iin[0] = Chip_I2S_Receive(LPC_I2S0) >> 16;
 		iin[1] = Chip_I2S_Receive(LPC_I2S0) >> 16;
 	}
 
-	if(Chip_I2S_GetRxLevel(LPC_I2S1) > 0) {
+	if(Chip_I2S_GetRxLevel(LPC_I2S1) >=2 ) {
 		iin[2] = Chip_I2S_Receive(LPC_I2S1) >> 16;
 		iin[3] = Chip_I2S_Receive(LPC_I2S1) >> 16;
 	}
@@ -109,6 +109,8 @@ void I2S0_IRQHandler(void)
 	if(Chip_I2S_GetTxLevel(LPC_I2S0) < 4) {
 		Chip_I2S_Send(LPC_I2S0, iout[0] << 16);
 		Chip_I2S_Send(LPC_I2S0, iout[1] << 16);
+	}
+	if(Chip_I2S_GetTxLevel(LPC_I2S1) < 4) {
 		Chip_I2S_Send(LPC_I2S1, iout[2] << 16);
 		Chip_I2S_Send(LPC_I2S1, iout[3] << 16);
 	}
