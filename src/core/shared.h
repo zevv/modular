@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #define SHARED_LOG_BUF_SIZE 1024
 

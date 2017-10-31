@@ -5,6 +5,7 @@
 
 #include "chip.h"
 #include "module.h"
+#include "pot.h"
 #include "../core/shared.h"
 
 
@@ -132,6 +133,7 @@ void main(void)
 
 		update_led();
 		update_state();
+		pot_poll();
 	}
 
 }

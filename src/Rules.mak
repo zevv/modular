@@ -5,7 +5,7 @@ ELF	?= $(NAME).elf
 LDS	?= $(NAME).lds
 
 CFLAGS	+= -ggdb -O3
-CFLAGS	+= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
+CFLAGS	+= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-strict-overflow
 
 CFLAGS	+= -DSRATE=44270.83
 CFLAGS	+= -DVERSION=\"$(VERSION)\"
