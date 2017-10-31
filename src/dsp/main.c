@@ -48,7 +48,7 @@ static void update_level(int i, int32_t v)
 }
 
 
-static const float scale_i2s = -1.0 / 32768.0;
+static const float scale_i2s = 1.0 / 32768.0;
 void (*logd)(const char *str, ...);
 
 
@@ -83,14 +83,18 @@ void I2S0_IRQHandler(void)
 		float fin[12];
 		float fout[4] = { 0 };
 
-		fin[0] = iin[0] * scale_i2s;
-		fin[1] = iin[1] * scale_i2s;
-		fin[2] = iin[2] * scale_i2s;
-		fin[3] = iin[3] * scale_i2s;
-		fin[4] = iin[4] * scale_i2s;
-		fin[5] = iin[5] * scale_i2s;
-		fin[6] = iin[6] * scale_i2s;
-		fin[7] = iin[7] * scale_i2s;
+		fin[ 0] = -iin[ 0] * scale_i2s;
+		fin[ 1] = -iin[ 1] * scale_i2s;
+		fin[ 2] = -iin[ 2] * scale_i2s;
+		fin[ 3] = -iin[ 3] * scale_i2s;
+		fin[ 4] =  iin[ 4] * scale_i2s;
+		fin[ 5] =  iin[ 5] * scale_i2s;
+		fin[ 6] =  iin[ 6] * scale_i2s;
+		fin[ 7] =  iin[ 7] * scale_i2s;
+		fin[ 8] =  iin[ 8] * scale_i2s;
+		fin[ 9] =  iin[ 9] * scale_i2s;
+		fin[10] =  iin[10] * scale_i2s;
+		fin[11] =  iin[11] * scale_i2s;
 
 		mod_run(fin, fout);
 
@@ -139,7 +143,7 @@ void main(void)
 		}
 
 		for(i=0; i<8; i++) {
-			iin[i+4] = (shared->adc_in[i] - 0x8000);
+			iin[i+4] = -(shared->adc_in[i] - 0x8000);
 			update_level(i+8, iin[i+4]);
 		}
 

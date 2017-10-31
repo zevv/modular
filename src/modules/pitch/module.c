@@ -8,9 +8,9 @@
 
 #define DEL_SIZE 10000
 #define STEP 14
-#define WIN 100
+#define WIN 200
 #define NMIX 50
-#define DMAX 500
+#define DMAX 800
 
 static float delbuf[DEL_SIZE];
 
