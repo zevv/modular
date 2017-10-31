@@ -1,7 +1,7 @@
 #ifndef reverb_h
 #define reverb_h
 
-#define numcombs 6
+#define numcombs 8
 #define numallpasses 4
 
 typedef struct _allpass allpass;
@@ -21,7 +21,7 @@ typedef enum
 
 struct _allpass {
 	float feedback;
-	float buffer[576];
+	float *buffer; //[576];
 	int bufsize;
 	int bufidx;
 };

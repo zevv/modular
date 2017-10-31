@@ -38,6 +38,6 @@ struct shared {
 	void (*logd)(const char *str, ...);
 };
 
-#define shared ((struct shared *)0x10091800)
+#define shared ((struct shared *)0x2000f000)
 
 #endif

@@ -66,10 +66,6 @@ void revmodel_set(revmodel_t* rev, int set, float roomsize,
 
 
 
-void allpass_init(allpass* allpass);
-void allpass_setfeedback(allpass* allpass, float val);
-float allpass_getfeedback(allpass* allpass);
-
 void allpass_setbuffer(allpass* allpass, int size)
 {
 	allpass->bufidx = 0;
@@ -77,11 +73,11 @@ void allpass_setbuffer(allpass* allpass, int size)
 }
 
 
-void allpass_init(allpass* allpass)
+void allpass_init(allpass* allpass, float *buf)
 {
 	int i;
 	int len = allpass->bufsize;
-	float* buf = allpass->buffer;
+	allpass->buffer = buf;
 	for (i = 0; i < len; i++) {
 		buf[i] = DC_OFFSET; /* this is not 100 % correct. */
 	}
@@ -261,6 +257,8 @@ void set_revmodel_buffers(revmodel_t* rev, float sample_rate)
 }
 
 
+static float apbuf[numallpasses][2][576] __attribute__((section(".ram2")));
+
 static void revmodel_init(revmodel_t* rev)
 {
 	int i;
@@ -269,8 +267,8 @@ static void revmodel_init(revmodel_t* rev)
 		comb_init(&rev->combR[i]);
 	}
 	for (i = 0; i < numallpasses; i++) {
-		allpass_init(&rev->allpassL[i]);
-		allpass_init(&rev->allpassR[i]);
+		allpass_init(&rev->allpassL[i], apbuf[i][0]);
+		allpass_init(&rev->allpassR[i], apbuf[i][1]);
 	}
 }
 

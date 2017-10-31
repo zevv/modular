@@ -44,6 +44,12 @@ SECTIONS {
 		*(.bss*);
 		_ebss = .;
 	} > RAM1
+	
+	.ram2 (NOLOAD) : {
+		_ram2 = .;
+		*(.ram*);
+		_ram2 = .;
+	} > RAM2
 		
 	_sstack = .;
 }

@@ -44,7 +44,7 @@ void main(void)
 
 	/* Copy core image for M0 to RAM2 bank */
 
-	uint32_t core_base = 0x10080000;
+	uint32_t core_base = 0x20000000;
 	memcpy((void *)core_base, core, sizeof(core));
 
 	/* Boot M0 */

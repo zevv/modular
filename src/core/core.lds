@@ -17,19 +17,19 @@ SECTIONS {
 
 	.vectors : { 
 		KEEP(*(.vectors)); 
-	} > RAM2
+	} > RAM3
 
 	.text : { 
 		_stext = .;
 		*(.text*);
 		_etext = .;
-	} > RAM2
+	} > RAM3
 
 	.rodata : { 
 		_srodata = .;
 		*(.rodata*);
 		_erodata = .;
-	} > RAM2
+	} > RAM3
 
 	. = ALIGN(16);
 
@@ -37,20 +37,20 @@ SECTIONS {
 		_sdata = .;
 		*(.data*);
 		_edata = .;
-	} > RAM2
+	} > RAM3
 
 	.bss : {
 		_sbss = .;
 		*(.bss*);
 		_ebss = .;
-	} > RAM2
+	} > RAM3
 		
 	_sstack = .;
 }
 
-/* Stack is at end of RAM2 with room for shared IPC block  */
+/* Stack is at end of RAM3 with room for shared IPC block  */
 
-PROVIDE(_estack = 0x10091800);
+PROVIDE(_estack = 0x2000f000);
 
 
 

@@ -127,6 +127,8 @@ static ErrorCode_t on_configure(USBD_HANDLE_T hUsb)
 }
 
 
+uint8_t usb_mem[USB_STACK_MEM_SIZE] __attribute__((aligned(4096)));
+
 int cdc_uart_init(void)
 {
 	USBD_API_INIT_PARAM_T usb_param;
@@ -146,7 +148,7 @@ int cdc_uart_init(void)
 	memset(&usb_param, 0, sizeof(usb_param));
 	usb_param.usb_reg_base = LPC_USB_BASE;
 	usb_param.max_num_ep = 4;
-	usb_param.mem_base = USB_STACK_MEM_BASE;
+	usb_param.mem_base = (uint32_t)usb_mem;
 	usb_param.mem_size = USB_STACK_MEM_SIZE;
 	usb_param.USB_Configure_Event = on_configure;
 
