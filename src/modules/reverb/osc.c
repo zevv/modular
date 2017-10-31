@@ -99,6 +99,12 @@ float osc_gen(struct osc *osc)
 }
 
 
+struct module mod = {
+	init = mod_init,
+	run = mod_run,
+};
+
+
 /*
  * End
  */

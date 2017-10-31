@@ -45,6 +45,12 @@ void mod_run(float *fin, float *fout)
 }
 
 
+struct module mod = {
+	.init = mod_init,
+	.run_float = mod_run,
+};
+
+
 /*
  * End
  */

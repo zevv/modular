@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+#include <string.h>
+#include <math.h>
+#include "module.h"
 #include "osc.h"
 #include "biquad.h"
 #include "pot.h"
@@ -110,6 +114,12 @@ void mod_run(float *fin, float *fout)
 
 	fout[0] = fout[1] = fout[2] = fout[3] = v * 0.1;
 }
+
+
+struct module mod = {
+	.init = mod_init,
+	.run_float = mod_run,
+};
 
 
 #ifdef SIM

@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../../dsp/module.h"
+#include "module.h"
 
 static int q;
 static float c1;
@@ -40,6 +40,12 @@ void mod_run(float *fin, float *fout)
 	fout[0] = prand() * 2. - 1.;
 	fout[1] = prand() * 2. - 1.;
 }
+
+
+struct module mod = {
+	.init = mod_init,
+	.run_float = mod_run,
+};
 
 
 /*

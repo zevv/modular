@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "adsr.h"
+#include "module.h"
 	
 ADSR adsr;
 bool trig;
@@ -30,6 +31,12 @@ void mod_run(float *fin, float *fout)
 
 	fout[0] = process(&adsr);
 }
+
+
+struct module mod = {
+	.init = mod_init,
+	.run_float = mod_run,
+};
 
 
 /*

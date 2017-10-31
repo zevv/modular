@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "../../dsp/module.h"
-#include "../../dsp/biquad.h"
-#include "../../dsp/fir.h"
+#include "module.h"
+#include "biquad.h"
+#include "fir.h"
 #include "osc.h"
 
 
@@ -131,6 +131,12 @@ void mod_run(float *fin, float *fout)
 	fout[0] = fout[1] = fir_calc(&fir1) * 0.06;
 
 }
+
+struct module mod = {
+	.init = mod_init,
+	.run_float = mod_run,
+};
+
 
 #ifdef TEST_SAW
 

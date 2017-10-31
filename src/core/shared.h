@@ -29,7 +29,7 @@ struct shared {
 
 	uint32_t m4_load;
 	enum m4_state m4_state;
-	int debug;
+
 	struct {
 		uint8_t buf[SHARED_LOG_BUF_SIZE];
 		size_t head;

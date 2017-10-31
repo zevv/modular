@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../../dsp/module.h"
+#include "module.h"
 #include "lpc_chip_43xx/inc/cmsis.h"
 #include "arm_math.h"
 
@@ -108,6 +108,12 @@ void mod_run_int(int16_t *in, int16_t *out)
 
 	out[0] = out[1] = (acc >> 16) * 1;
 }
+
+
+struct module mod = {
+	.init = mod_init,
+	.run_int16 = mod_run_int,
+};
 
 
 /*

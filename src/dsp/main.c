@@ -55,12 +55,6 @@ void (*logd)(const char *str, ...);
 volatile float gain = 1.0;
 
 
-void mod_run(float *fin, float *fout) __attribute__((weak));
-void mod_run(float *fin, float *fout) {}
-
-void mod_run_int(int16_t *in, int16_t *out) __attribute__((weak));
-void mod_run_int(int16_t *in, int16_t *out) {}
-
 void mod_bg(void) __attribute__((weak));
 void mod_bg(void) {};
 
@@ -79,7 +73,7 @@ void I2S0_IRQHandler(void)
 		shared->in[3] = Chip_I2S_Receive(LPC_I2S1) >> 16;
 	}
 
-	if(module_mode == MODULE_MODE_FLOAT) {
+	if(mod.run_float) {
 		float fin[12];
 		float fout[4] = { 0 };
 
@@ -96,14 +90,16 @@ void I2S0_IRQHandler(void)
 		fin[10] =  shared->in[10] * scale_i2s;
 		fin[11] =  shared->in[11] * scale_i2s;
 
-		mod_run(fin, fout);
+		mod.run_float(fin, fout);
 
 		shared->out[0] = fout[0] * gain;
 		shared->out[1] = fout[1] * gain;
 		shared->out[2] = fout[2] * gain;
 		shared->out[3] = fout[3] * gain;
-	} else {
-		mod_run_int((int16_t *)shared->in, (int16_t *)shared->out);
+	}
+	
+	if(mod.run_int16) {
+		mod.run_int16((int16_t *)shared->in, (int16_t *)shared->out);
 	}
 
 	if(Chip_I2S_GetTxLevel(LPC_I2S0) < 4) {
@@ -122,7 +118,9 @@ void I2S0_IRQHandler(void)
 
 void main(void)
 {
-	mod_init();
+	if(mod.init) {
+		mod.init();
+	}
 
 	logd = shared->logd;
 
@@ -137,7 +135,9 @@ void main(void)
 		__DMB();
 		__WFI();
 
-		mod_bg();
+		if(mod.run_bg) {
+			mod.run_bg();
+		}
 
 		int i;
 

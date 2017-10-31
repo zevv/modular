@@ -10,9 +10,14 @@ enum module_mode {
 
 extern enum module_mode module_mode;
 
-void mod_init(void);
-void mod_run(float *fin, float *fout);
-void mod_run_int(int16_t *in, int16_t *out);
+struct module {
+	void (*init)(void);
+	void (*run_float)(float *fin, float *fout);
+	void (*run_int16)(int16_t *in, int16_t *out);
+	void (*run_bg)(void);
+};
+
+extern struct module mod;
 
 #endif
 

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../../dsp/module.h"
+#include "module.h"
 #include "lpc_chip_43xx/inc/cmsis.h"
 #include "arm_math.h"
 #include "osc.h"
@@ -90,6 +90,13 @@ void mod_bg(void)
 	}
 
 }
+
+
+struct module mod = {
+	.init = mod_init,
+	.run_float = mod_run,
+	.run_bg = mod_bg,
+};
 
 
 /*
