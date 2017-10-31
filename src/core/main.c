@@ -121,9 +121,7 @@ void main(void)
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
 		read_m4_log();
-		led_set(LED_ID_GREEN, (n++ & 0x200) ? LED_STATE_ON : LED_STATE_OFF);
-		volatile int i;
-		for(i=0; i<10000; i++);
+		led_set(LED_ID_GREEN, (n++ & 0x20000) ? LED_STATE_ON : LED_STATE_OFF);
 		i2s_tick();
 		adc_tick();
 		watchdog_poll();

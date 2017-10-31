@@ -38,8 +38,7 @@ void mod_bg(void) {};
 
 void I2S0_IRQHandler(void)
 {
-	uint32_t t1 = 0x00ffffffu;
-	SysTick->VAL = t1;
+	uint32_t t1 = SysTick->VAL;
 
 	if(Chip_I2S_GetRxLevel(LPC_I2S0) >= 2) {
 		shared->in[0] = Chip_I2S_Receive(LPC_I2S0) >> 16;
@@ -90,7 +89,7 @@ void I2S0_IRQHandler(void)
 	}
 		
 	uint32_t t2 = SysTick->VAL;
-	shared->m4_load = t1-t2;
+	shared->m4_load = (int32_t)t1-(int32_t)t2;
 }
 
 
