@@ -24,9 +24,9 @@ struct shared {
 		int32_t max;
 	} level[16];
 
-	int32_t i2s_in[4];
-	int32_t i2s_out[4];
-	int32_t adc_in[8];
+	int16_t in[12];
+	int16_t out[4];
+
 	uint32_t m4_load;
 	enum m4_state m4_state;
 	int debug;
@@ -38,6 +38,6 @@ struct shared {
 	void (*logd)(const char *str, ...);
 };
 
-static volatile struct shared *shared = (struct shared *)0x10091800;
+#define shared ((struct shared *)0x10091800)
 
 #endif

@@ -27,19 +27,19 @@ static volatile int32_t accum[8];
 
 void ADC0_IRQHandler(void)
 {
-	shared->adc_in[5] = LPC_ADC0->DR[0] & 0x0000ffff;
-	shared->adc_in[7] = LPC_ADC0->DR[1] & 0x0000ffff;
-	shared->adc_in[2] = LPC_ADC0->DR[2] & 0x0000ffff;
-	shared->adc_in[3] = LPC_ADC0->DR[3] & 0x0000ffff;
+	shared->in[ 9] = -(LPC_ADC0->DR[0] & 0x0000ffff) - 0x8000;
+	shared->in[11] = -(LPC_ADC0->DR[1] & 0x0000ffff) - 0x8000;
+	shared->in[ 6] = -(LPC_ADC0->DR[2] & 0x0000ffff) - 0x8000;
+	shared->in[ 7] = -(LPC_ADC0->DR[3] & 0x0000ffff) - 0x8000;
 }
 
 
 void ADC1_IRQHandler(void)
 {
-	shared->adc_in[4] = LPC_ADC1->DR[4] & 0x0000ffff;
-	shared->adc_in[0] = LPC_ADC1->DR[5] & 0x0000ffff;
-	shared->adc_in[6] = LPC_ADC1->DR[6] & 0x0000ffff;
-	shared->adc_in[1] = LPC_ADC1->DR[7] & 0x0000ffff;
+	shared->in[ 8] = -(LPC_ADC1->DR[4] & 0x0000ffff) - 0x8000;
+	shared->in[ 4] = -(LPC_ADC1->DR[5] & 0x0000ffff) - 0x8000;
+	shared->in[10] = -(LPC_ADC1->DR[6] & 0x0000ffff) - 0x8000;
+	shared->in[ 5] = -(LPC_ADC1->DR[7] & 0x0000ffff) - 0x8000;
 }
 
 

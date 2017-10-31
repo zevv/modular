@@ -47,10 +47,19 @@ void mod_run(float *in, float *out)
 
 void mod_run_int(int16_t *in, int16_t *out)
 {
+	out[0] = in[0];
+	out[1] = in[1];
+	out[2] = in[2];
+	out[3] = in[3];
+}
+
+
+void mod_bg(void)
+{
 	static int n = 0;
 
 	if(n < FFT_SIZE) {
-		buf[n] = in[0] * win[n] >> 15;
+		buf[n] = shared->in[0] * win[n] >> 15;
 	}
 
 	n ++;
@@ -80,10 +89,6 @@ void mod_run_int(int16_t *in, int16_t *out)
 		n = 0;
 	}
 
-	out[0] = in[0];
-	out[1] = in[1];
-	out[2] = in[2];
-	out[3] = in[3];
 }
 
 

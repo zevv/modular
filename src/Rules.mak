@@ -60,6 +60,9 @@ CCACHE	:= ccache
 OBJS    = $(subst .c,.o, $(SRC))
 DEPS    = $(subst .c,.d, $(SRC))
 
+CLEAN	+= $(BIN) $(ELF) $(LIB) $(OBJS) $(DEPS)
+CLEAN	+= cscope.*
+
 ifdef V
 E       =
 P       = @true
@@ -79,7 +82,7 @@ lib: $(LIB)
 
 clean:
 	$(P) " CLEAN"
-	$(E) rm -f $(BIN) $(ELF) $(LIB) $(OBJS) $(DEPS) $(CLEAN)
+	$(E) rm -f $(CLEAN)
 	$(E) for d in $(SUBDIRS); do $(MAKE) -C $$d clean; done
 	
 %.o: %.c

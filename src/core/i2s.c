@@ -4,7 +4,6 @@
 #include "board.h"
 #include "i2s.h"
 #include "printd.h"
-#include "shared.h"
 #include "adc.h"
 
 union sample {
@@ -105,7 +104,6 @@ void i2s_tick(void)
 {
 	static int n = 0;
 	if(n ++ == 100) {
-		if(0) printd("%d\n", shared->i2s_in[0], shared->i2s_in[1]);
 		n = 0;
 	}
 }
