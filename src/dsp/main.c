@@ -8,36 +8,14 @@
 #include "../core/shared.h"
 
 
+static void update_state(void);
+static void update_led(void);
+
 enum module_mode module_mode = MODULE_MODE_FLOAT;
 
 void M0APP_IRQHandler(void)
 {
 	Chip_CREG_ClearM0AppEvent();
-}
-
-
-const uint8_t breath[] = {
-	0, 0, 0, 16, 32, 64, 128, 254, 254, 200, 150, 100, 60, 40, 30, 30, 60,
-	120, 240, 230, 200, 170, 140, 110, 90, 70, 50, 40, 30, 20, 10, 7, 5, 4,
-	3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-
-static void update_led(void)
-{
-	static size_t i = 0;
-	static size_t j = 0;
-	static uint8_t v = 0;
-
-	LPC_GPIO_PORT->B[0][14] = (j > v);
-
-	if(++j >= 255) {
-		j = 0;
-		if(++i >= sizeof(breath)<<3) {
-			i = 0;
-		}
-		v = breath[i >> 3];
-	}
 }
 
 
@@ -154,32 +132,64 @@ void main(void)
 		/* Bookkeeping */
 
 		update_led();
+		update_state();
+	}
 
-		/* Handle fade in/out */
+}
 
-		if(shared->m4_state == M4_STATE_FADEIN) {
-			if(gain < 32767.0) {
-				gain *= 1.0006;
-			} else {
-				shared->m4_state = M4_STATE_RUNNING;
-			}
-		} else if(shared->m4_state == M4_STATE_FADEOUT) {
-			if(gain > 1.0) {
-				gain *= 0.9994;
-			} else {
-				shared->m4_state = M4_STATE_HALT;
-			}
+
+static void update_state(void)
+{
+	/* Handle fade in/out */
+
+	if(shared->m4_state == M4_STATE_FADEIN) {
+		if(gain < 32767.0) {
+			gain *= 1.0006;
+		} else {
+			shared->m4_state = M4_STATE_RUNNING;
 		}
+	} else if(shared->m4_state == M4_STATE_FADEOUT) {
+		if(gain > 1.0) {
+			gain *= 0.9994;
+		} else {
+			shared->m4_state = M4_STATE_HALT;
+		}
+	}
 
-		if(shared->m4_state == M4_STATE_HALT) {
-			NVIC_DisableIRQ(I2S0_IRQn);
-			for(;;) {
-				__WFI();
-				Chip_GPIO_SetPinState(LPC_GPIO_PORT, 1, 11, 0);
-			}
+	if(shared->m4_state == M4_STATE_HALT) {
+		NVIC_DisableIRQ(I2S0_IRQn);
+		for(;;) {
+			__WFI();
+			Chip_GPIO_SetPinState(LPC_GPIO_PORT, 1, 11, 0);
 		}
 	}
 }
+
+
+static void update_led(void)
+{
+	static const uint8_t breath[] = {
+		0, 0, 0, 16, 32, 64, 128, 254, 254, 200, 150, 100, 60, 40, 30,
+		30, 60, 120, 240, 230, 200, 170, 140, 110, 90, 70, 50, 40, 30,
+		20, 10, 7, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+	};
+
+	static size_t i = 0;
+	static size_t j = 0;
+	static uint8_t v = 0;
+
+	LPC_GPIO_PORT->B[0][14] = (j > v);
+
+	if(++j >= 255) {
+		j = 0;
+		if(++i >= sizeof(breath)<<3) {
+			i = 0;
+		}
+		v = breath[i >> 3];
+	}
+}
+
+
 
 
 /*
