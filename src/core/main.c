@@ -225,10 +225,9 @@ static void mon_tick(void)
 	n = 0;
 
 	printd("\e[H");
-	printd("DSP load: %3d.%d\n", shared->m4_load/10, shared->m4_load % 10);
+	printd("DSP load: %3d.%d\e[K\n", shared->m4_load/10, shared->m4_load % 10);
+	printd("\e[K\n");
 	shared->m4_load = 0;
-
-	printd("\n");
 	
 	int i, j;
 	for(i=0; i<16; i++) {
@@ -255,7 +254,7 @@ static void mon_tick(void)
 			printd("%s", (j >= v1 && j <= v2) ? "\e[33;1m◆\e[0m" : 
 					(j == 0) ? "|" : "┄");
 		}
-		printd("\e[0m| %+5.1f dB      \n", dB);
+		printd("\e[0m| %+5.1f dB\e[K\n", dB);
 		shared->level[i].min = INT32_MAX;
 		shared->level[i].max = INT32_MIN;
 	}

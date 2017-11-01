@@ -6,14 +6,14 @@
 
 static struct osc osc1, osc2, osc3, osc4;
 static float freq, vol, fm;
-static bool naive;
+static bool bandlimit;
 
 
-static void on_set_naive(void)
+static void on_set_bandlimit(void)
 {
-	osc_set_type(&osc2, naive ? OSC_TYPE_TRIANGLE_NAIVE : OSC_TYPE_TRIANGLE);
-	osc_set_type(&osc3, naive ? OSC_TYPE_PULSE_NAIVE : OSC_TYPE_PULSE);
-	osc_set_type(&osc4, naive ? OSC_TYPE_SAW_NAIVE : OSC_TYPE_SAW);
+	osc_set_type(&osc2, bandlimit ? OSC_TYPE_TRIANGLE : OSC_TYPE_TRIANGLE_NAIVE);
+	osc_set_type(&osc3, bandlimit ? OSC_TYPE_PULSE : OSC_TYPE_PULSE_NAIVE);
+	osc_set_type(&osc4, bandlimit ? OSC_TYPE_SAW : OSC_TYPE_SAW_NAIVE);
 }
 
 
@@ -32,7 +32,7 @@ void mod_init(void)
 	ctl_bind_pot(6, &freq, NULL, POT_SCALE_LOG, 10, 15000);
 	ctl_bind_pot(4, &vol, NULL, POT_SCALE_LOG, 0, 1);
 	ctl_bind_pot(5, &fm, NULL, POT_SCALE_LOG, 0, 10);
-	ctl_bind_switch(7, &naive, on_set_naive);
+	ctl_bind_switch(7, &bandlimit, on_set_bandlimit);
 }
 
 
