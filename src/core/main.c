@@ -18,9 +18,9 @@
 #include "button.h"
 #include "shared.h"
 #include "mod.h"
+#include "ifft.h"
 
-static void mon_tick(void);
-static bool mon_enable = false;
+void mon_tick(void);
 
 const uint32_t OscRateIn = 12000000;
 const uint32_t ExtRateIn = 0;
@@ -109,6 +109,7 @@ void main(void)
 	ssm2604_init();
 
 	shared->logd = logd;
+	shared->scope.src = &shared->in[0];
 	logd("M0 ready\n");
 
 	//mod_load_name("bypass");
@@ -209,67 +210,6 @@ static int on_cmd_clock(struct cmd_cli *cli, uint8_t argc, char **argv)
 
 
 CMD_REGISTER(clock, on_cmd_clock, "");
-
-static const char *label[] = {
-	"in   1", "in   2", "in   3", "in   4",
-	"out  9", "out 10", "out 11", "out 12",
-	"ctl  5", "ctl  6", "ctl  7", "ctl  8",
-	"ctl  9", "ctl 10", "ctl 11", "ctl 12",
-};
-
-static void mon_tick(void)
-{
-	if(!mon_enable) return;
-	static int n = 0;
-	if(n++ < 100) return;
-	n = 0;
-
-	printd("\e[H");
-	printd("DSP load: %3d.%d\e[K\n", shared->m4_load/10, shared->m4_load % 10);
-	printd("\e[K\n");
-	shared->m4_load = 0;
-	
-	int i, j;
-	for(i=0; i<16; i++) {
-		uint32_t amp = (shared->level[i].max - shared->level[i].min);
-		
-		float dB = -96.33;
-		if(amp > 1) {
-			dB += 20 * logf(amp) / logf(10);
-		}
-		
-		printd("%s |", label[i]);
-
-		for(j=-70; j<0; j+=2) {
-			if(j == -12) printd("\e[32;1m");
-			if(j == -12) printd("\e[33;1m");
-			if(j ==  -6) printd("\e[31;1m");
-			printd("%s", dB >= j ? "■" : " ");
-		}
-		printd("\e[0m|");
-		float v1 = shared->level[i].min >> 11;
-		float v2 = shared->level[i].max >> 11;
-		int j;
-		for(j=-16; j<=16; j++) {
-			printd("%s", (j >= v1 && j <= v2) ? "\e[33;1m◆\e[0m" : 
-					(j == 0) ? "|" : "┄");
-		}
-		printd("\e[0m| %+5.1f dB\e[K\n", dB);
-		shared->level[i].min = INT32_MAX;
-		shared->level[i].max = INT32_MIN;
-	}
-	printd("\e[0J");
-}
-
-
-static int on_cmd_mon(struct cmd_cli *cli, uint8_t argc, char **argv)
-{
-	mon_enable = !mon_enable;
-	printd("\e[2J");
-	return 1;
-}
-
-CMD_REGISTER(mon, on_cmd_mon, "");
 
 
 static int on_cmd_log(struct cmd_cli *cli, uint8_t argc, char **argv)

@@ -29,7 +29,7 @@ void mod_init(void)
 	osc_set_type(&osc3, OSC_TYPE_PULSE);
 	osc_set_type(&osc4, OSC_TYPE_SAW);
 
-	ctl_bind_pot(6, &freq, NULL, POT_SCALE_LOG, 10, 15000);
+	ctl_bind_pot(6, &freq, NULL, POT_SCALE_LOG, 10, 20000);
 	ctl_bind_pot(4, &vol, NULL, POT_SCALE_LOG, 0, 1);
 	ctl_bind_pot(5, &fm, NULL, POT_SCALE_LOG, 0, 10);
 	ctl_bind_switch(7, &bandlimit, on_set_bandlimit);
@@ -38,7 +38,7 @@ void mod_init(void)
 
 void mod_run(float *fin, float *fout)
 {
-	float f = freq * (1 + fin[3] * fm);
+	float f = freq;
 
 	osc_set_freq(&osc1, f);
 	osc_set_freq(&osc2, f);

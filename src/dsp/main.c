@@ -88,6 +88,10 @@ void I2S0_IRQHandler(void)
 		Chip_I2S_Send(LPC_I2S1, shared->out[2] << 16);
 		Chip_I2S_Send(LPC_I2S1, shared->out[3] << 16);
 	}
+
+	if(shared->scope.src && shared->scope.n < SHARED_SCOPE_SIZE) {
+		shared->scope.buf[shared->scope.n++] = *shared->scope.src;
+	}
 		
 	uint32_t t2 = SysTick->VAL;
 	shared->m4_load = (int32_t)t1-(int32_t)t2;

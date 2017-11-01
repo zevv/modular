@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #define SHARED_LOG_BUF_SIZE 1024
+#define SHARED_SCOPE_SIZE 128
 
 /* Shared data at the end of RAM2 */
 
@@ -37,6 +38,12 @@ struct shared {
 		size_t tail;
 	} log;
 	void (*logd)(const char *str, ...);
+
+	struct {
+		int16_t buf[SHARED_SCOPE_SIZE];
+		int16_t *src;
+		uint32_t n;
+	} scope;
 };
 
 #define shared ((struct shared *)0x2000f000)
