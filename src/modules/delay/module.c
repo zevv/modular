@@ -5,13 +5,11 @@
 #include "module.h"
 #include "osc.h"
 #include "biquad.h"
-#include "pot.h"
+#include "ctl.h"
 
 #define DEL_SIZE 55000
 #define MAX_TAPS 8
 
-static struct pot pot_delay;
-static struct pot pot_feedback;
 static struct osc osc, lfo[MAX_TAPS];
 
 static int q;
@@ -100,6 +98,21 @@ float prand(void)
 
 
 static struct delay del;
+static float where;
+static float feedback;
+static float lfofreq;
+
+
+static void on_set(void)
+{
+	delay_set_feedback(&del, feedback);
+	int i;
+	for(i=0; i<MAX_TAPS; i++) {
+		osc_init(&lfo[i], SRATE);
+		osc_set_freq(&lfo[i], lfofreq * (1 + i * 0.1));
+	}
+}
+
 
 void mod_init(void)
 {
@@ -119,11 +132,11 @@ void mod_init(void)
 	int i;
 	for(i=0; i<MAX_TAPS; i++) {
 		osc_init(&lfo[i], SRATE);
-		osc_set_freq(&lfo[i], 1.5 + i * 0.1);
 	}
 
-	pot_init(&pot_delay, POT_SCALE_LOG, 0, 1);
-	pot_init(&pot_feedback, POT_SCALE_LIN, 0, 1);
+	ctl_bind_pot(4, &where, on_set, POT_SCALE_LOG, 0, 1);
+	ctl_bind_pot(5, &lfofreq, on_set, POT_SCALE_LOG, 0.5, 10);
+	ctl_bind_pot(6, &feedback, on_set, POT_SCALE_LIN, 0, 1);
 }
 
 
@@ -135,10 +148,6 @@ void mod_run(float *fin, float *fout)
 		osc_set_freq(&osc, prand() * 500 + 10);
 		n = 0;
 	}
-
-	float where = pot_read(&pot_delay, fin[4]);
-
-	delay_set_feedback(&del, pot_read(&pot_feedback, fin[6]));
 
 	float vl = 0, vr = 0;
 

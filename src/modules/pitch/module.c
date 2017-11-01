@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "module.h"
-#include "osc.h"
+#include "ctl.h"
 #include "biquad.h"
 
 #define DEL_SIZE 10000
@@ -91,10 +91,14 @@ float prand(void)
 
 
 static struct delay del;
+static float factor;
+static float wet;
 
 void mod_init(void)
 {
 	delay_init(&del, delbuf, DEL_SIZE);
+	ctl_bind_pot(4, &factor, NULL, POT_SCALE_LIN, 0.4, 2.2);
+	ctl_bind_pot(5, &wet, NULL, POT_SCALE_LIN, 0, 1);
 
 }
 
@@ -125,7 +129,6 @@ void mod_run(float *fin, float *fout)
 	float vi = fin[0];
 	static float pr = 0, prn = 0;
 	static int mix = 0;
-	float factor = fin[4] * 1.5 + 1.5;
 
 	delay_write(&del, vi);
 	float vo = read4(pr, del.buf, del.size);
@@ -163,8 +166,8 @@ void mod_run(float *fin, float *fout)
 	prn += factor;
 	if(prn > del.size) prn -= del.size;
 
-	fout[0] = vo * 1.0;
-	fout[1] = vo * 1.0;
+	fout[0] = vi * (1-wet) + vo * wet;
+	fout[1] = vi * (1-wet) + vo * wet;
 }
 
 

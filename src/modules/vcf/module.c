@@ -5,7 +5,7 @@
 #include "module.h"
 #include "../../core/shared.h"
 #include "biquad.h"
-#include "pot.h"
+#include "ctl.h"
 
 
 static struct biquad f1, f2;
@@ -24,8 +24,8 @@ void mod_init(void)
 {
 	biquad_init(&f1, SRATE);
 	biquad_init(&f2, SRATE);
-	pot_bind(4, &Q, on_pot, POT_SCALE_LOG, 0.5, 15.0);
-	pot_bind(6, &freq, on_pot, POT_SCALE_LOG, 10, 15000.0);
+	ctl_bind_pot(4, &Q, on_pot, POT_SCALE_LOG, 0.5, 15.0);
+	ctl_bind_pot(6, &freq, on_pot, POT_SCALE_LOG, 10, 15000.0);
 }
 
 

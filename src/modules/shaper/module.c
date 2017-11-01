@@ -10,7 +10,7 @@
 #include "module.h"
 #include "osc.h"
 #include "biquad.h"
-#include "pot.h"
+#include "ctl.h"
 #include "fir.h"
 #include "tabread.h"
 
@@ -51,11 +51,17 @@ float shape[] = {
 };
 
 
-struct biquad hp;
-struct osc osc;
-struct pot pot;
-struct pot pot_f;
-struct fir fir1, fir2;
+static struct biquad hp;
+static struct osc osc;
+static struct fir fir1, fir2;
+static float f, g;
+static bool oversample;
+
+static void on_set(void)
+{
+	osc_set_freq(&osc, f);
+}
+
 
 void mod_init(void)
 {
@@ -63,8 +69,9 @@ void mod_init(void)
 	osc_set_freq(&osc, 220);
 	osc_set_type(&osc, OSC_TYPE_SIN);
 
-	pot_init(&pot, POT_SCALE_LOG, 0, 50);
-	pot_init(&pot_f, POT_SCALE_LOG, 100, 10000);
+	ctl_bind_pot(6, &g, on_set, POT_SCALE_LOG, 0, 50);
+	ctl_bind_pot(4, &f, on_set, POT_SCALE_LOG, 100, 10000);
+	ctl_bind_switch(7, &oversample, on_set);
 
 	fir_init(&fir1, filter_taps, FILTER_TAP_NUM);
 	fir_init(&fir2, filter_taps, FILTER_TAP_NUM);
@@ -89,16 +96,11 @@ void mod_run(float *fin, float *fout)
 	v = fin[0];
 	fout[0] = fout[1] = v;
 
-	float g = pot_read(&pot, fin[6]);
-	float f = pot_read(&pot_f, fin[4]);
-
-	osc_set_freq(&osc, f);
-
 	v = biquad_run(&hp, v);
 	v = v * g;
 	fir_load(&fir1, v);
 		
-	if(fin[5] < 0) {
+	if(oversample) {
 		int i;
 		for(i=0; i<4; i++) {
 			v = fir_calc_poly(&fir1, 4, i);

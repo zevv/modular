@@ -6,7 +6,7 @@
 #include "module.h"
 #include "reverb.h"
 #include "biquad.h"
-#include "pot.h"
+#include "ctl.h"
 
 static revmodel_t rev;
 static struct biquad lp;
@@ -23,9 +23,9 @@ static void on_pot(void)
 void mod_init(void)
 {
 	rev_init(&rev, 40100);
-	pot_bind(4, &room, on_pot, POT_SCALE_LIN, 0.0, 1.0);
-	pot_bind(6, &damp, on_pot, POT_SCALE_LIN, 1.0, 0.0);
-	pot_bind(5, &wet,  on_pot, POT_SCALE_LIN, 0.0, 1.0);
+	ctl_bind_pot(4, &room, on_pot, POT_SCALE_LIN, 0.0, 1.0);
+	ctl_bind_pot(6, &damp, on_pot, POT_SCALE_LIN, 1.0, 0.0);
+	ctl_bind_pot(5, &wet,  on_pot, POT_SCALE_LIN, 0.0, 1.0);
 	biquad_init(&lp, SRATE);
 	biquad_config(&lp, BIQUAD_TYPE_HP, 20, 0.707);
 }
