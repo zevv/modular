@@ -139,6 +139,14 @@ static int on_cmd_ssm(struct cmd_cli *cli, uint8_t argc, char **argv)
 			cmd_printd(cli,"%03x\n", reg_read(bus, reg));
 			return 1;
 		}
+		
+		if(cmd == 'g') {
+			int gain = strtol(argv[1], NULL, 0);
+			reg_write(0, REG_LEFT_CHANNEL_ADC_INPUT_VOLUME, LRINBOTH | LINVOL(gain));
+			reg_write(0, REG_RIGHT_CHANNEL_ADC_INPUT_VOLUME, RLINBOTH | RINVOL(gain));
+			reg_write(1, REG_LEFT_CHANNEL_ADC_INPUT_VOLUME, LRINBOTH | LINVOL(gain));
+			reg_write(1, REG_RIGHT_CHANNEL_ADC_INPUT_VOLUME, RLINBOTH | RINVOL(gain));
+		}
 
 		if(cmd == 'w') {
 			int bus = strtol(argv[1], NULL, 0);
