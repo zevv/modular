@@ -53,7 +53,7 @@ void ctl_poll(void)
 		struct ctl *ctl = &ctl_list[i];
 
 		int32_t val = biquad_run(&ctl->lp, *ctl->in);
-		int32_t delta = 512;
+		int32_t delta = 128;
 		bool hit = false;
 
 		if(val > ctl->val + delta) {

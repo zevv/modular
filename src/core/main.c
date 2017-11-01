@@ -259,6 +259,7 @@ static void mon_tick(void)
 		shared->level[i].min = INT32_MAX;
 		shared->level[i].max = INT32_MIN;
 	}
+	printd("\e[0J");
 }
 
 
