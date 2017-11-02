@@ -9,9 +9,6 @@
 #include "adc.h"
 #include "shared.h"
 
- 
-#define OVERSAMPLE 4
-#define SAMPLERATE 24000
 
 /* Scale back oversampled samples to -1.0..+1.0 range */
 

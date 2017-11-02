@@ -109,7 +109,6 @@ void main(void)
 	ssm2604_init();
 
 	shared->logd = logd;
-	shared->scope.src = &shared->in[0];
 	logd("M0 ready\n");
 
 	//mod_load_name("bypass");
@@ -119,10 +118,12 @@ void main(void)
 	static int mod_id = 0;
 
 	for(;;) {
+		volatile int i;
+		for(i=0; i<5000; i++);
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
 		read_m4_log();
-		led_set(LED_ID_GREEN, (n++ & 0x20000) ? LED_STATE_ON : LED_STATE_OFF);
+		led_set(LED_ID_GREEN, (n++ & 0x200) ? LED_STATE_ON : LED_STATE_OFF);
 		i2s_tick();
 		adc_tick();
 		watchdog_poll();

@@ -20,7 +20,7 @@
 #include "mod.h"
 #include "ifft.h"
 
-static bool mon_enable = false;
+static bool mon_enable = true;
 
 static const char *label[] = {
 	"in   1", "in   2", "in   3", "in   4",
@@ -41,6 +41,10 @@ static const uint8_t hamming_window[SHARED_SCOPE_SIZE] = {
 	21, 20, 20, 19, 19,
 };
 
+
+#define GREEN "\e[32m"
+#define YELLOW "\e[33;1m"
+#define RED "\e[31;1m"
 
 void mon_tick(void)
 {
@@ -66,11 +70,11 @@ void mon_tick(void)
 		}
 		
 		printd("%s |", label[i]);
+		printd(GREEN);
 
 		for(j=-70; j<0; j+=2) {
-			if(j == -12) printd("\e[32;1m");
-			if(j == -12) printd("\e[33;1m");
-			if(j ==  -6) printd("\e[31;1m");
+			if(j == -12) printd(YELLOW);
+			if(j ==  -6) printd(RED);
 			printd("%s", dB >= j ? "■" : " ");
 		}
 		printd("\e[0m|");
@@ -79,7 +83,7 @@ void mon_tick(void)
 		int j;
 		for(j=-16; j<=16; j++) {
 			printd("%s", (j >= v1 && j <= v2) ? "\e[33;1m◆\e[0m" : 
-					(j == 0) ? "|" : "┄");
+					(j == 0) ? "│" : "┄");
 		}
 		printd("\e[0m| %+5.1f dB\e[K\n", dB);
 		shared->level[i].min = INT32_MAX;
@@ -99,27 +103,51 @@ void mon_tick(void)
 		for(i=0; i<SHARED_SCOPE_SIZE; i++) {
 			/* Not accurate but fast */
 			int32_t n = (abs(re[i])+abs(im[i])) >> 4;
-			re[i] = 8 * logf(n);
+			re[i] = n > 0 ? 8 * logf(n) : 0;
 		}
 
+		static const char *sym[] = { " ", "▂", "▃", "▄", "▅", "▆", "▇", "█" };
 		int y, x;
-		for(y=96; y>=16; y-=8) {
+		for(y=10; y>=0; y--) {
+			printd("│");
+			if(y > 8) printd(RED);
+			else if(y > 6) printd(YELLOW);
+			else printd(GREEN);
 			for(x=0; x<SHARED_SCOPE_SIZE/2; x++) {
-				printd("%s", re[x] > y ? "▊" : " ");
+				int d = re[x] - y*8;
+				if(d < 0) d = 0;
+				if(d > 7) d = 7;
+				printd("%s", sym[d]);
 			}
-			printd("\e[0m\e[0K\n");
+			printd("\e[0m│\e[0K\n");
 		}
 		shared->scope.n = 0;
 	}
 	
-	printd("%d\e[0J");
+	printd("\e[0J");
 }
 
 
 static int on_cmd_mon(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
-	mon_enable = !mon_enable;
-	printd("\e[2J");
+	if(argc >= 1u) {
+		char cmd = argv[0][0];
+
+		if(cmd == 's') {
+			if(argc >= 2u) {
+				int idx = atoi(argv[1]);
+				if(idx >= 1 && idx <= 8) {
+					shared->scope.src = &shared->in[idx-1];
+				} else if(idx >= 9 && idx <= 12) {
+					shared->scope.src = &shared->out[idx-9];
+				} 
+			} else {
+				shared->scope.src = NULL;
+			}
+		}
+	} else {
+		mon_enable = !mon_enable;
+	}
 	return 1;
 }
 
