@@ -78,7 +78,7 @@ void ctl_poll(void)
 			}
 
 			if(ctl->type == CTL_TYPE_SWITCH) {
-				*(float *)ctl->out = ctl->val > 0;
+				*(bool *)ctl->out = ctl->val > 0;
 			}
 
 			if(ctl->fn) {

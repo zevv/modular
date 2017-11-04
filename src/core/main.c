@@ -115,7 +115,7 @@ void main(void)
 	shared->logd = logd;
 	logd("M0 ready\n");
 
-	mod_load_name("vcf");
+	//mod_load_name("vco");
 
 	int n = 0;
 	static bool bp = false;

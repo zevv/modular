@@ -2,7 +2,7 @@
 #define fir_h
 
 struct fir {
-	float s[512];
+	float s[128];
 	const float *taps;
 	int ntaps;
 	int head;
