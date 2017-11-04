@@ -69,7 +69,7 @@ void mod_init(void)
 	osc_set_freq(&osc, 220);
 	osc_set_type(&osc, OSC_TYPE_SIN);
 
-	ctl_bind_pot(6, &g, on_set, POT_SCALE_LOG, 0, 50);
+	ctl_bind_pot(6, &g, on_set, POT_SCALE_LOG, 0, 150);
 	ctl_bind_pot(4, &f, on_set, POT_SCALE_LOG, 100, 10000);
 	ctl_bind_switch(7, &oversample, on_set);
 

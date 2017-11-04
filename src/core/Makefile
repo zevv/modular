@@ -23,6 +23,7 @@ SRC     += watchdog.c
 SRC     += mod.c
 SRC     += mon.c
 SRC     += ifft.c
+SRC     += dpy.c
 
 SRC	+= lpc_chip_43xx_m0/src/chip_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/adc_18xx_43xx.c

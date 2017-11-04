@@ -19,9 +19,8 @@ enum ctl_type {
 
 struct ctl {
 	enum ctl_type type;
-	float *out_float;
-	bool *out_bool;
 	int16_t *in;
+	void *out;
 	int16_t val;
 	enum pot_scale scale;
 	void (*fn)(void);

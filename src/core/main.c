@@ -19,7 +19,9 @@
 #include "shared.h"
 #include "mod.h"
 #include "ifft.h"
+#include "dpy.h"
 
+void mon_init(void);
 void mon_tick(void);
 
 const uint32_t OscRateIn = 12000000;
@@ -107,11 +109,13 @@ void main(void)
 	adc_init();
 	i2s_init(SRATE);
 	ssm2604_init();
+	dpy_init();
+	mon_init();
 
 	shared->logd = logd;
 	logd("M0 ready\n");
 
-	//mod_load_name("bypass");
+	mod_load_name("vcf");
 
 	int n = 0;
 	static bool bp = false;

@@ -19,6 +19,7 @@
 #include "shared.h"
 #include "mod.h"
 #include "ifft.h"
+#include "dpy.h"
 
 static bool mon_enable = true;
 
@@ -45,6 +46,12 @@ static const uint8_t hamming_window[SHARED_SCOPE_SIZE] = {
 #define GREEN "\e[32m"
 #define YELLOW "\e[33;1m"
 #define RED "\e[31;1m"
+
+void mon_init(void)
+{
+	shared->scope.src = &shared->in[0];
+}
+
 
 void mon_tick(void)
 {
@@ -90,6 +97,14 @@ void mon_tick(void)
 		shared->level[i].max = INT32_MIN;
 	}
 
+	dpy_clear();
+	int x, y;
+	for(y=4; y<64; y+=8) {
+		for(x=4; x<128; x+=8) {
+			dpy_pset(x, y, 1);
+		}
+	}
+
 	/* Spectral analyzer */
 
 	if(shared->scope.n == SHARED_SCOPE_SIZE) {
@@ -122,7 +137,16 @@ void mon_tick(void)
 			printd("\e[0m│\e[0K\n");
 		}
 		shared->scope.n = 0;
+
+		for(x=0; x<SHARED_SCOPE_SIZE/2; x++) {
+			int y = 64 - re[x];
+			if(y < 0) y = 0;
+			if(y > 95) y = 95;
+			dpy_line(x*2+0, y, x*2+0, 96, 1);
+		}
 	}
+
+	dpy_flush();
 	
 	printd("\e[0J");
 }

@@ -93,7 +93,7 @@ $(SUBDIRS):
 	$(P) "SUB $@"
 	$(E) $(MAKE) -C $@
 
-$(ELF): $(OBJS) $(LDS)
+$(ELF): $(OBJS) $(LDS) $(LIBS)
 	$(P) " LD $<"
 	$(E) $(CC) -T$(LDS) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
@@ -105,3 +105,4 @@ $(LIB): $(OBJS)
 	$(P) " LIB $@"
 	$(E) chronic $(AR) $(ARFLAGS) $@ $?
 
+-include $(DEPS)

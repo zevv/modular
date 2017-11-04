@@ -26,7 +26,7 @@ void ctl_bind_pot(size_t idx, float *out, void (*fn)(void), enum pot_scale scale
 {
 	struct ctl *ctl = ctl_init(idx, CTL_TYPE_POT);
 
-	ctl->out_float = out;
+	ctl->out = out;
 	ctl->fn = fn;
 	ctl->scale = scale;
 	ctl->min = min;
@@ -39,7 +39,7 @@ void ctl_bind_switch(size_t idx, bool *out, void (*fn)(void))
 	struct ctl *ctl = ctl_init(idx, CTL_TYPE_SWITCH);
 
 	ctl->in = &shared->in[idx];
-	ctl->out_bool = out;
+	ctl->out = out;
 	ctl->fn = fn;
 }
 
@@ -74,11 +74,11 @@ void ctl_poll(void)
 				}
 				if(v < 0.0) v = 0.0;
 				if(v > 1.0) v = 1.0;
-				*ctl->out_float = v * (ctl->max - ctl->min) + ctl->min;
+				*(float *)ctl->out = v * (ctl->max - ctl->min) + ctl->min;
 			}
 
 			if(ctl->type == CTL_TYPE_SWITCH) {
-				*ctl->out_bool = ctl->val > 0;
+				*(float *)ctl->out = ctl->val > 0;
 			}
 
 			if(ctl->fn) {
