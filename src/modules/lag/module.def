@@ -1,0 +1,62 @@
+
+return {
+	name = "LAG",
+	connections = {
+		[1] = {
+			type = "input",
+			label = "IN",
+		},
+		[2] = {
+			type = "pot",
+			label = "SHP",
+		},
+		[3] = {
+			type = "input",
+			label = "SHP",
+		},
+		[4] = {
+			type = "input",
+			label = "IN",
+		},
+		[5] = {
+			type = "pot",
+			label = "RISE",
+		},
+		[6] = {
+			type = "pot",
+			label = "RISE",
+		},
+		[7] = {
+			type = "pot",
+			label = "FALL",
+		},
+		[8] = {
+			type = "pot",
+			label = "FALL",
+		},
+		[9] = {
+			type = "output",
+			label = "OUT",
+		},
+		[12] = {
+			type = "output",
+			label = "OUT",
+		},
+	},
+	links = {
+		{ 1, 5 },
+		{ 2, 1 },
+		{ 5, 2 },
+		{ 5, 7 },
+		{ 7, 9 },
+		
+		{ 3, 4 },
+		{ 3, 6 },
+		{ 4, 6 },
+		{ 6, 8 },
+		{ 8, 12 },
+	},
+}
+
+
+-- vi: ft=lua ts=3 sw=3
