@@ -30,25 +30,28 @@ static void update_level(int i, int32_t v)
 static const float scale_i2s = 1.0 / 32768.0;
 void (*logd)(const char *str, ...);
 
+static volatile float gain = 1.0;
 
-volatile float gain = 1.0;
+static union sample {
+	int16_t s16[2];
+	uint32_t u32;
+} s;
 
-
-void mod_bg(void) __attribute__((weak));
-void mod_bg(void) {};
 
 void I2S0_IRQHandler(void)
 {
 	uint32_t t1 = SysTick->VAL;
 
 	if(Chip_I2S_GetRxLevel(LPC_I2S0) >= 2) {
-		shared->in[0] = Chip_I2S_Receive(LPC_I2S0) >> 16;
-		shared->in[1] = Chip_I2S_Receive(LPC_I2S0) >> 16;
+		uint32_t v = Chip_I2S_Receive(LPC_I2S0);
+		shared->in[0] = v >> 16;
+		shared->in[1] = v & 0xffff;
 	}
 
 	if(Chip_I2S_GetRxLevel(LPC_I2S1) >= 2) {
-		shared->in[2] = Chip_I2S_Receive(LPC_I2S1) >> 16;
-		shared->in[3] = Chip_I2S_Receive(LPC_I2S1) >> 16;
+		uint32_t v = Chip_I2S_Receive(LPC_I2S1);
+		shared->in[2] = v >> 16;
+		shared->in[3] = v & 0xffff;
 	}
 
 	if(mod.run_float) {
@@ -81,12 +84,14 @@ void I2S0_IRQHandler(void)
 	}
 
 	if(Chip_I2S_GetTxLevel(LPC_I2S0) < 4) {
-		Chip_I2S_Send(LPC_I2S0, shared->out[0] << 16);
-		Chip_I2S_Send(LPC_I2S0, shared->out[1] << 16);
+		s.s16[0] = shared->out[1];
+		s.s16[1] = shared->out[0];
+		Chip_I2S_Send(LPC_I2S0, s.u32);
 	}
 	if(Chip_I2S_GetTxLevel(LPC_I2S1) < 4) {
-		Chip_I2S_Send(LPC_I2S1, shared->out[2] << 16);
-		Chip_I2S_Send(LPC_I2S1, shared->out[3] << 16);
+		s.s16[0] = shared->out[3];
+		s.s16[1] = shared->out[2];
+		Chip_I2S_Send(LPC_I2S1, s.u32);
 	}
 
 	if(shared->scope.src && shared->scope.n < SHARED_SCOPE_SIZE) {

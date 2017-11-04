@@ -104,7 +104,7 @@ static void init_one(enum I2C_ID bus)
 	reg_write(bus, REG_ANALOG_AUDIO_PATH, DACSEL);
 	reg_write(bus, REG_DIGITAL_AUDIO_PATH, 0 * ADCHPF);
 	reg_write(bus, REG_SAMPLING_RATE, BOSR);
-	reg_write(bus, REG_DIGITAL_AUDIO_I_F, FORMAT(2) | WL(3);
+	reg_write(bus, REG_DIGITAL_AUDIO_I_F, FORMAT(2) | WL(0);
 
 	volatile int i;
 	for(i=0; i<5000000; i++);

@@ -40,7 +40,7 @@ void i2s_init_one(LPC_I2S_T *i2s, int srate)
 	I2S_AUDIO_FORMAT_T conf;
 	conf.SampleRate = srate;
 	conf.ChannelNumber = 2;
-	conf.WordWidth = 32;
+	conf.WordWidth = 16;
         
 	Chip_I2S_RxConfig(i2s, &conf);
 	Chip_I2S_TxConfig(i2s, &conf);
@@ -52,15 +52,15 @@ void i2s_init_one(LPC_I2S_T *i2s, int srate)
 	 *
 	 * 204E6 * 1 / 6 / 2 = 17 Mhz MCLK
 	 *
-	 * This clock is further divided by 6 (5+1) to generate the bit clock
+	 * This clock is further divided by 12 (11+1) to generate the bit clock
 	 * at 2.83Mhz. With 2 channels 32 bits each, this results in a sample
 	 * rate of 2.83/32/2, resulting in a sample rate of 44270.833Hz
 	 */
 
 	Chip_I2S_SetTxXYDivider(i2s, 1, 6);
-	Chip_I2S_SetTxBitRate(i2s, 5);
+	Chip_I2S_SetTxBitRate(i2s, 11);
 	Chip_I2S_SetRxXYDivider(i2s, 1, 6);
-	Chip_I2S_SetRxBitRate(i2s, 5);
+	Chip_I2S_SetRxBitRate(i2s, 11);
 
 	Chip_I2S_TxModeConfig(i2s, 0, 0, I2S_RXMODE_MCENA);
 
