@@ -21,6 +21,8 @@
 #include "ifft.h"
 #include "dpy.h"
 
+#define LPC_OTP ((LPC_OTP_T *) LPC_OTP_BASE)
+
 void mon_init(void);
 void mon_tick(void);
 
@@ -98,7 +100,9 @@ void main(void)
 	//watchdog_init();
 	printd_set_handler(uart_tx);
 
-	printd("\n\nHello %s %s %s\n", VERSION, __DATE__, __TIME__);
+	uint32_t id = LPC_OTP->OTP0_2;
+
+	printd("\n\nHello %s %s %s %08x\n", VERSION, __DATE__, __TIME__);
 
 	memset((void *)shared, 0, sizeof(*shared));
 
@@ -113,9 +117,10 @@ void main(void)
 	mon_init();
 
 	shared->logd = logd;
-	logd("M0 ready\n");
+	logd("M0 ready %08x\n", id);
 
-	//mod_load_name("vco");
+	if(id == 0x24b14191) mod_load_name("vco");
+	if(id == 0x1ab14191) mod_load_name("vcf");
 
 	int n = 0;
 	static bool bp = false;

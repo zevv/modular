@@ -21,7 +21,7 @@
 #include "ifft.h"
 #include "dpy.h"
 
-static bool mon_enable = true;
+static bool mon_enable = false;
 
 static const char *label[] = {
 	"in   1", "in   2", "in   3", "in   4",

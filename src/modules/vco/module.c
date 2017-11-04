@@ -50,8 +50,8 @@ void mod_init(void)
 {
 	osc_init(&osc1, SRATE);
 	osc_init(&osc2, SRATE);
-	osc_init(&osc3, SRATE * OVERSAMPLE);
-	osc_init(&osc4, SRATE * OVERSAMPLE);
+	osc_init(&osc3, SRATE);
+	osc_init(&osc4, SRATE);
 
 	osc_set_type(&osc1, OSC_TYPE_SIN);
 	osc_set_type(&osc2, OSC_TYPE_TRIANGLE);
@@ -85,15 +85,9 @@ void mod_run(float *fin, float *fout)
 
 	fout[0] = osc_gen(&osc1) * vol;
 	fout[1] = osc_gen(&osc2) * vol;
+	fout[2] = osc_gen(&osc3) * vol;
+	fout[3] = osc_gen(&osc4) * vol;
 
-	int i;
-	for(i=0; i<OVERSAMPLE; i++) {
-		fir_load(&fir3, osc_gen(&osc3));
-		fir_load(&fir4, osc_gen(&osc4));
-	}
-		
-	fout[2] = fir_calc(&fir3) * vol;
-	fout[3] = fir_calc(&fir4) * vol;
 }
 
 
