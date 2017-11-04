@@ -102,7 +102,7 @@ static void init_one(enum I2C_ID bus)
 	reg_write(bus, REG_LEFT_CHANNEL_ADC_INPUT_VOLUME, LRINBOTH | LINVOL(0x18));
 	reg_write(bus, REG_RIGHT_CHANNEL_ADC_INPUT_VOLUME, RLINBOTH | RINVOL(0x18));
 	reg_write(bus, REG_ANALOG_AUDIO_PATH, DACSEL);
-	reg_write(bus, REG_DIGITAL_AUDIO_PATH, ADCHPF);
+	reg_write(bus, REG_DIGITAL_AUDIO_PATH, 0 * ADCHPF);
 	reg_write(bus, REG_SAMPLING_RATE, BOSR);
 	reg_write(bus, REG_DIGITAL_AUDIO_I_F, FORMAT(2) | WL(3);
 

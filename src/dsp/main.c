@@ -46,7 +46,7 @@ void I2S0_IRQHandler(void)
 		shared->in[1] = Chip_I2S_Receive(LPC_I2S0) >> 16;
 	}
 
-	if(Chip_I2S_GetRxLevel(LPC_I2S1) >=2 ) {
+	if(Chip_I2S_GetRxLevel(LPC_I2S1) >= 2) {
 		shared->in[2] = Chip_I2S_Receive(LPC_I2S1) >> 16;
 		shared->in[3] = Chip_I2S_Receive(LPC_I2S1) >> 16;
 	}

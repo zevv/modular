@@ -72,6 +72,10 @@ void mod_run(float *fin, float *fout)
 {
 	float f = freq;
 
+	float Ufm = fm * fin[0] * 5;
+
+	f = f * powf(2, Ufm);
+
 	osc_set_freq(&osc1, f);
 	osc_set_freq(&osc2, f);
 	osc_set_freq(&osc3, f);
