@@ -1,4 +1,5 @@
 
+- PBC offset 0,0 = linksonder
 - Weerstanden LED's -> 330ohm
 - pullup flash -> 10k
 - pullups I2C -> 10k
@@ -17,4 +18,5 @@
 - schuine hoeken pcb
 - adc input clamp
 - rotary encoders?
+- R102 / C51 silkscreen
 
