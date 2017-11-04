@@ -28,6 +28,7 @@ static void update_level(int i, int32_t v)
 
 
 static const float scale_i2s = 1.0 / 32768.0;
+static float inv_ticks_per_sample = 1000 * SRATE / 204e6;
 void (*logd)(const char *str, ...);
 
 static volatile float gain = 1.0;
@@ -99,7 +100,7 @@ void I2S0_IRQHandler(void)
 	}
 		
 	uint32_t t2 = SysTick->VAL;
-	shared->m4_load = (int32_t)t1-(int32_t)t2;
+	shared->m4_load = ((int32_t)t1-(int32_t)t2) * inv_ticks_per_sample;
 }
 
 
