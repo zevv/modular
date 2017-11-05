@@ -3,6 +3,7 @@
 - Weerstanden LED's -> 330ohm
 - pullup flash -> 10k
 - pullups I2C -> 10k
+- pullup DBGEN -> 10k
 - footprints potmeters/switches toleranties
 - footprint flash schematics
 - I2S rx/tx swap
@@ -19,4 +20,5 @@
 - adc input clamp
 - rotary encoders?
 - R102 / C51 silkscreen
-
+- sporen power dikker
+- pinning I2S0 / CNA0 -> CAN1 pennen vrij
