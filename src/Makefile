@@ -45,6 +45,10 @@ flash-loader: modular.dfu
 	$(P) "FLASH"
 	$(E) ./tools/flash modular.dfu 0 > /dev/ttyACM0
 
+flash-loader2: modular.dfu
+	$(P) "FLASH"
+	$(E) ./tools/flash modular.dfu 0 > /dev/ttyACM1
+
 flash-modules: modules.img
 	$(P) "FLASH"
 	$(E) ./tools/flash modules.img 0x21000 > /dev/ttyACM0

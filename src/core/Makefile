@@ -5,6 +5,7 @@ LIBS	+= -lm
 CORE	:= m0
 
 SRC     += adc.c
+SRC     += can.c
 SRC     += boot.c
 SRC     += cdc_uart.c
 SRC     += cmd.c
@@ -34,6 +35,7 @@ SRC	+= lpc_chip_43xx_m0/src/ssp_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/sysinit_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/uart_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/wwdt_18xx_43xx.c
+SRC	+= lpc_chip_43xx_m0/src/ccan_18xx_43xx.c
 
 CFLAGS	+= -I.
 CFLAGS	+= -Ilpc_chip_43xx_m0/inc/

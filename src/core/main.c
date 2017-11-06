@@ -5,6 +5,7 @@
 #include "chip.h"
 
 #include "adc.h"
+#include "can.h"
 #include "cdc_uart.h"
 #include "cmd.h"
 #include "flash.h"
@@ -38,6 +39,12 @@ static struct cmd_cli cli1 = {
 static struct cmd_cli cli2 = {
 	.rx = cdc_uart_rx,
 	.tx = cdc_uart_tx,
+	.echo = true,
+};
+
+static struct cmd_cli cli3 = {
+	.rx = can_uart_rx,
+	.tx = can_uart_tx,
 	.echo = true,
 };
 
@@ -93,18 +100,27 @@ static void read_m4_log(void)
 
 void main(void)
 {
+	uint32_t mod_id = 0;
+
+	uint32_t id = LPC_OTP->OTP0_2;
+	if(id == 0x24b14191) {
+		mod_id = 1;
+	}
+	if(id == 0x1ab14191) {
+		mod_id = 2;
+	}
+
+	memset((void *)shared, 0, sizeof(*shared));
+	shared->logd = logd;
+
 	arch_init();
 	led_init();
 	button_init();
 	uart_init();
 	//watchdog_init();
+
 	printd_set_handler(uart_tx);
-
-	uint32_t id = LPC_OTP->OTP0_2;
-
 	printd("\n\nHello %s %s %s %08x\n", VERSION, __DATE__, __TIME__);
-
-	memset((void *)shared, 0, sizeof(*shared));
 
 	cdc_uart_init();
 	printd_set_handler(cdc_uart_tx);
@@ -113,37 +129,30 @@ void main(void)
 	adc_init();
 	i2s_init(SRATE);
 	ssm2604_init();
+	can_init(mod_id); /* Must be done after I2C/ADC setup, see errata 3.2 */
 	dpy_init();
 	mon_init();
 
-	shared->logd = logd;
 	logd("M0 ready %08x\n", id);
 
-	if(id == 0x24b14191) mod_load_name("vco");
-	if(id == 0x1ab14191) mod_load_name("vcf");
+	if(mod_id == 1) mod_load_name("vco");
+	if(mod_id == 2) mod_load_name("vcf");
 
 	int n = 0;
-	static bool bp = false;
-	static int mod_id = 0;
 
 	for(;;) {
 		volatile int i;
 		for(i=0; i<5000; i++);
 		cmd_cli_poll(&cli1);
 		cmd_cli_poll(&cli2);
+		cmd_cli_poll(&cli3);
 		read_m4_log();
 		led_set(LED_ID_GREEN, (n++ & 0x200) ? LED_STATE_ON : LED_STATE_OFF);
 		i2s_tick();
 		adc_tick();
 		watchdog_poll();
 		mon_tick();
-
-		bool b = button_get();
-		if(b && !bp) {
-			mod_load_id(mod_id);
-			mod_id = (mod_id + 1) % 8;
-		}
-		bp = b;
+		can_tick();
 	}
 }
 
