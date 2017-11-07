@@ -108,7 +108,7 @@ static size_t tx_len = 0;
 void can_tick(void)
 {
 	static int n = 0;
-	if(n++ < 10000) return;
+	if(n++ < 1000) return;
 	n = 0;
 
 	if(tx_len > 0) {
