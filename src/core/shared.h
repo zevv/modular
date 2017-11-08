@@ -33,6 +33,11 @@ struct shared {
 	enum m4_state m4_state;
 
 	struct {
+		uint16_t val;
+		bool dirty;
+	} ctl[12];
+
+	struct {
 		uint8_t buf[SHARED_LOG_BUF_SIZE];
 		size_t head;
 		size_t tail;

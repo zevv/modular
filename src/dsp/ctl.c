@@ -15,7 +15,7 @@ static struct ctl *ctl_init(size_t idx, enum ctl_type type)
 {
 	struct ctl *ctl = &ctl_list[ctl_count ++];
 	ctl->type = type;
-	ctl->in = &shared->in[idx];
+	ctl->idx = idx;
 	biquad_init(&ctl->lp, SRATE);
 	biquad_config(&ctl->lp, BIQUAD_TYPE_LP, 100, 0.1);
 	return ctl;
@@ -38,7 +38,6 @@ void ctl_bind_switch(size_t idx, bool *out, void (*fn)(void))
 {
 	struct ctl *ctl = ctl_init(idx, CTL_TYPE_SWITCH);
 
-	ctl->in = &shared->in[idx];
 	ctl->out = out;
 	ctl->fn = fn;
 }
@@ -52,7 +51,8 @@ void ctl_poll(void)
 
 		struct ctl *ctl = &ctl_list[i];
 
-		int32_t val = biquad_run(&ctl->lp, *ctl->in);
+		int32_t val = shared->in[ctl->idx];
+		val = biquad_run(&ctl->lp, val);
 		int32_t delta = 128;
 		bool hit = false;
 
@@ -75,6 +75,9 @@ void ctl_poll(void)
 				if(v < 0.0) v = 0.0;
 				if(v > 1.0) v = 1.0;
 				*(float *)ctl->out = v * (ctl->max - ctl->min) + ctl->min;
+
+				shared->ctl[ctl->idx].val = v * 255;
+				shared->ctl[ctl->idx].dirty = true;
 			}
 
 			if(ctl->type == CTL_TYPE_SWITCH) {

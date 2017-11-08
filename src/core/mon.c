@@ -1,6 +1,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "chip.h"
 
@@ -10,7 +11,6 @@
 #include "flash.h"
 #include "i2s.h"
 #include "led.h"
-#include "printd.h"
 #include "uart.h"
 #include "uda1380.h"
 #include "watchdog.h"
@@ -21,7 +21,6 @@
 #include "ifft.h"
 #include "dpy.h"
 
-static bool mon_enable = false;
 
 static const char *label[] = {
 	"in   1", "in   2", "in   3", "in   4",
@@ -52,19 +51,31 @@ void mon_init(void)
 	shared->scope.src = &shared->in[0];
 }
 
+struct cmd_cli *mon_cli = NULL;
+
+static void out(const char *fmt, ...)
+{
+	if(mon_cli) {
+		va_list va;
+		va_start(va, fmt);
+		cmd_vprintd(mon_cli, fmt, va);
+		va_end(va);
+	}
+}
+
 
 void mon_tick(void)
 {
-	if(!mon_enable) return;
+	if(mon_cli == NULL) return;
 	static int n = 0;
 	if(n++ < 100) return;
 	n = 0;
 
 	/* Channel levels */
 
-	printd("\e[H");
-	printd("DSP load: %3d.%d\e[K\n", shared->m4_load/10, shared->m4_load % 10);
-	printd("\e[K\n");
+	out("\e[H");
+	out("DSP load: %3d.%d\e[K\n", shared->m4_load/10, shared->m4_load % 10);
+	out("\e[K\n");
 	shared->m4_load = 0;
 	
 	int i, j;
@@ -76,23 +87,23 @@ void mon_tick(void)
 			dB += 20 * logf(amp) / logf(10);
 		}
 		
-		printd("%s |", label[i]);
-		printd(GREEN);
+		out("%s |", label[i]);
+		out(GREEN);
 
 		for(j=-70; j<0; j+=2) {
-			if(j == -12) printd(YELLOW);
-			if(j ==  -6) printd(RED);
-			printd("%s", dB >= j ? "■" : " ");
+			if(j == -12) out(YELLOW);
+			if(j ==  -6) out(RED);
+			out("%s", dB >= j ? "■" : " ");
 		}
-		printd("\e[0m|");
+		out("\e[0m|");
 		float v1 = shared->level[i].min >> 11;
 		float v2 = shared->level[i].max >> 11;
 		int j;
 		for(j=-16; j<=16; j++) {
-			printd("%s", (j >= v1 && j <= v2) ? "\e[33;1m◆\e[0m" : 
+			out("%s", (j >= v1 && j <= v2) ? "\e[33;1m◆\e[0m" : 
 					(j == 0) ? "│" : "┄");
 		}
-		printd("\e[0m| %+5.1f dB\e[K\n", dB);
+		out("\e[0m| %+5.1f dB\e[K\n", dB);
 		shared->level[i].min = INT32_MAX;
 		shared->level[i].max = INT32_MIN;
 	}
@@ -124,17 +135,17 @@ void mon_tick(void)
 		static const char *sym[] = { " ", "▂", "▃", "▄", "▅", "▆", "▇", "█" };
 		int y, x;
 		for(y=10; y>=0; y--) {
-			printd("│");
-			if(y > 8) printd(RED);
-			else if(y > 6) printd(YELLOW);
-			else printd(GREEN);
+			out("│");
+			if(y > 8) out(RED);
+			else if(y > 6) out(YELLOW);
+			else out(GREEN);
 			for(x=0; x<SHARED_SCOPE_SIZE/2; x++) {
 				int d = re[x] - y*8;
 				if(d < 0) d = 0;
 				if(d > 7) d = 7;
-				printd("%s", sym[d]);
+				out("%s", sym[d]);
 			}
-			printd("\e[0m│\e[0K\n");
+			out("\e[0m│\e[0K\n");
 		}
 		shared->scope.n = 0;
 
@@ -148,13 +159,14 @@ void mon_tick(void)
 
 	dpy_flush();
 	
-	printd("\e[0J");
+	out("\e[0J");
 }
 
 
 static int on_cmd_mon(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
 	if(argc >= 1u) {
+		mon_cli = cli;
 		char cmd = argv[0][0];
 
 		if(cmd == 's') {
@@ -169,8 +181,9 @@ static int on_cmd_mon(struct cmd_cli *cli, uint8_t argc, char **argv)
 				shared->scope.src = NULL;
 			}
 		}
+		cmd_printd(cli, "mon is now on %p\n", mon_cli);
 	} else {
-		mon_enable = !mon_enable;
+		mon_cli = NULL;
 	}
 	return 1;
 }

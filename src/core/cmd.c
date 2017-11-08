@@ -169,6 +169,12 @@ static int on_help(struct cmd_cli *cli, uint8_t argc, char **argv)
 }
 
 
+void cmd_vprintd(struct cmd_cli *cli, const char *fmt, va_list va)
+{
+	vfprintd(cli->tx, fmt, va);
+}
+
+
 void cmd_printd(struct cmd_cli *cli, const char *fmt, ...)
 {
 	va_list va;

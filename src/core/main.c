@@ -6,7 +6,7 @@
 
 #include "adc.h"
 #include "can.h"
-#include "cdc_uart.h"
+#include "midi.h"
 #include "cmd.h"
 #include "flash.h"
 #include "i2s.h"
@@ -37,8 +37,8 @@ static struct cmd_cli cli1 = {
 };
 
 static struct cmd_cli cli2 = {
-	.rx = cdc_uart_rx,
-	.tx = cdc_uart_tx,
+	.rx = midi_rx,
+	.tx = midi_tx,
 	.echo = true,
 };
 
@@ -122,8 +122,7 @@ void main(void)
 	printd_set_handler(uart_tx);
 	printd("\n\nHello %s %s %s %08x\n", VERSION, __DATE__, __TIME__);
 
-	cdc_uart_init();
-	printd_set_handler(cdc_uart_tx);
+	midi_init(mod_id);
 
 	flash_init();
 	adc_init();
@@ -153,6 +152,7 @@ void main(void)
 		watchdog_poll();
 		mon_tick();
 		can_tick();
+		midi_tick();
 	}
 }
 

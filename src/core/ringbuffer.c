@@ -22,6 +22,16 @@ int rb_push(struct ringbuffer *rb, uint8_t c)
 }
 
 
+int rb_push_blocking(struct ringbuffer *rb, uint8_t c)
+{
+	uint32_t head_next = (rb->head + 1) % rb->size;
+	while(head_next == rb->tail);
+	rb->data[rb->head] = c;
+	rb->head = head_next;
+	return 1;
+}
+
+
 int rb_pop(struct ringbuffer *rb, uint8_t *c)
 {
 	if(rb->head != rb->tail) {

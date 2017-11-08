@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 struct cmd_cli {
 	char buf[128];
@@ -19,6 +20,7 @@ void cmd_init(struct cmd_cli *cli);
 void cmd_cli_handle_char(struct cmd_cli *cli, uint8_t c);
 void cmd_cli_poll(struct cmd_cli *cli);
 void cmd_printd(struct cmd_cli *cli, const char *fmt, ...);
+void cmd_vprintd(struct cmd_cli *cli, const char *fmt, va_list va);
 void cmd_hexdump(struct cmd_cli *cli, void *addr, size_t len, off_t offset);
 
 struct cmd_handler_t {
