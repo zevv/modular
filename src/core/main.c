@@ -103,12 +103,9 @@ void main(void)
 	uint32_t mod_id = 0;
 
 	uint32_t id = LPC_OTP->OTP0_2;
-	if(id == 0x24b14191) {
-		mod_id = 1;
-	}
-	if(id == 0x1ab14191) {
-		mod_id = 2;
-	}
+	if(id == 0x24b14191) mod_id = 1;
+	if(id == 0x1ab14191) mod_id = 2;
+	if(id == 0x26c94191) mod_id = 3;
 
 	memset((void *)shared, 0, sizeof(*shared));
 	shared->logd = logd;
@@ -136,6 +133,7 @@ void main(void)
 
 	if(mod_id == 1) mod_load_name("vco");
 	if(mod_id == 2) mod_load_name("vcf");
+	if(mod_id == 3) mod_load_name("reverb");
 
 	int n = 0;
 

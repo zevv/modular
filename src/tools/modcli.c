@@ -62,8 +62,12 @@ int main(int argc, char **argv)
 		
 		int len;
 		r = libusb_bulk_transfer(h, 0x82, buf, sizeof(buf), &len, 10);
+
 		if(r == 0) {
 			write(1, buf, len);
+		} else if(r == LIBUSB_ERROR_NO_DEVICE) {
+			fprintf(stderr, "[disconnect]\n");
+			exit(0);
 		}
 	}
 
