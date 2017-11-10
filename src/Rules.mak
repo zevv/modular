@@ -4,7 +4,7 @@ VERSION	:= 1.0
 ELF	?= $(NAME).elf
 LDS	?= $(NAME).lds
 
-CFLAGS	+= -ggdb -O3
+CFLAGS	+= -ggdb 
 CFLAGS	+= -Wall -Werror -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-strict-overflow
 
 CFLAGS	+= -DSRATE=44270.83
@@ -29,12 +29,14 @@ ALL	+= $(SUBDIRS) $(LIB) $(BIN)
 
 ifeq ($(CORE), m0)
   MFLAGS  += -mcpu=cortex-m0
+  CFLAGS  += -Os
   CFLAGS  += -DCORE_M0
   CFLAGS  += -I.
   CFLAGS  += -Ilpc_chip_43xx_m0/inc/
 endif
 
 ifeq ($(CORE), m4)
+  CFLAGS  += -O3
   MFLAGS  += -mcpu=cortex-m4
   MFLAGS  += -mfloat-abi=softfp
   MFLAGS  += -mfpu=fpv4-sp-d16

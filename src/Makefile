@@ -21,10 +21,10 @@ tools/lpchdr:
 tools/mkimg:
 	$(E) $(MAKE) -C tools mkimg
 
-tools/midimon:
-	$(E) $(MAKE) -C tools midimon
+tools/modcli:
+	$(E) $(MAKE) -C tools modcli
 
-.PHONY: tools/lpcsum tools/lpchdr tools/mkimg tools/midimon
+.PHONY: tools/lpcsum tools/lpchdr tools/mkimg tools/modcli
 
 modular.dfu: core loader tools
 	$(P) "LPCHDR $@"
@@ -46,12 +46,12 @@ run: usb
 	$(E) sleep 0.1
 	$(E) iterm /dev/ttyACM0
 
-flash-loader: modular.dfu tools/midimon
+flash-loader: modular.dfu tools/modcli
 	$(P) "FLASH"
-	$(E) ./tools/flash modular.dfu 0 | tools/midimon
+	$(E) ./tools/flash modular.dfu 0 | tools/modcli
 
-flash-modules: modules.img tools/midimon
+flash-modules: modules.img tools/modcli
 	$(P) "FLASH"
-	$(E) ./tools/flash modules.img 0x21000 | tools/midimon
+	$(E) ./tools/flash modules.img 0x21000 | tools/modcli
 
 flash: flash-loader flash-modules

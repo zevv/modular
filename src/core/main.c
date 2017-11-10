@@ -6,7 +6,7 @@
 
 #include "adc.h"
 #include "can.h"
-#include "midi.h"
+#include "usb.h"
 #include "cmd.h"
 #include "flash.h"
 #include "i2s.h"
@@ -37,8 +37,8 @@ static struct cmd_cli cli1 = {
 };
 
 static struct cmd_cli cli2 = {
-	.rx = midi_rx,
-	.tx = midi_tx,
+	.rx = usb_clipipe_rx,
+	.tx = usb_clipipe_tx,
 	.echo = true,
 };
 
@@ -122,7 +122,7 @@ void main(void)
 	printd_set_handler(uart_tx);
 	printd("\n\nHello %s %s %s %08x\n", VERSION, __DATE__, __TIME__);
 
-	midi_init(mod_id);
+	usb_init(mod_id);
 
 	flash_init();
 	adc_init();
@@ -152,7 +152,7 @@ void main(void)
 		watchdog_poll();
 		mon_tick();
 		can_tick();
-		midi_tick();
+		usb_tick();
 	}
 }
 

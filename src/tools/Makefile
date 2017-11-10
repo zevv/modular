@@ -13,6 +13,9 @@ mkimg: mkimg.c
 midimon: midimon.c
 	gcc -Wall -Werror midimon.c -o midimon -lasound
 
+modcli: modcli.c
+	gcc -Wall -Werror modcli.c -o modcli $(shell pkg-config --cflags --libs libusb-1.0)
+
 clean:
 	rm -f lpchdr lpcsum mkimg
 
