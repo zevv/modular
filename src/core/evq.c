@@ -22,7 +22,7 @@ struct evq {
 	size_t used_max;
 
 	uint8_t ticks_busy;
-	float load;
+	int load;
 
 };
 
@@ -224,7 +224,7 @@ uint8_t evq_get_load(void)
 
 static void on_ev_tick_1hz(event_t *ev, void *data)
 {
-	evq.load = evq.ticks_busy / 10u;
+	evq.load = evq.ticks_busy;
 	evq.ticks_busy = 0;
 }
 

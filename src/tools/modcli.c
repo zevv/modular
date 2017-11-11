@@ -54,20 +54,36 @@ int main(int argc, char **argv)
 			if(buf[0] == 3 || buf[0] == 4) {
 				exit(0);
 			}
-			int len;
-			libusb_bulk_transfer(h, 0x02, buf, r, &len, 5);
+			int todo = r;
+			int done;
+			r = libusb_bulk_transfer(h, 0x02, buf, todo, &done, 500);
+			if(r == LIBUSB_ERROR_NO_DEVICE) {
+				fprintf(stderr, "[disconnect]\n");
+				exit(0);
+			} else if(r != 0) {
+				fprintf(stderr, "bulk 0x02: %s\n", libusb_error_name(r));
+				exit(1);
+			}
+			if(todo != done) {
+				fprintf(stderr, "bulk 0x02: %d != %d", todo, done);
+				exit(1);
+			}
+
 		} else if(r == 0) {
 			exit(0);
 		}
 		
 		int len;
-		r = libusb_bulk_transfer(h, 0x82, buf, sizeof(buf), &len, 5);
+		r = libusb_bulk_transfer(h, 0x82, buf, sizeof(buf), &len, 2);
 
 		if(r == 0) {
 			write(1, buf, len);
 		} else if(r == LIBUSB_ERROR_NO_DEVICE) {
 			fprintf(stderr, "[disconnect]\n");
 			exit(0);
+		} else if(r != LIBUSB_ERROR_TIMEOUT) {
+			fprintf(stderr, "bulk 0x82: %s\n", libusb_error_name(r));
+			exit(1);
 		}
 	}
 

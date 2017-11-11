@@ -130,7 +130,7 @@ static ErrorCode_t cli_bulk_handler(USBD_HANDLE_T usbd, void *ptr, uint32_t even
 			break;
 
 		case USB_EVT_OUT_NAK:
-			if(!clipipe.rx_busy && evq_room() >= sizeof(rx_buf)) {
+			if(!clipipe.rx_busy && evq_room() >= sizeof(rx_buf) * 2) {
 				clipipe.rx_busy = true;
 				usbd_api->hw->ReadReqEP(usbd, 0x02, (void *)rx_buf, sizeof(rx_buf));
 			}
