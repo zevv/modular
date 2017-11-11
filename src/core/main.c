@@ -5,8 +5,11 @@
 #include "chip.h"
 
 #include "adc.h"
+#include "mon.h"
+#include "evq.h"
 #include "can.h"
 #include "usb.h"
+#include "timer.h"
 #include "cmd.h"
 #include "flash.h"
 #include "i2s.h"
@@ -24,27 +27,11 @@
 
 #define LPC_OTP ((LPC_OTP_T *) LPC_OTP_BASE)
 
-void mon_init(void);
-void mon_tick(void);
-
 const uint32_t OscRateIn = 12000000;
 const uint32_t ExtRateIn = 0;
 
-static struct cmd_cli cli1 = {
-	.rx = uart_rx,
-	.tx = uart_tx,
-	.echo = true,
-};
-
-static struct cmd_cli cli2 = {
-	.rx = usb_clipipe_rx,
-	.tx = usb_clipipe_tx,
-	.echo = true,
-};
-
-static struct cmd_cli cli3 = {
-	.rx = can_uart_rx,
-	.tx = can_uart_tx,
+static struct cmd_cli cli = {
+	.tx = NULL,
 	.echo = true,
 };
 
@@ -119,6 +106,7 @@ void main(void)
 	printd_set_handler(uart_tx);
 	printd("\n\nHello %s %s %s %08x\n", VERSION, __DATE__, __TIME__);
 
+	timer_init();
 	usb_init(mod_id);
 
 	flash_init();
@@ -135,24 +123,62 @@ void main(void)
 	if(mod_id == 2) mod_load_name("vcf");
 	if(mod_id == 3) mod_load_name("reverb");
 
-	int n = 0;
-
 	for(;;) {
-		volatile int i;
-		for(i=0; i<5000; i++);
-		cmd_cli_poll(&cli1);
-		cmd_cli_poll(&cli2);
-		cmd_cli_poll(&cli3);
 		read_m4_log();
-		led_set(LED_ID_GREEN, (n++ & 0x200) ? LED_STATE_ON : LED_STATE_OFF);
-		i2s_tick();
-		adc_tick();
 		watchdog_poll();
-		mon_tick();
 		can_tick();
 		usb_tick();
+
+		event_t ev;
+		evq_wait(&ev);
 	}
 }
+
+
+
+static void on_ev_can(event_t *ev, void *data)
+{
+	struct ev_can *evc = &ev->can;
+	cli.tx = can_uart_tx;
+	size_t i;
+	for(i=0; i<evc->len; i++) {
+		cmd_cli_handle_char(&cli, evc->data[i]);
+	}
+}
+
+EVQ_REGISTER(EV_CAN, on_ev_can);
+
+
+static void on_ev_usbcli(event_t *ev, void *data)
+{
+	size_t i;
+	cli.tx = usb_clipipe_tx;
+	for(i=0; i<ev->usbcli.len; i++) {
+		cmd_cli_handle_char(&cli, ev->usbcli.data[i]);
+	}
+}
+
+EVQ_REGISTER(EV_USBCLI, on_ev_usbcli);
+
+
+static void on_ev_uart(event_t *ev, void *data)
+{
+	cli.tx = uart_tx;
+	uint8_t c = ev->uart.data;
+	cmd_cli_handle_char(&cli, c);
+}
+
+EVQ_REGISTER(EV_UART, on_ev_uart);
+
+
+static void on_ev_tick_10hz(event_t *ev, void *data)
+{
+	static int m = false;
+	led_set(LED_ID_GREEN, m ? LED_STATE_ON : LED_STATE_OFF);
+	m = !m;
+}
+
+EVQ_REGISTER(EV_TICK_10HZ, on_ev_tick_10hz);
 
 
 static int on_cmd_reboot(struct cmd_cli *cli, uint8_t argc, char **argv)

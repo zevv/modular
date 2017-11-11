@@ -12,6 +12,7 @@
 #include "i2s.h"
 #include "led.h"
 #include "uart.h"
+#include "evq.h"
 #include "uda1380.h"
 #include "watchdog.h"
 #include "ssm2604.h"
@@ -63,14 +64,10 @@ static void out(const char *fmt, ...)
 	}
 }
 
-
-void mon_tick(void)
+static void on_ev_tick_10hz(event_t *ev, void *data)
 {
 	if(mon_cli == NULL) return;
-	static int n = 0;
-	if(n++ < 100) return;
-	n = 0;
-
+	
 	/* Channel levels */
 
 	out("\e[H");
@@ -161,6 +158,8 @@ void mon_tick(void)
 	
 	out("\e[0J");
 }
+
+EVQ_REGISTER(EV_TICK_10HZ, on_ev_tick_10hz);
 
 
 static int on_cmd_mon(struct cmd_cli *cli, uint8_t argc, char **argv)

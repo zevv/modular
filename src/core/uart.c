@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include "chip.h"
+#include "evq.h"
 
 #include "uart.h"
 #include "ringbuffer.h"
@@ -51,6 +52,12 @@ void UART0_IRQHandler(void)
 {
 	while (Chip_UART_ReadLineStatus(LPC_USART0) & UART_LSR_RDR) {
  		uint8_t c = LPC_USART0->RBR & UART_RBR_MASKBIT;
+
+		event_t ev;
+		ev.type = EV_UART;
+		ev.uart.data = c;
+		evq_push(&ev);
+
 		rb_push(&rb, c);
 	}
 }

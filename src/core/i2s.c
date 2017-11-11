@@ -99,15 +99,6 @@ void i2s_init(int srate)
 }
 
 
-
-void i2s_tick(void)
-{
-	static int n = 0;
-	if(n ++ == 100) {
-		n = 0;
-	}
-}
-
 /*
  * End
  */

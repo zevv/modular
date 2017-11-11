@@ -5,6 +5,7 @@
 
 #include <string.h>
 #include <math.h>
+
 #include "board.h"
 #include "led.h"
 #include "cmd.h"
@@ -14,6 +15,7 @@
 #include "usb.h"
 #include "ringbuffer.h"
 #include "shared.h"
+#include "evq.h"
 
 
 static struct {
@@ -22,12 +24,10 @@ static struct {
 } midi;
 
 static struct {
-	bool tx_busy;
-	bool rx_busy;
+	volatile bool tx_busy;
+	volatile bool rx_busy;
 	struct ringbuffer tx_rb;
-	struct ringbuffer rx_rb;
-	uint8_t rx_rb_buf[1024];
-	uint8_t tx_rb_buf[4096];
+	uint8_t tx_rb_buf[256];
 } clipipe;
 
 /* 1192 bytes is returned by usbd_api->hw->GetMemSize() with the current
@@ -73,7 +73,6 @@ static ErrorCode_t midi_bulk_handler(USBD_HANDLE_T usbd, void *ptr, uint32_t eve
 
 		case USB_EVT_IN:
 			midi.tx_busy = false;
-			//kick_tx();
 			break;
 
 		case USB_EVT_OUT_NAK:
@@ -120,8 +119,8 @@ static void kick_tx(void)
 
 static ErrorCode_t cli_bulk_handler(USBD_HANDLE_T usbd, void *ptr, uint32_t event)
 {
-	int n;
-	int i;
+	size_t i = 0;
+	size_t n;
 
 	switch(event) {
 
@@ -131,7 +130,7 @@ static ErrorCode_t cli_bulk_handler(USBD_HANDLE_T usbd, void *ptr, uint32_t even
 			break;
 
 		case USB_EVT_OUT_NAK:
-			if(!clipipe.rx_busy && rb_free(&clipipe.rx_rb) >= sizeof(rx_buf)) {
+			if(!clipipe.rx_busy && evq_room() >= sizeof(rx_buf)) {
 				clipipe.rx_busy = true;
 				usbd_api->hw->ReadReqEP(usbd, 0x02, (void *)rx_buf, sizeof(rx_buf));
 			}
@@ -139,8 +138,15 @@ static ErrorCode_t cli_bulk_handler(USBD_HANDLE_T usbd, void *ptr, uint32_t even
 
 		case USB_EVT_OUT:
 			n = usbd_api->hw->ReadEP(usbd, 0x02, (void *)rx_buf);
-			for(i=0; i<n; i++) {
-				rb_push(&clipipe.rx_rb, rx_buf[i]);
+			while(n > 0) {
+				event_t ev;
+				size_t m = n < sizeof(ev.usbcli.data) ? n : sizeof(ev.usbcli.data);
+				ev.type = EV_USBCLI;
+				ev.usbcli.len = m;
+				memcpy(ev.usbcli.data, rx_buf+i, m);
+				evq_push(&ev);
+				i += m;
+				n -= m;
 			}
 			clipipe.rx_busy = false;
 			break;
@@ -163,9 +169,10 @@ void USB1_IRQHandler(void)
 
 static ErrorCode_t on_configure(USBD_HANDLE_T hUsb)
 {
-	printd("Conf\n");
 	usbd_api->hw->ReadReqEP(usbd, 0x01, (void *)rx_buf, sizeof(rx_buf));
 	usbd_api->hw->ReadReqEP(usbd, 0x02, (void *)rx_buf, sizeof(rx_buf));
+	midi.rx_busy = true;
+	clipipe.rx_busy = true;
 	return LPC_OK;
 }
 
@@ -185,7 +192,6 @@ int usb_init(uint8_t id)
 	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 5, 6, true); /* GPIO5[6] output high */
 
 	rb_init(&clipipe.tx_rb, clipipe.tx_rb_buf, sizeof(clipipe.tx_rb_buf));
-	rb_init(&clipipe.rx_rb, clipipe.rx_rb_buf, sizeof(clipipe.rx_rb_buf));
 
 	Chip_USB1_Init();
 
@@ -275,7 +281,7 @@ void usb_clipipe_tx(uint8_t c)
 
 int usb_clipipe_rx(uint8_t *c)
 {
-	return rb_pop(&clipipe.rx_rb, c);
+	return 0;
 }
 
 

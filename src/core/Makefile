@@ -6,7 +6,9 @@ CORE	:= m0
 
 SRC     += adc.c
 SRC     += can.c
+SRC     += timer.c
 SRC     += boot.c
+SRC     += evq.c
 SRC     += usb.c
 SRC     += cmd.c
 SRC     += flash.c
@@ -35,6 +37,7 @@ SRC	+= lpc_chip_43xx_m0/src/ssp_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/sysinit_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/uart_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/wwdt_18xx_43xx.c
+SRC	+= lpc_chip_43xx_m0/src/timer_18xx_43xx.c
 SRC	+= lpc_chip_43xx_m0/src/ccan_18xx_43xx.c
 
 CFLAGS	+= -I.

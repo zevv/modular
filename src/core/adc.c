@@ -40,13 +40,6 @@ void ADC1_IRQHandler(void)
 }
 
 
-
-void adc_tick(void)
-{
-	//printd("%d\n", count0);
-}
-
-
 void adc_init(void)
 {
 	ADC_CLOCK_SETUP_T cs;

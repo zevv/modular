@@ -111,7 +111,9 @@ void cmd_cli_handle_char(struct cmd_cli *cli, uint8_t c)
 			cli->len++;
 			cli->buf[cli->len] = '\0';
 			if(cli->echo) {
-				cli->tx(c);
+				if(cli->tx) {
+					cli->tx(c);
+				}
 			}
 		}
 	}
@@ -120,7 +122,9 @@ void cmd_cli_handle_char(struct cmd_cli *cli, uint8_t c)
 
 	if((c == '\n') || (c == '\r')) {
 		if(cli->echo) {
-			cli->tx('\n');
+			if(cli->tx) {
+				cli->tx('\n');
+			}
 		}
 	
 		char *part[CMD_MAX_PARTS];
@@ -144,16 +148,6 @@ void cmd_cli_handle_char(struct cmd_cli *cli, uint8_t c)
 }
 
 
-void cmd_cli_poll(struct cmd_cli *cli)
-{
-	uint8_t c;
-
-	while(cli->rx(&c)) {
-		cmd_cli_handle_char(cli, c);
-	}
-}
-
-
 static int on_help(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
 	extern struct cmd_handler_t __start_cmd;
@@ -171,7 +165,9 @@ static int on_help(struct cmd_cli *cli, uint8_t argc, char **argv)
 
 void cmd_vprintd(struct cmd_cli *cli, const char *fmt, va_list va)
 {
-	vfprintd(cli->tx, fmt, va);
+	if(cli->tx) {
+		vfprintd(cli->tx, fmt, va);
+	}
 }
 
 
@@ -179,15 +175,19 @@ void cmd_printd(struct cmd_cli *cli, const char *fmt, ...)
 {
 	va_list va;
 
-	va_start(va, fmt);
-	vfprintd(cli->tx, fmt, va);
-	va_end(va);
+	if(cli->tx) {
+		va_start(va, fmt);
+		vfprintd(cli->tx, fmt, va);
+		va_end(va);
+	}
 }
 
 
 void cmd_hexdump(struct cmd_cli *cli, void *addr, size_t len, off_t offset)
 {
-	fhexdump(cli->tx, addr, len, offset);
+	if(cli->tx) {
+		fhexdump(cli->tx, addr, len, offset);
+	}
 }
 
 

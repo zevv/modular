@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include "printd.h"
+#include "evq.h"
 #include "can.h"
 #include "led.h"
 #include "cmd.h"
@@ -66,7 +67,8 @@ void can_tx(uint16_t id, void *data, size_t len)
 void CAN0_IRQHandler(void)
 {
 	CCAN_MSG_OBJ_T msg_buf;
-	uint32_t can_int, can_stat, i;
+	uint32_t can_int, can_stat;
+
 	while ( (can_int = Chip_CCAN_GetIntID(LPC_C_CAN0)) != 0 ) {
 		if (can_int & CCAN_INT_STATUS) {
 			can_stat = Chip_CCAN_GetStatus(LPC_C_CAN0);
@@ -90,13 +92,13 @@ void CAN0_IRQHandler(void)
 		else if ((1 <= CCAN_INT_MSG_NUM(can_int)) && (CCAN_INT_MSG_NUM(can_int) <= 0x20)) {
 		
 			Chip_CCAN_GetMsgObject(LPC_C_CAN0, CCAN_MSG_IF1, can_int, &msg_buf);
-
-			if(msg_buf.id == my_id) {
-				for (i = 0; i < msg_buf.dlc; i++) {
-					rb_push(&rx_rb, msg_buf.data[i]);
-				}
-				break;
-			}
+			event_t ev;
+			ev.type = EV_CAN;
+			ev.can.id = msg_buf.id & 0x1fffffff;
+			ev.can.extended = !!(msg_buf.id & (1<<30));
+			ev.can.len = msg_buf.dlc;
+			memcpy(ev.can.data, msg_buf.data, msg_buf.dlc);
+			evq_push(&ev);
 		}
 	}
 }

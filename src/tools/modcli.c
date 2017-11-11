@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
 	for(;;) {
 
-		uint8_t buf[512];
+		uint8_t buf[256];
 
 		r = read(0, buf, sizeof(buf));
 
@@ -55,13 +55,13 @@ int main(int argc, char **argv)
 				exit(0);
 			}
 			int len;
-			libusb_bulk_transfer(h, 0x02, buf, r, &len, 100);
+			libusb_bulk_transfer(h, 0x02, buf, r, &len, 5);
 		} else if(r == 0) {
 			exit(0);
 		}
 		
 		int len;
-		r = libusb_bulk_transfer(h, 0x82, buf, sizeof(buf), &len, 10);
+		r = libusb_bulk_transfer(h, 0x82, buf, sizeof(buf), &len, 5);
 
 		if(r == 0) {
 			write(1, buf, len);

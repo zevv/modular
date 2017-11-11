@@ -9,7 +9,6 @@ struct cmd_cli {
 	char buf[128];
 	size_t len;
 	void (*tx)(uint8_t c);
-	int (*rx)(uint8_t *c);
 	bool echo;
 };
 
@@ -18,7 +17,6 @@ typedef int (*cmd_handler)(struct cmd_cli *cli, uint8_t argc, char **argv);
 
 void cmd_init(struct cmd_cli *cli);
 void cmd_cli_handle_char(struct cmd_cli *cli, uint8_t c);
-void cmd_cli_poll(struct cmd_cli *cli);
 void cmd_printd(struct cmd_cli *cli, const char *fmt, ...);
 void cmd_vprintd(struct cmd_cli *cli, const char *fmt, va_list va);
 void cmd_hexdump(struct cmd_cli *cli, void *addr, size_t len, off_t offset);
