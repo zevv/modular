@@ -16,9 +16,6 @@
 #include "shared.h"
 
 
-#define CU_RXBUF_SZ	USB_HS_MAX_BULK_PACKET
-#define CU_TXBUF_SZ	USB_HS_MAX_BULK_PACKET
-
 static struct {
 	volatile bool tx_busy;
 	volatile bool rx_busy;
@@ -33,12 +30,21 @@ static struct {
 	uint8_t tx_rb_buf[4096];
 } clipipe;
 
-static uint8_t usb_mem[USB_STACK_MEM_SIZE] __attribute__((aligned(4096)));
+/* 1192 bytes is returned by usbd_api->hw->GetMemSize() with the current
+ * configuration */
+
+static uint8_t usb_mem[1192] __attribute__((aligned(4096)));
 static const USBD_API_T *usbd_api;
 static USBD_HANDLE_T usbd;
 static uint8_t my_id;
 static uint8_t rx_buf[64];
 static uint8_t tx_buf[64];
+
+
+extern const uint8_t USB_DeviceDescriptor[];
+extern uint8_t USB_FsConfigDescriptor[];
+extern const uint8_t USB_StringDescriptor[];
+
 
 static const PINMUX_GRP_T mux[] = {
         { 2, 11, (SCU_MODE_INBUFF_EN | SCU_MODE_PULLDOWN | SCU_MODE_FUNC0)},
@@ -125,12 +131,12 @@ static ErrorCode_t cli_bulk_handler(USBD_HANDLE_T usbd, void *ptr, uint32_t even
 			break;
 
 		case USB_EVT_OUT_NAK:
-			if(!clipipe.rx_busy && rb_free(&clipipe.rx_rb) >= CU_RXBUF_SZ) {
+			if(!clipipe.rx_busy && rb_free(&clipipe.rx_rb) >= sizeof(rx_buf)) {
 				clipipe.rx_busy = true;
 				usbd_api->hw->ReadReqEP(usbd, 0x02, (void *)rx_buf, sizeof(rx_buf));
 			}
 			break;
-		
+
 		case USB_EVT_OUT:
 			n = usbd_api->hw->ReadEP(usbd, 0x02, (void *)rx_buf);
 			for(i=0; i<n; i++) {
@@ -149,7 +155,7 @@ static ErrorCode_t cli_bulk_handler(USBD_HANDLE_T usbd, void *ptr, uint32_t even
 }
 
 
-void USB_IRQHandler(void)
+void USB1_IRQHandler(void)
 {
 	usbd_api->hw->ISR(usbd);
 }
@@ -177,19 +183,19 @@ int usb_init(uint8_t id)
         Chip_SCU_SetPinMuxing(mux, sizeof(mux) / sizeof(mux[0]));
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 5, 6);	  /* GPIO5[6] = USB1_PWR_EN */
 	Chip_GPIO_SetPinState(LPC_GPIO_PORT, 5, 6, true); /* GPIO5[6] output high */
-	
+
 	rb_init(&clipipe.tx_rb, clipipe.tx_rb_buf, sizeof(clipipe.tx_rb_buf));
 	rb_init(&clipipe.rx_rb, clipipe.rx_rb_buf, sizeof(clipipe.rx_rb_buf));
-	
-	USB_init_pin_clk();
+
+	Chip_USB1_Init();
 
 	usbd_api = (const USBD_API_T *) LPC_ROM_API->usbdApiBase;
 
 	memset(&param, 0, sizeof(param));
-	param.usb_reg_base = LPC_USB_BASE;
+	param.usb_reg_base = LPC_USB1_BASE;
 	param.max_num_ep = 4;
 	param.mem_base = (uint32_t)usb_mem;
-	param.mem_size = USB_STACK_MEM_SIZE;
+	param.mem_size = sizeof(usb_mem);
 	param.USB_Configure_Event = on_configure;
 
 	desc.device_desc = (uint8_t *)USB_DeviceDescriptor;
@@ -197,13 +203,15 @@ int usb_init(uint8_t id)
 	desc.high_speed_desc = USB_FsConfigDescriptor;
 	desc.full_speed_desc = USB_FsConfigDescriptor;
 
+	assert(sizeof(usb_mem) == usbd_api->hw->GetMemSize(&param));
+
 	ret = usbd_api->hw->Init(&usbd, &desc, &param);
 
 	if (ret == LPC_OK) {
 		ep_indx = (((0x01 & 0x0F) << 1));
 		ret = usbd_api->core->RegisterEpHandler(usbd, ep_indx, midi_bulk_handler, &midi);
 	}
-	
+
 	if (ret == LPC_OK) {
 		ep_indx = (((0x81 & 0x0F) << 1) + 1);
 		ret = usbd_api->core->RegisterEpHandler(usbd, ep_indx, midi_bulk_handler, &midi);
@@ -213,7 +221,7 @@ int usb_init(uint8_t id)
 		ep_indx = (((0x02 & 0x0F) << 1));
 		ret = usbd_api->core->RegisterEpHandler(usbd, ep_indx, cli_bulk_handler, &midi);
 	}
-	
+
 	if (ret == LPC_OK) {
 		ep_indx = (((0x82 & 0x0F) << 1) + 1);
 		ret = usbd_api->core->RegisterEpHandler(usbd, ep_indx, cli_bulk_handler, &midi);
@@ -221,8 +229,8 @@ int usb_init(uint8_t id)
 
 	if(ret == LPC_OK) {
 
-		NVIC_SetPriority(LPC_USB_IRQ, 1);
-		NVIC_EnableIRQ(LPC_USB_IRQ);
+		NVIC_SetPriority(USB1_IRQn, 1);
+		NVIC_EnableIRQ(USB1_IRQn);
 		usbd_api->hw->Connect(usbd, 1);
 	}
 
@@ -233,7 +241,7 @@ int usb_init(uint8_t id)
 static void send_controls(void)
 {
 	size_t i;
-	
+
 	if(midi.tx_busy) return;
 
 	for(i=0; i<12; i++) {
