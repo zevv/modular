@@ -116,6 +116,8 @@ void main(void)
 	can_init(mod_id); /* Must be done after I2C/ADC setup, see errata 3.2 */
 	dpy_init();
 	mon_init();
+		
+	NVIC_EnableIRQ(M4_IRQn);
 
 	logd("M0 ready %08x\n", id);
 
@@ -127,13 +129,20 @@ void main(void)
 		read_m4_log();
 		watchdog_poll();
 		can_tick();
-		usb_tick();
 
 		event_t ev;
 		evq_wait(&ev);
 	}
 }
 
+
+void M4_IRQHandler(void)
+{
+	Chip_CREG_ClearM4Event();
+	event_t ev;
+	ev.type = EV_M4;
+	evq_push(&ev);
+}
 
 
 static void on_ev_can(event_t *ev, void *data)
@@ -237,6 +246,7 @@ static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
 }
 
 CMD_REGISTER(m4, on_cmd_m4, "");
+
 
 static int on_cmd_clock(struct cmd_cli *cli, uint8_t argc, char **argv)
 {

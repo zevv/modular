@@ -22,8 +22,8 @@ enum m4_state {
 struct shared {
 
 	struct {
-		int32_t min;
-		int32_t max;
+		int16_t min;
+		int16_t max;
 	} level[16];
 
 	int16_t in[12];
@@ -32,10 +32,10 @@ struct shared {
 	uint32_t m4_load;
 	enum m4_state m4_state;
 
-	struct {
-		uint16_t val;
+	struct shared_midi_ctl {
+		uint8_t val;
 		bool dirty;
-	} ctl[12];
+	} midi_ctl[12];
 
 	struct {
 		uint8_t buf[SHARED_LOG_BUF_SIZE];

@@ -244,19 +244,21 @@ int usb_init(uint8_t id)
 }
 
 
-static void send_controls(void)
+static void on_ev_m4(event_t *ev, void *data)
 {
 	size_t i;
+	if(!USB_IsConfigured(usbd)) return;
 
 	if(midi.tx_busy) return;
 
 	for(i=0; i<12; i++) {
-		if(shared->ctl[i].dirty) {
-			shared->ctl[i].dirty = false;
+		struct shared_midi_ctl *smc = &shared->midi_ctl[i];
+		if(smc->dirty) {
+			smc->dirty = false;
 			tx_buf[0] = 0x0b;
 			tx_buf[1] = 0xb0 | 0;
 			tx_buf[2] = 0x20 | i;
-			tx_buf[3] = shared->ctl[i].val / 2;
+			tx_buf[3] = smc->val / 2;
 			midi.tx_busy = true;
 			usbd_api->hw->WriteEP(usbd, 0x81, tx_buf, 4);
 			return;
@@ -264,12 +266,7 @@ static void send_controls(void)
 	}
 }
 
-
-void usb_tick(void)
-{
-	if(!USB_IsConfigured(usbd)) return;
-	send_controls();
-}
+EVQ_REGISTER(EV_M4, on_ev_m4);
 
 
 void usb_clipipe_tx(uint8_t c)

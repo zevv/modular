@@ -102,8 +102,8 @@ static void on_ev_tick_10hz(event_t *ev, void *data)
 					(j == 0) ? "│" : "┄");
 		}
 		out("\e[0m| %+5.1f dB\e[K\n", dB);
-		shared->level[i].min = INT32_MAX;
-		shared->level[i].max = INT32_MIN;
+		shared->level[i].min = INT16_MAX;
+		shared->level[i].max = INT16_MIN;
 	}
 
 	dpy_clear();

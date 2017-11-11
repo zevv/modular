@@ -1,6 +1,7 @@
 
 #include <stdint.h>
 
+#include "chip.h"
 #include "ctl.h"
 #include "../core/shared.h"
 
@@ -50,6 +51,7 @@ void ctl_poll(void)
 	for(i=0; i<ctl_count; i++) {
 
 		struct ctl *ctl = &ctl_list[i];
+		struct shared_midi_ctl *smc = &shared->midi_ctl[ctl->idx];
 
 		int32_t val = shared->in[ctl->idx];
 		val = biquad_run(&ctl->lp, val);
@@ -76,8 +78,12 @@ void ctl_poll(void)
 				if(v > 1.0) v = 1.0;
 				*(float *)ctl->out = v * (ctl->max - ctl->min) + ctl->min;
 
-				shared->ctl[ctl->idx].val = v * 255;
-				shared->ctl[ctl->idx].dirty = true;
+				uint8_t newval = v * 127;
+				if(smc->val != newval) {
+					smc->val = newval;
+					smc->dirty = true;
+					__SEV();
+				}
 			}
 
 			if(ctl->type == CTL_TYPE_SWITCH) {

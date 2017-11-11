@@ -21,7 +21,7 @@
 
 enum {
 	EV_BOOT       = (1 << 0),
-	EV_START      = (1 << 1),
+	EV_M4         = (1 << 1),
 	EV_TICK_1HZ   = (1 << 2),
 	EV_TICK_10HZ  = (1 << 3),
 	EV_USBCLI     = (1 << 4),
@@ -40,7 +40,7 @@ struct ev_boot {
 	evtype_t type;
 } __attribute__ (( __packed__ ));
 
-struct ev_start {
+struct ev_m4 {
 	evtype_t type;
 } __attribute__ (( __packed__ ));
 

@@ -55,8 +55,8 @@ static size_t ev_size(evtype_t type)
 		case EV_BOOT: 
 			s = sizeof(struct ev_boot); 
 			break;
-		case EV_START: 
-			s = sizeof(struct ev_start); 
+		case EV_M4: 
+			s = sizeof(struct ev_m4); 
 			break;
 		default: 
 			/* nothing */
