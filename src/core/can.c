@@ -107,18 +107,6 @@ void CAN0_IRQHandler(void)
 static uint8_t tx_buf[8];
 static size_t tx_len = 0;
 
-void can_tick(void)
-{
-	static int n = 0;
-	if(n++ < 1000) return;
-	n = 0;
-
-	if(tx_len > 0) {
-		can_tx(my_id + 0x100, tx_buf, tx_len);
-		tx_len = 0;
-	}
-}
-
 
 void can_uart_tx(uint8_t c)
 {

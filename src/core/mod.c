@@ -166,3 +166,44 @@ static int on_cmd_mod(struct cmd_cli *cli, uint8_t argc, char **argv)
 
 CMD_REGISTER(mod, on_cmd_mod, "");
 
+
+static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
+{
+	if(argc >= 1u) {
+		char cmd = argv[0][0];
+
+		if(cmd == 's') { /* stop */
+			shared->m4_state = M4_STATE_FADEOUT;
+			return 1;
+		}
+
+		if(cmd == 'g') { /* go */
+			shared->m4_state = M4_STATE_FADEIN;
+			Chip_RGU_TriggerReset(RGU_M3_RST);
+			return 1;
+		}
+
+		if(cmd == 'h') { /* halt */
+			shared->m4_state = M4_STATE_HALT;
+			return 1;
+		}
+
+		if(cmd == 'l') {
+			cmd_printd(cli, "%d.%d\n", shared->m4_load/10, shared->m4_load % 10);
+			shared->m4_load = 0;
+			return 1;
+		}
+
+		if(cmd == 'w') {
+			for(;;);
+		}
+
+	}
+
+	return 1;
+}
+
+CMD_REGISTER(m4, on_cmd_m4, "");
+
+
+

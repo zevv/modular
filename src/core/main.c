@@ -65,18 +65,6 @@ static void logd(const char *fmt, ...)
 }
 
 
-static void read_m4_log(void)
-{
-	if(shared->log.tail != shared->log.head) {
-		printd("\e[36m");
-		while(shared->log.tail != shared->log.head) {
-			printd("%c", shared->log.buf[shared->log.tail]);
-			shared->log.tail = (shared->log.tail + 1) % SHARED_LOG_BUF_SIZE;
-		}
-		printd("\e[0m");
-	}
-}
-
 
 
 /*
@@ -98,10 +86,10 @@ void main(void)
 	shared->logd = logd;
 
 	arch_init();
+	watchdog_init();
 	led_init();
 	button_init();
 	uart_init();
-	//watchdog_init();
 
 	printd_set_handler(uart_tx);
 	printd("\n\nHello %s %s %s %08x\n", VERSION, __DATE__, __TIME__);
@@ -126,12 +114,9 @@ void main(void)
 	if(mod_id == 3) mod_load_name("reverb");
 
 	for(;;) {
-		read_m4_log();
-		watchdog_poll();
-		can_tick();
-
 		event_t ev;
 		evq_wait(&ev);
+		watchdog_poll();
 	}
 }
 
@@ -144,6 +129,21 @@ void M4_IRQHandler(void)
 	evq_push(&ev);
 }
 
+static void on_ev_m4(event_t *ev, void *data)
+{
+	if(shared->log.tail != shared->log.head) {
+		printd("\e[36m");
+		while(shared->log.tail != shared->log.head) {
+			printd("%c", shared->log.buf[shared->log.tail]);
+			shared->log.tail = (shared->log.tail + 1) % SHARED_LOG_BUF_SIZE;
+		}
+		printd("\e[0m");
+	}
+}
+
+	
+
+EVQ_REGISTER(EV_M4, on_ev_m4);
 
 static void on_ev_can(event_t *ev, void *data)
 {
@@ -207,45 +207,6 @@ static int on_cmd_version(struct cmd_cli *cli, uint8_t argc, char **argv)
 }
 
 CMD_REGISTER(version, on_cmd_version, "");
-
-
-static int on_cmd_m4(struct cmd_cli *cli, uint8_t argc, char **argv)
-{
-	if(argc >= 1u) {
-		char cmd = argv[0][0];
-
-		if(cmd == 's') { /* stop */
-			shared->m4_state = M4_STATE_FADEOUT;
-			return 1;
-		}
-
-		if(cmd == 'g') { /* go */
-			shared->m4_state = M4_STATE_FADEIN;
-			Chip_RGU_TriggerReset(RGU_M3_RST);
-			return 1;
-		}
-
-		if(cmd == 'h') { /* halt */
-			shared->m4_state = M4_STATE_HALT;
-			return 1;
-		}
-
-		if(cmd == 'l') {
-			cmd_printd(cli, "%d.%d\n", shared->m4_load/10, shared->m4_load % 10);
-			shared->m4_load = 0;
-			return 1;
-		}
-
-		if(cmd == 'w') {
-			for(;;);
-		}
-
-	}
-
-	return 1;
-}
-
-CMD_REGISTER(m4, on_cmd_m4, "");
 
 
 static int on_cmd_clock(struct cmd_cli *cli, uint8_t argc, char **argv)

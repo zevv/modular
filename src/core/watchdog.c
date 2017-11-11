@@ -14,9 +14,10 @@ static void setup(int timeout)
 	Chip_WWDT_Start(LPC_WWDT);
 }
 
+
 void watchdog_init(void)
 {
-	setup(WDT_OSC / 10);
+	setup(WDT_OSC * 2);
 }
 
 
