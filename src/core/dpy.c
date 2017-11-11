@@ -41,6 +41,7 @@ struct font font_list[] = {
 		.c_from = '!',
 		.c_to = '~',
 	},
+#if NEE
 	[FONT_BOLD] = {
 		.img = &font_bold,
 		.cw = 8,
@@ -48,6 +49,7 @@ struct font font_list[] = {
 		.c_from = '!',
 		.c_to = '~',
 	},
+#endif
 };
 
 /*
@@ -171,6 +173,37 @@ static int dpy_cmd(uint8_t c)
 }
 
 
+static bool dpy_pget(uint8_t x, uint8_t y)
+{
+	uint16_t o = (y/8) * LCD_WIDTH + x;
+	uint8_t b = y & 0x07;
+	return !!(fb[o] & (1<<b));
+}
+
+
+#define UTFBUFSIZ 8
+
+void print_utf8(struct cmd_cli *cli, uint32_t x)
+{
+	size_t n = 1;
+	char buf[UTFBUFSIZ+1];
+
+	if (x < 0x80) {
+		buf[UTFBUFSIZ - 1] = (char)x;
+	} else {
+		uint32_t mfb = 0x3f;
+		do {
+			buf[UTFBUFSIZ - (n++)] = (char)(0x80 | (x & 0x3f));
+			x >>= 6;
+			mfb >>= 1;
+		} while (x > mfb);
+		buf[UTFBUFSIZ - n] = (char)((~mfb << 1) | x);
+	}
+	buf[UTFBUFSIZ] = '\0';
+	cmd_printd(cli, "%s", buf + UTFBUFSIZ - n);
+}
+
+
 void dpy_flush(void)
 {
 	dpy_cmd(CMD_PAGEADDR);
@@ -188,7 +221,28 @@ void dpy_flush(void)
 	for(i=0; i<sizeof(fb)-8; i+=64) {
 		dpy_tx(DC_DATA, fb+i, 64);
 	}
-};
+}
+
+
+void dpy_print(struct cmd_cli *cli)
+{
+	int y, x;
+	for(y=0; y<LCD_HEIGHT; y+=4) {
+		for(x=0; x<LCD_WIDTH; x+=2) {
+			uint32_t v = 0x2800;
+			if(dpy_pget(x+0, y+0)) v |= 0x01;
+			if(dpy_pget(x+1, y+0)) v |= 0x08;
+			if(dpy_pget(x+0, y+1)) v |= 0x02;
+			if(dpy_pget(x+1, y+1)) v |= 0x10;
+			if(dpy_pget(x+0, y+2)) v |= 0x04;
+			if(dpy_pget(x+1, y+2)) v |= 0x20;
+			if(dpy_pget(x+0, y+3)) v |= 0x40;
+			if(dpy_pget(x+1, y+3)) v |= 0x80;
+			print_utf8(cli, v);
+		}
+		cmd_printd(cli, "\n");
+	}
+}
 
 
 void dpy_clear(void)
@@ -346,11 +400,12 @@ void dpy_blit(const struct img *src, uint16_t sx, uint8_t sy, uint8_t dx, uint8_
 }
 
 
+#if NEE
 void dpy_icon(enum icon_id id, uint8_t x, uint8_t y)
 {
 	dpy_blit(&icons, (id-1)*16, 0, x, y, 16, 16);
 }
-
+#endif
 
 int dpy_text(enum font_id font_id, int xpos, int ypos, char *s)
 {

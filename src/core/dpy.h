@@ -2,6 +2,7 @@
 #define dpy_h
 
 #include "img.h"
+#include "cmd.h"
 
 enum font_id {
 	FONT_NORMAL,
@@ -39,6 +40,7 @@ void dpy_init(void);
 void dpy_clear(void);
 void dpy_clear_rect(uint8_t x, uint8_t y, uint8_t w, uint8_t h);
 void dpy_flush(void);
+void dpy_print(struct cmd_cli *cli);
 void dpy_brightness(uint8_t b);
 void dpy_pset(uint8_t x, uint8_t y, uint8_t v);
 void dpy_line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t v);

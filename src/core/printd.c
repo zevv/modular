@@ -604,12 +604,22 @@ void vfprintd(printd_handler tx, const char *fmt, va_list va)
 }
 
 
-struct string_printd_handler_data {
-	char *p;
-	size_t size;
-};
+static char *g_str = NULL;
+
+static void tx_string(uint8_t c)
+{
+	if(g_str) {
+		*g_str++ = c;
+	}
+}
 
 
+void vsnprintd(char *str, size_t size, const char *fmt, va_list va)
+{
+	g_str = str;
+	vfprintd(tx_string, fmt, va);
+	g_str = NULL;
+}
 
 void snprintd(char *str, size_t size, const char *fmt, ...)
 {

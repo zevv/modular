@@ -22,6 +22,9 @@
 #include "ifft.h"
 #include "dpy.h"
 
+#define GREEN "\e[32m"
+#define YELLOW "\e[33;1m"
+#define RED "\e[31;1m"
 
 static const char *label[] = {
 	"in   1", "in   2", "in   3", "in   4",
@@ -43,9 +46,7 @@ static const uint8_t hamming_window[SHARED_SCOPE_SIZE] = {
 };
 
 
-#define GREEN "\e[32m"
-#define YELLOW "\e[33;1m"
-#define RED "\e[31;1m"
+static bool mon_dpy = false;
 
 void mon_init(void)
 {
@@ -56,7 +57,7 @@ struct cmd_cli *mon_cli = NULL;
 
 static void out(const char *fmt, ...)
 {
-	if(mon_cli) {
+	if(mon_cli && !mon_dpy) {
 		va_list va;
 		va_start(va, fmt);
 		cmd_vprintd(mon_cli, fmt, va);
@@ -154,7 +155,12 @@ static void on_ev_tick_10hz(event_t *ev, void *data)
 		}
 	}
 
+	dpy_printf(FONT_TINY, 0, 0, "Freq: 1.03kHz");
 	dpy_flush();
+	if(mon_dpy) {
+		cmd_printd(mon_cli, "\e[H");
+		dpy_print(mon_cli);
+	}
 	
 	out("\e[0J");
 }
@@ -180,9 +186,14 @@ static int on_cmd_mon(struct cmd_cli *cli, uint8_t argc, char **argv)
 				shared->scope.src = NULL;
 			}
 		}
-		cmd_printd(cli, "mon is now on %p\n", mon_cli);
+
+		if(cmd == 'd') {
+			mon_dpy = true;
+		}
+
 	} else {
 		mon_cli = NULL;
+		mon_dpy = false;
 	}
 	return 1;
 }
