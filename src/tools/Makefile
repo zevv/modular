@@ -13,6 +13,9 @@ mkimg: mkimg.c
 modcli: modcli.c
 	gcc -Wall -Werror modcli.c -o modcli $(shell pkg-config --cflags --libs libusb-1.0)
 
+modrpc: modrpc.c
+	gcc -Wall -Werror modrpc.c -o modrpc
+
 clean:
 	rm -f lpchdr lpcsum mkimg
 

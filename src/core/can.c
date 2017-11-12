@@ -70,6 +70,7 @@ void CAN0_IRQHandler(void)
 	uint32_t can_int, can_stat;
 
 	while ( (can_int = Chip_CCAN_GetIntID(LPC_C_CAN0)) != 0 ) {
+				
 		if (can_int & CCAN_INT_STATUS) {
 			can_stat = Chip_CCAN_GetStatus(LPC_C_CAN0);
 			// TODO with error or TXOK, RXOK
@@ -90,15 +91,21 @@ void CAN0_IRQHandler(void)
 		}
 
 		else if ((1 <= CCAN_INT_MSG_NUM(can_int)) && (CCAN_INT_MSG_NUM(can_int) <= 0x20)) {
-		
+
+			msg_buf.dlc = 255;
+			msg_buf.id = 255;
+
 			Chip_CCAN_GetMsgObject(LPC_C_CAN0, CCAN_MSG_IF1, can_int, &msg_buf);
-			event_t ev;
-			ev.type = EV_CAN;
-			ev.can.id = msg_buf.id & 0x1fffffff;
-			ev.can.extended = !!(msg_buf.id & (1<<30));
-			ev.can.len = msg_buf.dlc;
-			memcpy(ev.can.data, msg_buf.data, msg_buf.dlc);
-			evq_push(&ev);
+
+			if(msg_buf.dlc <= 8) {
+				event_t ev;
+				ev.type = EV_CAN;
+				ev.can.id = msg_buf.id & 0x1fffffff;
+				ev.can.extended = !!(msg_buf.id & (1<<30));
+				ev.can.len = msg_buf.dlc;
+				memcpy(ev.can.data, msg_buf.data, msg_buf.dlc);
+				evq_push(&ev);
+			}
 		}
 	}
 }
@@ -130,8 +137,10 @@ int can_uart_rx(uint8_t *c)
 
 static int on_cmd_can(struct cmd_cli *cli, uint8_t argc, char **argv)
 {
+	can_tx(0x103, "flop", 4);
 	return 1;
 }
+
 
 CMD_REGISTER(can, on_cmd_can, "l[ist] | s[et] <id> <0|1>");
 

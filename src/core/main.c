@@ -26,6 +26,8 @@
 #include "dpy.h"
 
 #define LPC_OTP ((LPC_OTP_T *) LPC_OTP_BASE)
+	
+uint32_t mod_id = 0;
 
 const uint32_t OscRateIn = 12000000;
 const uint32_t ExtRateIn = 0;
@@ -75,8 +77,6 @@ static void logd(const char *fmt, ...)
 
 void main(void)
 {
-	uint32_t mod_id = 0;
-
 	uint32_t id = LPC_OTP->OTP0_2;
 	if(id == 0x24b14191) mod_id = 1;
 	if(id == 0x1ab14191) mod_id = 2;
@@ -145,17 +145,6 @@ static void on_ev_m4(event_t *ev, void *data)
 
 EVQ_REGISTER(EV_M4, on_ev_m4);
 
-static void on_ev_can(event_t *ev, void *data)
-{
-	struct ev_can *evc = &ev->can;
-	cli.tx = can_uart_tx;
-	size_t i;
-	for(i=0; i<evc->len; i++) {
-		cmd_cli_handle_char(&cli, evc->data[i]);
-	}
-}
-
-EVQ_REGISTER(EV_CAN, on_ev_can);
 
 
 static void on_ev_usbcli(event_t *ev, void *data)
