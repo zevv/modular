@@ -113,6 +113,9 @@ void main(void)
 	logd = shared->logd;
 
 	logd("M4 ready\n");
+	if(mod.name) {
+		logd("mod '%s'\n", mod.name);
+	}
 	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
 	SysTick->LOAD = 0x00ffffffu;
 	

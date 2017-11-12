@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	
-	if(strcmp(cmd, "load") == 0) {
+	if(strcmp(cmd, "m4_load") == 0) {
 		if(argc != 1) {
 			usage();
 			exit(1);
@@ -118,6 +118,7 @@ static void usage(void)
 		"\n"
 		"commands:\n"
 		"   flash <fname> <addr>\n"
+		"   m4_load <fname>\n"
 	);
 }
 

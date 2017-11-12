@@ -52,6 +52,7 @@ static void mod_run_int(int16_t *in, int16_t *out)
 
 
 struct module mod = {
+	.name = "vcf",
 	.init = mod_init,
 	.run_int16 = mod_run_int,
 };

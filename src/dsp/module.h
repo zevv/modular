@@ -11,6 +11,7 @@ enum module_mode {
 extern enum module_mode module_mode;
 
 struct module {
+	const char *name;
 	void (*init)(void);
 	void (*run_float)(float *fin, float *fout);
 	void (*run_int16)(int16_t *in, int16_t *out);

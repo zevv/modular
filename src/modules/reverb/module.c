@@ -47,6 +47,7 @@ void mod_run(float *fin, float *fout)
 
 
 struct module mod = {
+	.name = "reverb",
 	.init = mod_init,
 	.run_float = mod_run,
 };
