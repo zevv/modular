@@ -32,7 +32,7 @@ uint32_t mod_id = 0;
 const uint32_t OscRateIn = 12000000;
 const uint32_t ExtRateIn = 0;
 
-static struct cmd_cli cli = {
+struct cmd_cli cli = {
 	.tx = NULL,
 	.echo = true,
 };

@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <termios.h>
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -34,6 +35,7 @@ static void rpc_do(struct rpc *rpc, int function, void *data, size_t len);
 
 void cmd_m4_load(struct rpc *rpc, const char *fname);
 void cmd_flash_image(struct rpc *rpc, const char *fname, uint32_t address);
+void cmd_cli(struct rpc *rpc);
 
 void rpc_set_led(struct rpc *rpc, bool onoff);
 void rpc_reboot(struct rpc *rpc);
@@ -43,17 +45,22 @@ void rpc_flash_write(struct rpc *rpc, uint32_t addr);
 void rpc_mem_set_load_addr(struct rpc *rpc, uint32_t addr);
 void rpc_mem_load_data(struct rpc *rpc, void *data, size_t len);
 void rpc_m4_cmd(struct rpc *rpc, char cmd);
+void rpc_cli(struct rpc *rpc, void *data, size_t len);
 
 static void die(const char *fmt, ...);
 static void debug(const char *fmt, ...);
+static int set_noncanonical(int fd, struct termios *save);
+static void bye(void);
+
+static struct termios save;
 
 static int opt_verbose = false;
+static int opt_id = 1;
 
 
 int main(int argc, char **argv)
 {
 	char *opt_dev = "slcan0";
-	int opt_id = 1;
 	int c;
 
 	while((c = getopt(argc, argv, "d:hi:v")) != -1) {
@@ -82,7 +89,7 @@ int main(int argc, char **argv)
 		usage();
 		exit(1);
 	}
-	
+
 	struct rpc *rpc = rpc_open(opt_dev, opt_id);
 
 	const char *cmd = argv[0];
@@ -104,6 +111,10 @@ int main(int argc, char **argv)
 		}
 		cmd_m4_load(rpc, argv[0]);
 		return 0;
+	}
+
+	if(strcmp(cmd, "cli") == 0) {
+		cmd_cli(rpc);
 	}
 
 	usage();
@@ -212,9 +223,53 @@ void cmd_m4_load(struct rpc *rpc, const char *fname)
 }
 
 
+void cmd_cli(struct rpc *rpc)
+{
+	set_noncanonical(0, &save);
+	atexit(bye);
+	struct pollfd pfd[2] = {
+		{ .fd = 0, .events = POLLIN },
+		{ .fd = rpc->fd, .events = POLLIN },
+	};
+	for(;;) {
+		int r = poll(pfd, 2, 10);
+		if(r < 0) die("poll");
+		if(pfd[0].revents & POLLIN) {
+			uint8_t buf[7];
+			int n = read(0, buf, sizeof(buf));
+			if(n == 0) exit(0);
+			if(n < 0) die("read: %s", strerror(errno));
+			if(buf[0] == 3 || buf[0] == 4) exit(0);
+			rpc_cli(rpc, buf, n);
+		}
+		if(pfd[1].revents & POLLIN) {
+			struct can_frame frame;
+			int r = recv(rpc->fd, &frame, sizeof frame, 0);
+			if(r <= 0) die("recv: %s", strerror(errno));
+			if(frame.can_id == (opt_id | 0x100)) {
+				write(1, frame.data, frame.can_dlc);
+				fflush(stdout);
+			}
+		}
+	}
+}
+
 /*
  * RPC primitives
  */
+
+void rpc_set_led(struct rpc *rpc, bool onoff)
+{
+	uint8_t data = onoff;
+	rpc_do(rpc, 0x01, &data, sizeof(data));
+}
+
+
+void rpc_reboot(struct rpc *rpc)
+{
+	rpc_do(rpc, 0x02, NULL, 0);
+}
+
 
 void rpc_flash_set_load_addr(struct rpc *rpc, uint32_t addr)
 {
@@ -257,16 +312,9 @@ void rpc_m4_cmd(struct rpc *rpc, char cmd)
 }
 
 
-void rpc_set_led(struct rpc *rpc, bool onoff)
+void rpc_cli(struct rpc *rpc, void *data, size_t len)
 {
-	uint8_t data = onoff;
-	rpc_do(rpc, 0x01, &data, sizeof(data));
-}
-
-
-void rpc_reboot(struct rpc *rpc)
-{
-	rpc_do(rpc, 0x02, NULL, 0);
+	rpc_do(rpc, 0x09, data, len);
 }
 
 
@@ -329,7 +377,7 @@ static void rpc_do(struct rpc *rpc, int function, void *data, size_t len)
 	if(r < 0) die("poll: %s", strerror(errno));
 	if(r == 1) {
 		r = recv(rpc->fd, &frame, sizeof frame, 0);
-		assert(frame.data[0] == function);
+		//assert(frame.data[0] == function);
 		debug("%d\n", frame.data[1]);
 	} else {
 		die("timeout");
@@ -358,6 +406,34 @@ static void debug(const char *fmt, ...)
 	}
 }
 
+
+static int set_noncanonical(int fd, struct termios *save)
+{
+	int r;
+	struct termios tios;
+	
+	if(save) tcgetattr(fd, save);
+	tcgetattr(fd, &tios);
+
+	tios.c_lflag     = 0;
+	tios.c_cc[VTIME] = 0;
+	tios.c_cc[VMIN]  = 1;
+
+	tcflush (fd, TCIFLUSH);
+	r = tcsetattr (fd, TCSANOW, &tios);
+	if(r != 0) printf("tcsetattr : %s\n", strerror(errno));
+	
+	atexit(bye);
+
+	return(0);
+}
+
+
+static void bye(void)
+{
+	tcsetattr(0, TCSANOW, &save);
+	printf("\e[0m");
+}
 
 /*
  * End

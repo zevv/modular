@@ -10,10 +10,12 @@
 #include "flash.h"
 #include "can.h"
 #include "printd.h"
+#include "cmd.h"
 #include "led.h"
 #include "shared.h"
 
 extern uint32_t mod_id; /* main.c */
+extern struct cmd_cli cli; /*main */
 
 static uint32_t flash_load_addr = 0;
 static uint32_t mem_load_addr = 0;
@@ -101,6 +103,46 @@ static int on_can_m4_cmd(uint8_t *data, size_t len)
 }
 
 
+static uint8_t cli_rx_buf[8];
+static size_t cli_rx_len = 0;
+static uint8_t cli_tx_buf[8];
+static size_t cli_tx_len = 0;
+
+static void cli_tx_flush(void)
+{
+	if(cli_tx_len > 0) {
+		can_tx(0x100 + mod_id, cli_tx_buf, cli_tx_len);
+		cli_tx_len = 0;
+	}
+}
+
+
+static void on_ev_tick_10hz(event_t *ev, void *data)
+{
+	cli_tx_flush();
+}
+
+EVQ_REGISTER(EV_TICK_10HZ, on_ev_tick_10hz);
+
+
+static void cli_can_tx(uint8_t c)
+{
+	cli_tx_buf[cli_tx_len++] = c;
+	if(c == '\n' || c == '\r' || cli_tx_len == 8) {
+		cli_tx_flush();
+	}
+}
+
+
+static int on_can_cli(uint8_t *data, size_t len)
+{
+	cli.tx = cli_can_tx;
+	cli_rx_len = len;
+	memcpy(cli_rx_buf, data, len);
+	return 1;
+}
+
+
 static struct can_cmd {
 	uint8_t cmd;
 	uint8_t nargs;
@@ -114,6 +156,7 @@ static struct can_cmd {
 	{ 0x06, 4, on_can_mem_set_load_addr },
 	{ 0x07, 0, on_can_mem_load_data },
 	{ 0x08, 1, on_can_m4_cmd },
+	{ 0x09, 0, on_can_cli },
 	{ 0, 0, NULL },
 };
 
@@ -144,6 +187,14 @@ static void on_ev_can(event_t *ev, void *data)
 				can_tx(0x100 + mod_id, &rsp, sizeof(rsp));
 			}
 		}
+	}
+
+	if(cli_rx_len) {
+		size_t i;
+		for(i=0; i<cli_rx_len; i++) {
+			cmd_cli_handle_char(&cli, cli_rx_buf[i]);
+		}
+		cli_rx_len = 0;
 	}
 }
 
