@@ -39,7 +39,7 @@ void can_init(uint32_t can_id)
 
 	Chip_Clock_SetBaseClock(CLK_BASE_APB3, CLKIN_IDIVC, true, false);
 	Chip_CCAN_Init(LPC_C_CAN0);
-	Chip_CCAN_SetBitRate(LPC_C_CAN0, 250000);
+	Chip_CCAN_SetBitRate(LPC_C_CAN0, 1000000);
 	Chip_CCAN_EnableInt(LPC_C_CAN0, (CCAN_CTRL_IE | CCAN_CTRL_SIE | CCAN_CTRL_EIE));
 	
 	Chip_CCAN_AddReceiveID(LPC_C_CAN0, CCAN_MSG_IF1, 0);
