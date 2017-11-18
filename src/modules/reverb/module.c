@@ -35,14 +35,13 @@ void mod_run(float *fin, float *fout)
 {
 	float in = biquad_run(&lp, fin[0] + fin[1]);
 
-	
 	float a = wet;
 	float b = 1.0 - wet;
 
-	revmodel_process(&rev, in, &fout[0], &fout[1]);
+	revmodel_process(&rev, in, &fout[0], &fout[3]);
 
 	fout[0] = fout[0] * a + fin[0] * b;
-	fout[1] = fout[1] * a + fin[0] * b;
+	fout[3] = fout[3] * a + fin[0] * b;
 }
 
 

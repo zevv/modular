@@ -15,6 +15,7 @@ static float freq;
 static float lfo_freq;
 static float Q;
 static bool type;
+static bool noise;
 static float fm;
 
 
@@ -30,10 +31,19 @@ static void mod_init(void)
 	biquad_init(&f1, SRATE);
 	biquad_init(&f2, SRATE);
 	ctl_bind_pot(4, &Q, on_pot, POT_SCALE_LOG, 0.5, 15.0);
-	ctl_bind_pot(5, &fm, on_pot, POT_SCALE_LOG, 0, 5);
+	ctl_bind_pot(5, &fm, on_pot, POT_SCALE_LIN, -5, 5);
 	ctl_bind_pot(6, &freq, on_pot, POT_SCALE_LOG, 50, 15000.0);
 	ctl_bind_pot(9, &lfo_freq, on_pot, POT_SCALE_LOG, 0.5, 500);
 	ctl_bind_switch(7, &type, on_pot);
+	ctl_bind_switch(10, &noise, on_pot);
+}
+
+
+static float prand(void)
+{
+	static uint32_t r = 22222;
+	r = (r * 196314165) + 907633515;
+	return r / (float)UINT32_MAX;
 }
 
 
@@ -47,7 +57,20 @@ static void mod_run_int(int16_t *in, int16_t *out)
 	biquad_config(&f2, t, f, Q * 1.365);
 
 	out[0] = biquad_run(&f1, biquad_run(&f2, in[0])) / Q;
-	out[3] = osc_gen(&lfo) * 32000;
+
+	static int32_t lout_prev = 0;
+	int32_t lout = osc_gen(&lfo) * 32000;
+
+	if(noise) {
+		if(lout < 0 && lout_prev > 0) {
+			out[3] = prand() * 32000;
+		}
+	} else {
+		out[3] = lout;
+	}
+
+	lout_prev = lout;
+
 }
 
 

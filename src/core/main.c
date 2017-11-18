@@ -101,7 +101,7 @@ void main(void)
 	adc_init();
 	i2s_init(SRATE);
 	ssm2604_init();
-	can_init(mod_id); /* Must be done after I2C/ADC setup, see errata 3.2 */
+	can_init(500000, mod_id); /* Must be done after I2C/ADC setup, see errata 3.2 */
 	dpy_init();
 	mon_init();
 		

@@ -150,6 +150,8 @@ static void flash_page(struct rpc *rpc, uint32_t addr, void *data, size_t len)
 	}
 
 	rpc_flash_write(rpc, addr);
+	putchar('.');
+	fflush(stdout);
 }
 
 
@@ -184,6 +186,7 @@ void cmd_flash_image(struct rpc *rpc, const char *fname, uint32_t addr)
 		todo -= n;
 		off += n;
 	}
+	putchar('\n');
 }
 
 

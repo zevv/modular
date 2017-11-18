@@ -92,6 +92,7 @@ void mod_run(float *fin, float *fout)
 
 
 struct module mod = {
+	.name = "vco",
 	.init = mod_init,
 	.run_float = mod_run,
 };
