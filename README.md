@@ -7,6 +7,8 @@ and perform all work in the digital domain. The same PCB design is used in all
 modules, and the firmware will make each module behave as a different function
 like oscillators, filters, wave shapers, delay, reverb, etc.
 
+Engineering log with some pictures can be found here: http://zevv.nl/play/modular/
+
 Some specs for the module so far:
 
 * 204Mhz dual core ARM Cortex M4/M0
